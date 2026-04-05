@@ -13,3 +13,6 @@
 
 -[ĐỀ CƯƠNG ĐỒ ÁN CHUYÊN NGÀNH.docx](https://github.com/user-attachments/files/26488870/D.C.NG.D.AN.CHUYEN.NGANH.docx)
 
+**LINK DRAW**
+
+-https://drive.google.com/file/d/18lo3hcCboobLBkcLNGFK9gdo5J7_l7_B/view?usp=sharing
