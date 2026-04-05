@@ -15,4 +15,4 @@
 
 **LINK DRAW**
 
--https://drive.google.com/file/d/18lo3hcCboobLBkcLNGFK9gdo5J7_l7_B/view?usp=sharing
+-https://app.diagrams.net/?src=about#G18lo3hcCboobLBkcLNGFK9gdo5J7_l7_B#%7B%22pageId%22%3A%22M-BatAjLGkuJBDwJD2lP%22%7D
