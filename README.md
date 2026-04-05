@@ -16,3 +16,8 @@
 **LINK DRAW**
 
 -https://app.diagrams.net/?src=about#G18lo3hcCboobLBkcLNGFK9gdo5J7_l7_B#%7B%22pageId%22%3A%22M-BatAjLGkuJBDwJD2lP%22%7D
+
+**BIỂU ĐỒ**
+
+-[Biểu đồ Use Case.docx](https://github.com/user-attachments/files/26489133/Bi.u.d.Use.Case.docx)
+
