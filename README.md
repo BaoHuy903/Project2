@@ -21,3 +21,7 @@
 
 -[Biểu đồ Use Case.docx](https://github.com/user-attachments/files/26489133/Bi.u.d.Use.Case.docx)
 
+**BÁO CÁO**
+
+=[BÁO CÁO ĐỒ ÁN.docx](https://github.com/user-attachments/files/26517803/BAO.CAO.D.AN.docx)
+
