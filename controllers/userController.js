@@ -20,7 +20,12 @@ exports.register = async (req, res) => {
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
-    await axios.post(MOCK_API_BASE, { username, password: hashedPassword });
+    // Mặc định đăng ký là 'user'
+    await axios.post(MOCK_API_BASE, { 
+      username, 
+      password: hashedPassword, 
+      role: 'user' 
+    });
     res.redirect('/users/login');
   } catch (err) {
     res.render('users/register', { 
@@ -50,8 +55,19 @@ exports.login = async (req, res) => {
       error: 'Sai tài khoản hoặc mật khẩu'
     });
 
-    req.session.user = { id: user.id, username: user.username };
-    res.redirect('/users');
+    // Lưu role vào session
+    req.session.user = { 
+      id: user.id, 
+      username: user.username, 
+      role: user.role || 'user' 
+    };
+
+    // Điều hướng dựa trên role
+    if (req.session.user.role === 'admin') {
+      res.redirect('/admin');
+    } else {
+      res.redirect('/users');
+    }
   } catch (err) {
     res.render('users/login', { 
       title: 'Đăng nhập',
