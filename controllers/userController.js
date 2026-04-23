@@ -1,15 +1,6 @@
-// Tải axios để gọi API MockAPI
 const axios = require('axios');
-
-// Tải bcrypt để mã hóa password
 const bcrypt = require('bcrypt');
-
-// URL gốc của MockAPI
 const MOCK_API_BASE = 'https://69d242005043d95be971a7a0.mockapi.io/api/v1/users';
-
-// -------------------------------------------------------
-// ĐĂNG KÝ
-// -------------------------------------------------------
 
 // Hiển thị form đăng ký (GET /users/register)
 exports.registerForm = (req, res) =>
@@ -85,19 +76,11 @@ exports.login = async (req, res) => {
   }
 };
 
-// -------------------------------------------------------
-// ĐĂNG XUẤT
-// -------------------------------------------------------
-
 // Xử lý đăng xuất (GET /users/logout)
 exports.logout = (req, res) => {
   // Xóa hoàn toàn session trên server
   req.session.destroy(() => res.redirect('/users/login'));
 };
-
-// -------------------------------------------------------
-// ADMIN — QUẢN LÝ DANH SÁCH USER
-// -------------------------------------------------------
 
 // Hiển thị danh sách tất cả users (GET /users)
 exports.index = async (req, res) => {
