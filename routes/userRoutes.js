@@ -1,7 +1,3 @@
-// ====================================================
-// routes/userRoutes.js — Định nghĩa các đường dẫn liên quan đến User
-// ====================================================
-
 // Tải Express để tạo router
 const express = require('express');
 

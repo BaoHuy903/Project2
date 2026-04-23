@@ -1,7 +1,3 @@
-// ====================================================
-// controllers/userController.js — Xử lý logic nghiệp vụ User (MockAPI)
-// ====================================================
-
 // Tải axios để gọi API MockAPI
 const axios = require('axios');
 

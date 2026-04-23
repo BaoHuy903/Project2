@@ -1,7 +1,3 @@
-// ====================================================
-// models/User.js – MockAPI-compatible User utilities
-// ====================================================
-
 // Load bcrypt library for secure password hashing
 const bcrypt = require('bcrypt');
 

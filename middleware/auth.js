@@ -1,7 +1,3 @@
-// ====================================================
-// middleware/auth.js — Bảo vệ các route yêu cầu đăng nhập
-// ====================================================
-
 // requireLogin: middleware kiểm tra người dùng đã đăng nhập chưa
 // Được gắn vào router bằng: router.use(requireLogin)
 exports.requireLogin = (req, res, next) => {
