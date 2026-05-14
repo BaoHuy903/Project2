@@ -2,9 +2,16 @@ const axios = require('axios');
 const bcrypt = require('bcrypt');
 const MOCK_API_BASE = 'https://69d242005043d95be971a7a0.mockapi.io/api/v1/users';
 
+/**
+ * Hiển thị form Đăng ký tài khoản
+ */
 exports.registerForm = (req, res) =>
   res.render('users/register', { title: 'Đăng ký', error: null });
 
+/**
+ * Xử lý logic Đăng ký tài khoản mới
+ * Kiểm tra trùng lặp username, mã hóa mật khẩu và lưu lên MockAPI
+ */
 exports.register = async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -35,9 +42,16 @@ exports.register = async (req, res) => {
   }
 };
 
+/**
+ * Hiển thị form Đăng nhập
+ */
 exports.loginForm = (req, res) =>
   res.render('users/login', { title: 'Đăng nhập', error: null });
 
+/**
+ * Xử lý logic Đăng nhập
+ * Xác thực thông tin, cấp session và phân quyền điều hướng (Admin/User)
+ */
 exports.login = async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -62,11 +76,10 @@ exports.login = async (req, res) => {
       role: user.role || 'user' 
     };
 
-    // Điều hướng dựa trên role
     if (req.session.user.role === 'admin') {
       res.redirect('/admin');
     } else {
-      res.redirect('/users');
+      res.redirect('/rooms');
     }
   } catch (err) {
     res.render('users/login', { 
@@ -76,19 +89,11 @@ exports.login = async (req, res) => {
   }
 };
 
+/**
+ * Xử lý Đăng xuất
+ * Xóa session hiện tại và đưa về trang đăng nhập
+ */
 exports.logout = (req, res) => {
   req.session.destroy(() => res.redirect('/users/login'));
 };
-
-exports.index = async (req, res) => {
-  try {
-    const response = await axios.get(MOCK_API_BASE);
-    res.render('users/index', {
-      title: 'Trọ Víp - Trang chủ',
-      users: response.data,
-      user: req.session.user
-    });
-  } catch (err) {
-    res.status(500).send('Lỗi: ' + err.message);
-  }
-};
+

@@ -20,14 +20,16 @@ app.use(session({
 
 const userRoutes = require('./routes/userRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const roomRoutes = require('./routes/roomRoutes');
 
 app.use('/users', userRoutes);
 app.use('/admin', adminRoutes);
+app.use('/rooms', roomRoutes);
 
 app.get('/', (req, res) => {
   if (req.session.user) {
     if (req.session.user.role === 'admin') return res.redirect('/admin');
-    return res.redirect('/users');
+    return res.redirect('/rooms');
   }
   res.redirect('/users/login');
 });

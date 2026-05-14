@@ -1,6 +1,11 @@
 const axios = require('axios');
 const MOCK_API_BASE = 'https://69d242005043d95be971a7a0.mockapi.io/api/v1/users';
+const ROOMS_API_BASE = 'https://69d242005043d95be971a7a0.mockapi.io/api/v1/rooms';
 
+/**
+ * Hiển thị Bảng điều khiển dành cho Admin
+ * Tải danh sách tất cả Users từ MockAPI để quản lý
+ */
 exports.dashboard = async (req, res) => {
   try {
     const response = await axios.get(MOCK_API_BASE);

@@ -9,6 +9,5 @@ router.get('/login', userCtrl.loginForm);
 router.post('/login', userCtrl.login);
 
 router.get('/logout', userCtrl.logout);
-router.get('/', userCtrl.index);
 
 module.exports = router;

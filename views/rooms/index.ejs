@@ -10,124 +10,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    body {
-      font-family: 'Inter', sans-serif;
-      background-color: #f4f5f6;
-    }
-
-    /* Top Navbar */
-    .navbar-brand {
-      font-weight: 700;
-      color: #f28500 !important;
-      font-size: 1.5rem;
-    }
-
-    .search-bar {
-      flex: 1;
-      max-width: 500px;
-      margin-left: 2rem;
-      position: relative;
-    }
-
-    .search-bar input {
-      border-radius: 20px;
-      padding-left: 35px;
-      background-color: #f1f3f5;
-      border: none;
-    }
-
-    .search-bar .bi-search {
-      position: absolute;
-      left: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #6c757d;
-    }
-
-    /* Filter Bar */
-    .filter-bar {
-      background-color: #fff;
-      padding: 10px 0;
-      border-bottom: 1px solid #e9ecef;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
-    }
-
-    .filter-btn {
-      border-radius: 20px;
-      border: 1px solid #ced4da;
-      background-color: #fff;
-      color: #495057;
-      font-weight: 500;
-      padding: 6px 16px;
-      font-size: 0.9rem;
-      margin-right: 8px;
-      white-space: nowrap;
-    }
-
-    .filter-btn:hover {
-      background-color: #f8f9fa;
-    }
-
-    /* Sidebar */
-    .sidebar-widget {
-      background: #fff;
-      border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 20px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-    }
-
-    .sidebar-widget h5 {
-      font-size: 1rem;
-      font-weight: 600;
-      margin-bottom: 15px;
-      display: flex;
-      justify-content: space-between;
-      cursor: pointer;
-    }
-
-    .filter-list {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-
-    .filter-list li {
-      margin-bottom: 12px;
-    }
-
-    .filter-list a {
-      color: #495057;
-      text-decoration: none;
-      font-size: 0.9rem;
-      display: block;
-    }
-
-    .filter-list a:hover {
-      color: #f28500;
-    }
-
-    /* Main Content Placeholder */
-    .content-placeholder {
-      background: #fff;
-      border-radius: 12px;
-      border: 2px dashed #ced4da;
-      height: 500px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      color: #6c757d;
-      text-align: center;
-    }
-
-    .content-placeholder i {
-      font-size: 3rem;
-      margin-bottom: 15px;
-      color: #adb5bd;
-    }
-  </style>
+  <link rel="stylesheet" href="/css/rooms/index.css">
 </head>
 
 <body>
@@ -135,7 +18,7 @@
   <!-- Top Navbar -->
   <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom" style="position: relative; z-index: 1030;">
     <div class="container-fluid px-4">
-      <a class="navbar-brand d-flex align-items-center" href="/users">
+      <a class="navbar-brand d-flex align-items-center" href="/rooms">
         <i class="bi bi-house-door-fill fs-3 me-2"></i> TRỌ VÍP
       </a>
 
@@ -217,11 +100,46 @@
           </li>
         </ul>
 
-        <div class="content-placeholder shadow-sm">
-          <i class="bi bi-grid-3x3-gap"></i>
-          <h5 class="fw-bold text-dark">Khu vực hiển thị danh sách phòng</h5>
-          <p class="mb-0">Danh sách các phòng trọ sẽ được liệt kê ở đây.<br>(Hiện tại đang ẩn theo yêu cầu của bạn)</p>
-        </div>
+        <% if (typeof rooms !== 'undefined' && rooms.length > 0) { %>
+          <% rooms.forEach(room => { %>
+            <div class="room-card">
+              <div style="position: relative;">
+                <img src="<%= room.images && room.images.length > 0 ? room.images[0] : 'https://via.placeholder.com/140' %>" alt="Room image" class="room-image">
+                <span class="room-badge" style="bottom: 8px; left: 8px; right: auto;">Tin ưu tiên</span>
+                <span class="room-badge"><i class="bi bi-image"></i> <%= room.images ? room.images.length : 0 %></span>
+              </div>
+              <div class="room-info">
+                <a href="#" class="room-title">
+                  <span class="partner-badge"><i class="bi bi-shield-check"></i> Đối Tác</span>
+                  <span class="hot-icon">🔥</span>
+                  <%= room.title %>
+                </a>
+                <div class="room-meta"><%= room.category || 'Nội thất cơ bản' %></div>
+                <div class="room-price-area">
+                  <span class="price-text"><%= room.price ? (room.price / 1000000).toLocaleString('vi-VN') : 0 %> triệu/tháng</span>
+                  <span class="area-text"><%= room.area || 0 %> m²</span>
+                </div>
+                <div class="room-address">
+                  <i class="bi bi-geo-alt"></i> <%= room.address %>
+                </div>
+                <div class="room-footer">
+                  <div class="poster-info">
+                    <div class="poster-avatar"><%= room.host && room.host.username ? room.host.username.charAt(0).toUpperCase() : 'N' %></div>
+                    <span><%= room.host && room.host.username ? room.host.username : 'Ẩn danh' %></span>
+                    <span><i class="bi bi-bag"></i> <%= Math.floor(Math.random() * 10) + 1 %> tin đăng</span>
+                  </div>
+                  <button class="heart-btn"><i class="bi bi-heart"></i></button>
+                </div>
+              </div>
+            </div>
+          <% }) %>
+        <% } else { %>
+          <div class="content-placeholder shadow-sm">
+            <i class="bi bi-grid-3x3-gap"></i>
+            <h5 class="fw-bold text-dark">Khu vực hiển thị danh sách phòng</h5>
+            <p class="mb-0">Danh sách các phòng trọ sẽ được liệt kê ở đây.<br>(Chưa có dữ liệu phòng nào)</p>
+          </div>
+        <% } %>
       </div>
 
       <!-- Right Column: Sidebar Filters -->
