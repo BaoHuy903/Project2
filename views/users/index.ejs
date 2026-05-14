@@ -146,10 +146,11 @@
 
       <div class="ms-auto d-flex align-items-center">
         <!-- Nút Yêu thích -->
-        <a href="#" class="btn btn-light rounded-circle me-3 d-flex justify-content-center align-items-center" style="width: 40px; height: 40px;" title="Tin đã lưu">
+        <a href="#" class="btn btn-light rounded-circle me-3 d-flex justify-content-center align-items-center"
+          style="width: 40px; height: 40px;" title="Tin đã lưu">
           <i class="bi bi-heart fs-5"></i>
         </a>
-        
+
         <% if (user && user.role==='admin' ) { %>
           <a href="/rooms/add"
             class="btn btn-outline-warning text-dark border-warning btn-sm rounded-pill px-3 fw-bold me-3"
@@ -166,7 +167,6 @@
                 </span>
               </button>
               <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2">
-                <li><a class="dropdown-item" href="#"><i class="bi bi-heart me-2 text-danger"></i> Tin đã lưu</a></li>
                 <li>
                   <hr class="dropdown-divider">
                 </li>
