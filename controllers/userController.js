@@ -84,7 +84,7 @@ exports.index = async (req, res) => {
   try {
     const response = await axios.get(MOCK_API_BASE);
     res.render('users/index', {
-      title: 'Quản lý User',
+      title: 'Trọ Víp - Trang chủ',
       users: response.data,
       user: req.session.user
     });
