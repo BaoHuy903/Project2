@@ -12,11 +12,22 @@ const state = {
   favorites: []
 };
 
-// Load favorites from local storage
+// Get user-specific key for favorites
+const getFavKey = () => {
+  const userId = typeof LOGGED_IN_USER_ID !== 'undefined' ? LOGGED_IN_USER_ID : '';
+  return userId ? `favRoomIds_${userId}` : 'favRoomIds_guest';
+};
+
+// Load favorites
 document.addEventListener('DOMContentLoaded', () => {
-  const stored = localStorage.getItem('favRoomIds');
-  if (stored) {
-    state.favorites = JSON.parse(stored);
+  const userId = typeof LOGGED_IN_USER_ID !== 'undefined' ? LOGGED_IN_USER_ID : '';
+  if (userId) {
+    state.favorites = typeof INITIAL_FAVORITES !== 'undefined' ? INITIAL_FAVORITES : [];
+  } else {
+    const stored = localStorage.getItem(getFavKey());
+    if (stored) {
+      state.favorites = JSON.parse(stored);
+    }
   }
   updateHeartIcons();
   filterRooms();
@@ -68,22 +79,54 @@ function updateHeartIcons() {
 function toggleFavorite(event, id) {
   event.stopPropagation(); // Prevent opening detail modal
   
+  const userId = typeof LOGGED_IN_USER_ID !== 'undefined' ? LOGGED_IN_USER_ID : '';
   const index = state.favorites.indexOf(id);
+  const isAdding = index === -1;
   let msg = '';
-  if (index === -1) {
-    state.favorites.push(id);
-    msg = 'Đã lưu tin đăng phòng trọ!';
+  
+  if (userId) {
+    // Logged in: Sync with database via API
+    fetch('/users/favorites/toggle', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ roomId: id })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        state.favorites = data.favorites;
+        updateHeartIcons();
+        showFavToast(isAdding ? 'Đã lưu tin đăng phòng trọ!' : 'Đã xóa tin khỏi danh sách lưu!');
+        if (state.showFavoritesOnly) {
+          filterRooms();
+        }
+      } else {
+        alert('Lỗi cập nhật yêu thích: ' + data.message);
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      alert('Lỗi kết nối máy chủ');
+    });
   } else {
-    state.favorites.splice(index, 1);
-    msg = 'Đã xóa tin khỏi danh sách lưu!';
-  }
-  
-  localStorage.setItem('favRoomIds', JSON.stringify(state.favorites));
-  updateHeartIcons();
-  showFavToast(msg);
-  
-  if (state.showFavoritesOnly) {
-    filterRooms();
+    // Guest: use local storage
+    if (isAdding) {
+      state.favorites.push(id);
+      msg = 'Đã lưu tin đăng phòng trọ!';
+    } else {
+      state.favorites.splice(index, 1);
+      msg = 'Đã xóa tin khỏi danh sách lưu!';
+    }
+    
+    localStorage.setItem(getFavKey(), JSON.stringify(state.favorites));
+    updateHeartIcons();
+    showFavToast(msg);
+    
+    if (state.showFavoritesOnly) {
+      filterRooms();
+    }
   }
 }
 

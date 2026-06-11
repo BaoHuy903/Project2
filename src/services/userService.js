@@ -36,7 +36,8 @@ const loginUser = async (username, password) => {
   return {
     id: user.id,
     username: user.username,
-    role: user.role || 'TENANT'
+    role: user.role || 'TENANT',
+    favorites: user.favorites || []
   };
 };
 
@@ -79,9 +80,36 @@ const forgotPassword = async (username, newPassword) => {
   });
 };
 
+/**
+ * Toggle phòng trọ yêu thích của người dùng trong cơ sở dữ liệu
+ */
+const toggleFavorite = async (userId, roomId) => {
+  const user = await userRepository.getUserById(userId);
+  if (!user) {
+    throw new Error('Người dùng không tồn tại');
+  }
+
+  let favorites = user.favorites || [];
+  const index = favorites.indexOf(String(roomId));
+  if (index === -1) {
+    favorites.push(String(roomId));
+  } else {
+    favorites.splice(index, 1);
+  }
+
+  const updatedUser = {
+    ...user,
+    favorites
+  };
+
+  await userRepository.updateUser(userId, updatedUser);
+  return favorites;
+};
+
 module.exports = {
   registerUser,
   loginUser,
   changePassword,
-  forgotPassword
+  forgotPassword,
+  toggleFavorite
 };

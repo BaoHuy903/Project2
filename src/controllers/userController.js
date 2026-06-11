@@ -128,3 +128,19 @@ exports.forgotPassword = async (req, res) => {
     });
   }
 };
+
+/**
+ * API: Toggle phòng trọ yêu thích của người dùng
+ */
+exports.toggleFavorite = async (req, res) => {
+  try {
+    const { roomId } = req.body;
+    const userId = req.session.user.id;
+    const updatedFavorites = await userService.toggleFavorite(userId, roomId);
+    // Đồng bộ session
+    req.session.user.favorites = updatedFavorites;
+    res.json({ success: true, favorites: updatedFavorites });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Lỗi khi cập nhật yêu thích: ' + err.message });
+  }
+};

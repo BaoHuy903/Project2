@@ -16,6 +16,9 @@ router.get('/logout', userCtrl.logout);
 router.get('/change-password', requireLogin, userCtrl.changePasswordForm);
 router.post('/change-password', requireLogin, userValidator.validateChangePassword, userCtrl.changePassword);
 
+// Toggle yêu thích (cần đăng nhập)
+router.post('/favorites/toggle', requireLogin, userCtrl.toggleFavorite);
+
 // Quên mật khẩu (không cần đăng nhập)
 router.get('/forgot-password', userCtrl.forgotPasswordForm);
 router.post('/forgot-password', userValidator.validateForgotPassword, userCtrl.forgotPassword);

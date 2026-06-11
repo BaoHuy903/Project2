@@ -391,6 +391,10 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const LOGGED_IN_USER_ID = '<%= user ? user.id : "" %>';
+    const INITIAL_FAVORITES = <%- user && user.favorites ? JSON.stringify(user.favorites) : '[]' %>;
+  </script>
   <script src="/js/rooms/index.js"></script>
 </body>
 
