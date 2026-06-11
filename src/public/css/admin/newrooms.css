@@ -106,7 +106,7 @@ body {
 
 .custom-input {
   width: 100%;
-  padding: 12px 14px;
+  padding: 16px 14px 8px 14px;
   border: 1px solid #cbd5e1;
   border-radius: 6px;
   font-size: 0.9rem;
@@ -131,20 +131,30 @@ textarea.custom-input {
   min-height: 120px;
 }
 
-/* Focus and Value state for floating label */
-.custom-input:focus,
-.custom-input.has-value,
-.custom-input:not(:placeholder-shown):not(select) {
+/* Focus state: blue border */
+.custom-input:focus {
   border-color: #2563eb;
+}
+
+/* Value state without focus: keep default border */
+.custom-input.has-value:not(:focus),
+.custom-input:not(:placeholder-shown):not(select):not(:focus) {
+  border-color: #cbd5e1;
 }
 
 .floating-label .custom-input:focus ~ label,
 .floating-label .custom-input.has-value ~ label,
-.floating-label .custom-input:not(select):valid ~ label {
+.floating-label .custom-input:not(:placeholder-shown):not(select) ~ label {
   top: 0;
   font-size: 0.75rem;
   color: #2563eb;
   font-weight: 500;
+}
+
+/* Keep label color neutral (not blue) when not focused but has value */
+.floating-label .custom-input.has-value:not(:focus) ~ label,
+.floating-label .custom-input:not(:placeholder-shown):not(select):not(:focus) ~ label {
+  color: #64748b;
 }
 
 /* Error State */

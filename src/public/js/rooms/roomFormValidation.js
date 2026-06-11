@@ -2,6 +2,23 @@ document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('roomForm');
   if (!form) return;
 
+  // ── Floating Label: has-value class management ──
+  // Ensures labels stay floated when inputs/selects have values
+  function updateHasValue(el) {
+    if (el.value && el.value.trim() !== '') {
+      el.classList.add('has-value');
+    } else {
+      el.classList.remove('has-value');
+    }
+  }
+
+  // Initialize has-value on all custom-input elements (covers pre-filled edit forms)
+  form.querySelectorAll('.custom-input').forEach(el => {
+    updateHasValue(el);
+    el.addEventListener('change', () => updateHasValue(el));
+    el.addEventListener('input', () => updateHasValue(el));
+  });
+
   const fileInput = document.getElementById('fileInput');
   const uploadArea = document.getElementById('uploadArea');
   const uploadContent = document.querySelector('.upload-content');
