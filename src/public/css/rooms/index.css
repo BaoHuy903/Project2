@@ -1,0 +1,278 @@
+/* Font Inter được load qua layouts/header.ejs — không cần @import lại */
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #f8fafc;
+  color: #1e293b;
+}
+
+/* Navbar */
+.navbar {
+  background-color: #ffffff !important;
+  border-bottom: 1px solid #e2e8f0;
+  box-shadow: none !important;
+}
+
+.navbar-brand {
+  font-weight: 800 !important;
+  color: #0f172a !important;
+  font-size: 1.4rem;
+  letter-spacing: -0.5px;
+}
+
+.navbar-brand i {
+  color: #1e3a8a;
+  background: none !important;
+  -webkit-background-clip: initial !important;
+  -webkit-text-fill-color: initial !important;
+}
+
+/* Search Bar */
+.search-bar input {
+  font-weight: 500;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px !important;
+  font-size: 0.9rem;
+  background-color: #f1f5f9 !important;
+  color: #0f172a;
+  transition: all 0.15s ease-in-out;
+}
+
+.search-bar input:focus {
+  background-color: #ffffff !important;
+  border-color: #2563eb !important;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+}
+
+/* Filter Bar */
+.filter-bar {
+  background-color: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  box-shadow: none !important;
+}
+
+.filter-btn {
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  background-color: #ffffff;
+  color: #475569;
+  font-weight: 600;
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  margin-right: 6px;
+  white-space: nowrap;
+  transition: all 0.15s ease-in-out;
+}
+
+.filter-btn:hover {
+  background-color: #f1f5f9;
+  color: #0f172a;
+  border-color: #cbd5e1;
+}
+
+.filter-btn.active {
+  background-color: #1e3a8a;
+  border-color: #1e3a8a;
+  color: #ffffff;
+}
+
+.dropdown-menu {
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  padding: 6px;
+}
+
+.dropdown-item {
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 0.88rem;
+  color: #475569;
+  font-weight: 500;
+  transition: all 0.1s ease;
+}
+
+.dropdown-item:hover {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+/* Room Card */
+.room-card {
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  border-radius: 10px !important;
+  transition: all 0.2s ease-in-out;
+  box-shadow: none !important;
+}
+
+.room-card:hover {
+  transform: none !important;
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03) !important;
+}
+
+.text-hover-orange {
+  transition: color 0.15s;
+}
+
+.room-card:hover .text-hover-orange {
+  color: #1e3a8a !important;
+}
+
+.btn-fav-toggle {
+  transition: all 0.15s ease;
+}
+
+.btn-fav-toggle:hover {
+  transform: scale(1.1);
+  color: #ef4444 !important;
+}
+
+.fav-active {
+  color: #ef4444 !important;
+}
+
+/* Sidebar filter widgets */
+.card {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+}
+
+.hover-orange {
+  transition: color 0.15s;
+}
+
+.hover-orange:hover {
+  color: #2563eb !important;
+}
+
+/* Modal details styling */
+.modal-content {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+}
+
+#detailCarousel {
+  position: relative;
+  background-color: #0f172a;
+  border-top-left-radius: 11px;
+  border-top-right-radius: 11px;
+  overflow: hidden;
+}
+
+#carouselInner img {
+  height: 340px;
+  object-fit: contain;
+}
+
+.detail-badge {
+  background: #f1f5f9;
+  color: #475569;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+.price-large {
+  color: #ef4444;
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+#btnCallHost {
+  box-shadow: none;
+  background-color: #10b981 !important;
+  border-color: #10b981 !important;
+  transition: all 0.15s ease-in-out;
+  border-radius: 6px !important;
+}
+
+#btnCallHost:hover {
+  background-color: #059669 !important;
+  border-color: #059669 !important;
+  transform: none !important;
+}
+
+#btnZaloHost {
+  box-shadow: none;
+  background-color: #2563eb !important;
+  border-color: #2563eb !important;
+  transition: all 0.15s ease-in-out;
+  border-radius: 6px !important;
+}
+
+#btnZaloHost:hover {
+  background-color: #1d4ed8 !important;
+  border-color: #1d4ed8 !important;
+  transform: none !important;
+}
+
+.room-badge {
+  background: rgba(15, 23, 42, 0.65) !important;
+  backdrop-filter: blur(4px);
+  color: #ffffff !important;
+  font-size: 0.72rem;
+  font-weight: 600;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+}
+
+/* Carousel thumbnails styling */
+.carousel-thumbnails {
+  display: flex;
+  gap: 8px;
+  padding: 10px;
+  background-color: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+  overflow-x: auto;
+  justify-content: center;
+  scrollbar-width: none;
+}
+
+.carousel-thumbnails::-webkit-scrollbar {
+  display: none;
+}
+
+.thumbnail-item {
+  width: 60px;
+  height: 45px;
+  object-fit: cover;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  opacity: 0.5;
+  transition: all 0.15s ease-in-out;
+}
+
+.thumbnail-item:hover, .thumbnail-item.active {
+  opacity: 1;
+  border-color: #2563eb;
+  transform: scale(1.05);
+}
+
+/* Responsive adjustment */
+@media (max-width: 768px) {
+  .filter-btn {
+    padding: 6px 10px;
+    font-size: 0.8rem;
+  }
+  #carouselInner img {
+    height: 220px;
+  }
+  .room-card {
+    padding: 12px !important;
+  }
+  .thumbnail-item {
+    width: 50px;
+    height: 38px;
+  }
+}

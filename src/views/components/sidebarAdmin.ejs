@@ -1,0 +1,22 @@
+<div class="col-md-2 d-none d-md-block sidebar p-0">
+  <div class="p-4">
+    <h4 class="brand-title"><i class="bi bi-shield-lock me-2"></i>TRỌ VÍP ADMIN</h4>
+  </div>
+  <nav class="mt-2">
+    <a href="/admin" class="<%= activeTab === 'dashboard' ? 'active' : '' %>">
+      <i class="bi bi-speedometer2"></i> Bảng điều khiển
+    </a>
+    <a href="/rooms/add">
+      <i class="bi bi-house-add"></i> Đăng phòng trọ
+    </a>
+    <a href="/rooms">
+      <i class="bi bi-house"></i> Trang chủ (User)
+    </a>
+    <a href="/users/change-password">
+      <i class="bi bi-key"></i> Đổi mật khẩu
+    </a>
+    <a href="/users/logout">
+      <i class="bi bi-box-arrow-left"></i> Đăng xuất
+    </a>
+  </nav>
+</div>
