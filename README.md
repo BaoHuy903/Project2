@@ -1,6 +1,9 @@
 
 # Trọ Víp - Website Tìm Kiếm & Quản Lý Phòng Trọ Đà Nẵng
-
+cloudinary
+render.com
+**LINK WEB**
+https://trovip.onrender.com
 **ADMIN**
 TK: admin 
 MK: admin123
