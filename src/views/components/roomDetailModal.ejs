@@ -1,0 +1,72 @@
+  <!-- Room Details Modal -->
+  <div class="modal fade" id="roomDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content border-0 shadow-lg rounded overflow-hidden">
+        
+        <!-- Modal Carousel -->
+        <div id="detailCarousel" class="carousel slide bg-dark" data-bs-ride="carousel">
+          <div class="carousel-inner" id="carouselInner">
+            <!-- Populated via Javascript -->
+          </div>
+          <button class="carousel-control-prev" type="button" data-bs-target="#detailCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          </button>
+          <button class="carousel-control-next" type="button" data-bs-target="#detailCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          </button>
+        </div>
+        
+        <!-- Thumbnail indicators container -->
+        <div class="carousel-thumbnails" id="carouselThumbnails">
+          <!-- Populated via Javascript -->
+        </div>
+
+        <!-- Modal Body -->
+        <div class="modal-body p-4 bg-white">
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <div>
+              <span id="detailBadgeStatus" class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 small mb-2 d-inline-block" style="font-weight: 600; font-size: 0.75rem;">Còn trống</span>
+              <h4 class="fw-bold text-dark mb-1" id="detailTitle">Tiêu đề phòng trọ</h4>
+              <p class="text-muted small mb-0" id="detailAddress"><i class="bi bi-geo-alt-fill text-danger me-1"></i> Đà Nẵng</p>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+
+          <div class="d-flex flex-wrap gap-2 mb-4">
+            <div class="detail-badge"><i class="bi bi-grid-fill"></i> <span id="detailCategory">Nội thất cơ bản</span></div>
+            <div class="detail-badge"><i class="bi bi-people-fill"></i> <span id="detailStatus">Ở đơn</span></div>
+            <div class="detail-badge"><i class="bi bi-rulers"></i> <span id="detailArea">0</span> m²</div>
+            <div class="detail-badge" id="detailDepositBadge"><i class="bi bi-shield-fill-check"></i> Đặt cọc: <span id="detailDeposit">0</span> đ</div>
+          </div>
+
+          <div class="row g-3 border-top pt-4 mb-4">
+            <div class="col-md-6">
+              <div class="text-muted small">Giá thuê hàng tháng</div>
+              <div class="price-large mb-2" id="detailPrice">0 đ/tháng</div>
+              <div class="text-dark fw-medium small" id="detailHostInfo">
+                <i class="bi bi-person-circle text-secondary me-1"></i> Người đăng: <span id="detailHostName">Ẩn danh</span> (<span id="detailHostRole">Cá nhân</span>)
+              </div>
+              <div class="text-success fw-bold small mt-1" id="detailPhoneContainer">
+                <i class="bi bi-telephone-fill me-1"></i> Hotline: <span id="detailPhone">0905xxxxxx</span>
+              </div>
+            </div>
+            <div class="col-md-6 d-flex flex-column align-items-md-end justify-content-center gap-2 mt-md-0 mt-3">
+              <a href="tel:0905123456" id="btnCallHost" class="btn btn-success rounded px-4 py-2 fw-semibold d-inline-flex align-items-center gap-2 w-100 justify-content-center" style="max-width: 220px;">
+                <i class="bi bi-telephone-fill"></i> Gọi điện thoại
+              </a>
+              <a href="https://zalo.me" id="btnZaloHost" target="_blank" class="btn btn-primary rounded px-4 py-2 fw-semibold d-inline-flex align-items-center gap-2 w-100 justify-content-center" style="max-width: 220px;">
+                <i class="bi bi-chat-text-fill"></i> Liên hệ Zalo
+              </a>
+            </div>
+          </div>
+
+          <div class="border-top pt-4">
+            <h6 class="fw-bold text-dark mb-3">Mô tả chi tiết phòng trọ</h6>
+            <p class="text-secondary" id="detailDescription" style="white-space: pre-line; line-height: 1.6;">
+              Mô tả chi tiết phòng trọ.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>

@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= title %></title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/admin/dashboard.css">
+</head>
+<body>
+
+<div class="container-fluid">
+  <div class="row">
+    <!-- Sidebar -->
+    <%- include('../../components/sidebarAdmin', { activeTab: 'dashboard' }) %>
+
+    <!-- Main Content -->
+    <div class="col-md-10 p-4" style="min-height: 100vh;">
+      <!-- Top navbar/header -->
+      <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+        <div>
+          <h2 class="fw-bold text-dark mb-1">Bảng điều khiển</h2>
+          <p class="text-muted mb-0">Xin chào, <%= user.username %> | Quyền quản trị hệ thống</p>
+        </div>
+        <div class="dropdown">
+          <button class="btn btn-white border dropdown-toggle rounded px-3" type="button" data-bs-toggle="dropdown">
+            <i class="bi bi-person me-2 text-secondary"></i> <%= user.username %>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 mt-2">
+            <li><a class="dropdown-item" href="/rooms"><i class="bi bi-house me-2 text-muted"></i>Trang chủ</a></li>
+            <li class="d-md-none"><a class="dropdown-item" href="/rooms/add"><i class="bi bi-house-add me-2 text-muted"></i>Đăng phòng trọ</a></li>
+            <li><a class="dropdown-item" href="/users/change-password"><i class="bi bi-key me-2 text-muted"></i>Đổi mật khẩu</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item text-danger" href="/users/logout"><i class="bi bi-box-arrow-left me-2"></i>Đăng xuất</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Stats Cards -->
+      <%
+        let totalUsers = users.length;
+        let totalRooms = rooms.length;
+        let availableRooms = rooms.filter(r => r.isAvailable !== false).length;
+        let rentedRooms = totalRooms - availableRooms;
+      %>
+      <div class="row g-4 mb-4">
+        <div class="col-md-3">
+          <div class="card-stat d-flex align-items-center justify-content-between">
+            <div>
+              <h6 class="text-muted mb-1 text-uppercase font-weight-bold" style="font-size:0.75rem; letter-spacing: 0.5px;">Tổng người dùng</h6>
+              <h3 class="fw-bold mb-0 text-dark"><%= totalUsers %></h3>
+            </div>
+            <div class="stat-icon stat-bg-blue">
+              <i class="bi bi-people-fill"></i>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card-stat d-flex align-items-center justify-content-between">
+            <div>
+              <h6 class="text-muted mb-1 text-uppercase font-weight-bold" style="font-size:0.75rem; letter-spacing: 0.5px;">Tổng phòng đăng</h6>
+              <h3 class="fw-bold mb-0 text-dark"><%= totalRooms %></h3>
+            </div>
+            <div class="stat-icon stat-bg-green">
+              <i class="bi bi-house-door-fill"></i>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card-stat d-flex align-items-center justify-content-between">
+            <div>
+              <h6 class="text-muted mb-1 text-uppercase font-weight-bold" style="font-size:0.75rem; letter-spacing: 0.5px;">Phòng đang trống</h6>
+              <h3 class="fw-bold mb-0 text-dark"><%= availableRooms %></h3>
+            </div>
+            <div class="stat-icon stat-bg-yellow">
+              <i class="bi bi-door-open-fill"></i>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card-stat d-flex align-items-center justify-content-between">
+            <div>
+              <h6 class="text-muted mb-1 text-uppercase font-weight-bold" style="font-size:0.75rem; letter-spacing: 0.5px;">Phòng đã thuê</h6>
+              <h3 class="fw-bold mb-0 text-dark"><%= rentedRooms %></h3>
+            </div>
+            <div class="stat-icon stat-bg-red">
+              <i class="bi bi-door-closed-fill"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <ul class="nav nav-tabs nav-tabs-custom" id="adminTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active" id="rooms-tab" data-bs-toggle="tab" data-bs-target="#rooms-pane" type="button" role="tab"><i class="bi bi-house-fill me-2"></i>Quản lý phòng trọ</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="users-tab" data-bs-toggle="tab" data-bs-target="#users-pane" type="button" role="tab"><i class="bi bi-people-fill me-2"></i>Quản lý người dùng</button>
+        </li>
+      </ul>
+
+      <!-- Tabs Contents -->
+      <div class="tab-content" id="adminTabsContent">
+        
+        <!-- ROOMS PANE -->
+        <div class="tab-pane fade show active" id="rooms-pane" role="tabpanel">
+          <div class="table-container">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="fw-bold text-dark mb-0">Danh sách tin đăng phòng trọ</h5>
+              <a href="/rooms/add" class="btn btn-primary btn-sm rounded px-3" style="background-color: #1e3a8a; border-color: #1e3a8a;"><i class="bi bi-plus"></i> Đăng phòng mới</a>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th class="ps-3">Hình ảnh</th>
+                    <th>Tiêu đề / Địa chỉ</th>
+                    <th>Giá / Diện tích</th>
+                    <th>Người đăng</th>
+                    <th>Trạng thái</th>
+                    <th class="text-center">Hành động</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% if(rooms && rooms.length > 0) { %>
+                    <% rooms.forEach(room => { %>
+                      <tr id="room-row-<%= room.id %>">
+                        <td class="ps-3">
+                          <img src="<%= room.images && room.images.length > 0 ? room.images[0] : 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=120&h=80&q=80' %>" 
+                               alt="Room thumbnail" 
+                               class="rounded" 
+                               style="width: 80px; height: 55px; object-fit: cover;">
+                        </td>
+                        <td>
+                          <div class="fw-bold text-dark text-truncate" style="max-width: 250px;"><%= room.title %></div>
+                          <div class="text-muted small"><i class="bi bi-geo-alt me-1"></i><%= room.address %></div>
+                        </td>
+                        <td>
+                          <div class="fw-bold text-danger"><%= room.price ? (room.price / 1000000).toLocaleString('vi-VN') : 0 %> triệu/tháng</div>
+                          <div class="text-muted small">Diện tích: <%= room.area || 0 %> m²</div>
+                        </td>
+                        <td>
+                          <div class="fw-bold text-secondary"><%= room.host ? room.host.username : 'Ẩn danh' %></div>
+                          <div class="text-muted small"><%= room.host ? room.host.role : 'Cá nhân' %></div>
+                        </td>
+                        <td>
+                          <% const isAvail = room.isAvailable !== false; %>
+                          <span class="<%= isAvail ? 'badge-status-empty' : 'badge-status-rented' %>" 
+                                id="room-badge-<%= room.id %>">
+                            <%= isAvail ? 'Còn trống' : 'Đã thuê' %>
+                          </span>
+                        </td>
+                        <td class="text-center">
+                          <a href="/rooms/edit/<%= room.id %>" class="btn btn-sm btn-outline-primary me-2 rounded"
+                             title="Chỉnh sửa tin đăng"
+                             style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center;">
+                            <i class="bi bi-pencil-square"></i>
+                          </a>
+                          <button class="btn btn-sm btn-outline-secondary me-2 rounded btn-action-toggle" 
+                                  onclick="toggleRoomStatus('<%= room.id %>')"
+                                  title="Đổi trạng thái phòng"
+                                  style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center;">
+                            <i class="bi bi-arrow-repeat"></i>
+                          </button>
+                          <button class="btn btn-sm btn-outline-danger rounded" 
+                                  onclick="deleteRoom('<%= room.id %>')"
+                                  title="Xóa tin đăng"
+                                  style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center;">
+                            <i class="bi bi-trash"></i>
+                          </button>
+                        </td>
+                      </tr>
+                    <% }) %>
+                  <% } else { %>
+                    <tr>
+                      <td colspan="6" class="text-center py-4 text-muted">Chưa có phòng trọ nào được đăng.</td>
+                    </tr>
+                  <% } %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- USERS PANE -->
+        <div class="tab-pane fade" id="users-pane" role="tabpanel">
+          <div class="table-container">
+            <h5 class="fw-bold text-dark mb-4">Danh sách tài khoản người dùng</h5>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th class="ps-4">Mã số (ID)</th>
+                    <th>Tài khoản</th>
+                    <th>Vai trò</th>
+                    <th class="text-center">Hành động</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% users.forEach(u => { %>
+                    <tr id="user-row-<%= u.id %>">
+                      <td class="ps-4 text-muted small">#<%= u.id %></td>
+                      <td>
+                        <div class="d-flex align-items-center">
+                          <div class="text-primary rounded p-2 me-3 d-flex align-items-center justify-content-center" 
+                               style="width: 34px; height: 34px; background: rgba(37,99,235,0.06)">
+                            <i class="bi bi-person"></i>
+                          </div>
+                          <div>
+                            <div class="fw-bold text-dark"><%= u.username %></div>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                      <% if (u.role === ROLES.ADMIN) { %>
+                          <span class="badge badge-pill-custom" style="background-color: #f1f5f9; color: #1e3a8a; border: 1px solid #cbd5e1;">Quản trị viên</span>
+                        <% } else if (u.role === ROLES.LANDLORD) { %>
+                          <span class="badge badge-pill-custom" style="background-color: #ecfdf5; color: #047857; border: 1px solid #d1fae5;">Chủ trọ</span>
+                        <% } else if (u.role === ROLES.TENANT) { %>
+                          <span class="badge badge-pill-custom" style="background-color: #f0f9ff; color: #0369a1; border: 1px solid #e0f2fe;">Khách thuê</span>
+                        <% } else { %>
+                          <span class="badge badge-pill-custom" style="background-color: #f8fafc; color: #475569; border: 1px solid #e2e8f0;"><%= u.role || 'Người dùng' %></span>
+                        <% } %>
+                      </td>
+                      <td class="text-center">
+                        <button class="btn btn-sm btn-outline-danger rounded" 
+                                onclick="deleteUser('<%= u.id %>', '<%= u.username %>')"
+                                title="Xóa người dùng"
+                                style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center;">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                      </td>
+                    </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Alerts Toasts -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1050;">
+  <div id="toastMessage" class="toast align-items-center text-bg-success border-0 rounded-3" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body" id="toastBody">
+        Thao tác thành công!
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/shared/toast.js"></script>
+<script src="/js/admin/dashboard.js"></script>
+</body>
+</html>

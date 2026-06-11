@@ -1,8 +1,0 @@
-body { font-family: 'Inter', sans-serif; background-color: #f8f9fa; }
-.sidebar { min-height: 100vh; background: #212529; color: white; }
-.sidebar a { color: #adb5bd; text-decoration: none; padding: 10px 20px; display: block; }
-.sidebar a:hover, .sidebar a.active { background: #343a40; color: white; }
-.card { border: none; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-.table thead { background-color: #f1f3f5; }
-.badge-admin { background-color: #e7f5ff; color: #1c7ed6; }
-.badge-user { background-color: #fff4e6; color: #d9480f; }
