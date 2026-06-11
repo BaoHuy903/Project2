@@ -1,4 +1,12 @@
+
 # Trọ Víp - Website Tìm Kiếm & Quản Lý Phòng Trọ Đà Nẵng
+
+**ADMIN**
+TK: admin 
+MK: admin123
+
+**LINK MOCKAPI**
+
 
 **Trọ Víp** là một ứng dụng web MVC được phát triển bằng Node.js và Express, sử dụng EJS làm View Engine, Bootstrap 5 cho giao diện và MockAPI làm cơ sở dữ liệu giả lập. Dự án hỗ trợ người dùng tìm kiếm phòng trọ nhanh chóng, lưu tin đăng yêu thích và cho phép quản trị viên quản lý phòng trọ cũng như người dùng.
 
