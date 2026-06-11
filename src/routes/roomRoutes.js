@@ -5,18 +5,21 @@ const roomCtrl = require('../controllers/roomController');
 const { requireLogin, isLandlordOrAdmin } = require('../middleware/auth');
 const roomValidator = require('../validators/roomValidator');
 const multer = require('multer');
+const cloudinary = require('cloudinary');
+const cloudinaryStorage = require('multer-storage-cloudinary');
 
-// Cấu hình lưu trữ file với Multer
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    // Dùng absolute path để tránh lỗi relative path khi chạy từ các đường dẫn khác
-    cb(null, path.join(__dirname, '../public/uploads/'));
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    const ext = path.extname(file.originalname).toLowerCase();
-    cb(null, uniqueSuffix + ext);
-  }
+// Cấu hình Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+// Cấu hình Cloudinary Storage cho Multer
+const storage = cloudinaryStorage({
+  cloudinary: cloudinary,
+  folder: 'trovip',
+  allowedFormats: ['jpg', 'png', 'jpeg', 'webp']
 });
 
 const upload = multer({ 
