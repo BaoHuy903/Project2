@@ -29,7 +29,7 @@ exports.index = async (req, res) => {
     const { rooms } = await roomService.getRoomsHome();
 
     res.render('rooms/index', {
-      title: 'Trọ Víp - Trang chủ',
+      title: 'TrọVíp - Trang chủ',
       rooms,
       user: req.session.user
     });
