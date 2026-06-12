@@ -180,6 +180,11 @@
     .cursor-pointer {
       cursor: pointer;
     }
+    /* Hide default browser eye icon for password input */
+    input[type="password"]::-ms-reveal,
+    input[type="password"]::-ms-clear {
+      display: none;
+    }
   </style>
 </head>
 <body>
