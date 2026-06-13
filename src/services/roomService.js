@@ -52,13 +52,19 @@ const createRoom = async (roomData, files, sessionUser) => {
     description: roomData.description.trim(),
     deposit: Number(roomData.deposit || 0),
     phone: roomData.phone ? roomData.phone.trim() : DEFAULT_HOTLINE,
+    depositMonth: roomData.depositMonth ? Number(roomData.depositMonth) : null,
+    paymentCycle: roomData.paymentCycle ? roomData.paymentCycle.trim() : '',
+    parking: roomData.parking ? roomData.parking.trim() : '',
+    electricityPrice: roomData.electricityPrice ? Number(roomData.electricityPrice) : null,
+    waterPrice: roomData.waterPrice ? Number(roomData.waterPrice) : null,
     host: {
       id: sessionUser.id,
       username: sessionUser.username,
       role: sessionUser.role === ROLES.ADMIN ? 'Admin' : 'Chủ trọ'
     },
     images: imagesArr,
-    isAvailable: true
+    isAvailable: true,
+    createdAt: new Date().toISOString()
   };
 
   return roomRepository.createRoom(newRoom);
@@ -113,6 +119,11 @@ const updateRoom = async (roomId, roomData, files, sessionUser) => {
     description: roomData.description.trim(),
     deposit: Number(roomData.deposit || 0),
     phone: roomData.phone ? roomData.phone.trim() : DEFAULT_HOTLINE,
+    depositMonth: roomData.depositMonth ? Number(roomData.depositMonth) : null,
+    paymentCycle: roomData.paymentCycle ? roomData.paymentCycle.trim() : '',
+    parking: roomData.parking ? roomData.parking.trim() : '',
+    electricityPrice: roomData.electricityPrice ? Number(roomData.electricityPrice) : null,
+    waterPrice: roomData.waterPrice ? Number(roomData.waterPrice) : null,
     images: imagesArr
   };
 

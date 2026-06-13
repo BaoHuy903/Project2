@@ -10,7 +10,7 @@ function showToast(message, isSuccess = true) {
     toastEl.className = isSuccess
       ? 'toast align-items-center text-bg-success border-0 rounded-3'
       : 'toast align-items-center text-bg-danger border-0 rounded-3';
-    const toast = new bootstrap.Toast(toastEl);
+    const toast = new bootstrap.Toast(toastEl, { delay: 5000 });
     toast.show();
   }
 }

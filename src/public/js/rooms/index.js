@@ -8,9 +8,31 @@ const state = {
     category: 'Tất cả',
     search: ''
   },
+  sortBy: 'newest',
   showFavoritesOnly: false,
   favorites: []
 };
+
+// Formatting posting time helper
+function formatTimeSince(dateString) {
+  if (!dateString || dateString === 'undefined') return 'Vừa xong';
+  const date = new Date(dateString);
+  const now = new Date();
+  const seconds = Math.floor((now - date) / 1000);
+  
+  if (seconds < 60) return 'Vừa xong';
+  
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes} phút trước`;
+  
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} giờ trước`;
+  
+  const days = Math.floor(hours / 24);
+  if (days < 30) return `${days} ngày trước`;
+  
+  return 'Đăng ngày ' + date.toLocaleDateString('vi-VN');
+}
 
 // Get user-specific key for favorites
 const getFavKey = () => {
@@ -30,6 +52,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
   updateHeartIcons();
+  
+  // Format initial posting times
+  document.querySelectorAll('.posting-time-el').forEach(el => {
+    const created = el.getAttribute('data-created');
+    el.textContent = formatTimeSince(created);
+  });
+
   filterRooms();
 
   // Synchronize thumbnail active state with carousel sliding
@@ -135,7 +164,7 @@ function showFavToast(msg) {
   if (toastEl) {
     const bodyEl = document.getElementById('favToastBody');
     if (bodyEl) bodyEl.textContent = msg;
-    const toast = new bootstrap.Toast(toastEl);
+    const toast = new bootstrap.Toast(toastEl, { delay: 5000 });
     toast.show();
   }
 }
@@ -308,10 +337,18 @@ function filterRooms() {
       placeholder.style.display = 'none';
     }
   }
+  
+  // Sort room cards based on the selected criteria
+  sortRooms();
 }
 
 // Modal details triggers
 function handleCardClick(event, element) {
+  // Ignore click if user is selecting/highlighting text
+  if (window.getSelection() && window.getSelection().toString().trim() !== '') {
+    return;
+  }
+
   // Ignore click if user is clicking on favorite heart button
   if (event.target.closest('.btn-fav-toggle')) {
     return;
@@ -328,6 +365,18 @@ function handleCardClick(event, element) {
   document.getElementById('detailArea').textContent = room.area || 0;
   document.getElementById('detailDescription').textContent = room.description || '';
   
+  const timeEl = document.getElementById('detailPostingTime');
+  if (timeEl) {
+    timeEl.innerHTML = `<i class="bi bi-clock me-1"></i>${getRelativeTime(room.createdAt)}`;
+  }
+
+  const detailFavBtn = document.getElementById('detailFavBtn');
+  if (detailFavBtn) {
+    detailFavBtn.setAttribute('data-fav-id', room.id);
+    detailFavBtn.setAttribute('onclick', `toggleFavorite(event, '${room.id}')`);
+  }
+  updateHeartIcons();
+  
   const priceText = room.price ? (room.price / 1000000).toLocaleString('vi-VN') + ' triệu/tháng' : 'Thỏa thuận';
   document.getElementById('detailPrice').textContent = priceText;
   
@@ -338,6 +387,13 @@ function handleCardClick(event, element) {
   } else {
     depositBadge.style.display = 'none';
   }
+
+  // Populate new rules and utility costs
+  document.getElementById('detailDepositMonth').textContent = room.depositMonth !== undefined && room.depositMonth !== null ? `${room.depositMonth} tháng` : 'Chưa cập nhật';
+  document.getElementById('detailPaymentCycle').textContent = room.paymentCycle || 'Chưa cập nhật';
+  document.getElementById('detailParking').textContent = room.parking || 'Chưa cập nhật';
+  document.getElementById('detailElectricity').textContent = room.electricityPrice !== undefined && room.electricityPrice !== null ? `${room.electricityPrice.toLocaleString('vi-VN')} đ/kWh` : 'Chưa cập nhật';
+  document.getElementById('detailWater').textContent = room.waterPrice !== undefined && room.waterPrice !== null ? `${room.waterPrice.toLocaleString('vi-VN')} đ/m³` : 'Chưa cập nhật';
 
   // Availability badge
   const statusBadge = document.getElementById('detailBadgeStatus');
@@ -405,6 +461,11 @@ function handleCardClick(event, element) {
   const hostRole = room.host && room.host.role ? room.host.role : 'Cá nhân';
   const contactPhone = room.phone || '0905123456';
 
+  const detailPostingTime = document.getElementById('detailPostingTime');
+  if (detailPostingTime) {
+    detailPostingTime.innerHTML = `<i class="bi bi-clock me-1"></i>${formatTimeSince(room.createdAt)}`;
+  }
+
   document.getElementById('detailHostName').textContent = hostName;
   document.getElementById('detailHostRole').textContent = hostRole;
   document.getElementById('detailPhone').textContent = contactPhone;
@@ -416,3 +477,103 @@ function handleCardClick(event, element) {
   const modal = new bootstrap.Modal(document.getElementById('roomDetailModal'));
   modal.show();
 }
+
+// Sorting logic
+function setSort(type) {
+  state.sortBy = type;
+  
+  // Update dropdown button text
+  const btn = document.getElementById('sortByBtn');
+  if (btn) {
+    let text = 'Tin mới nhất';
+    if (type === 'price-asc') text = 'Giá thấp trước';
+    if (type === 'price-desc') text = 'Giá cao trước';
+    btn.textContent = text;
+  }
+
+  // Update checkmarks in dropdown menu
+  const options = ['newest', 'price-asc', 'price-desc'];
+  options.forEach(opt => {
+    const el = document.getElementById(`sort-${opt}`);
+    if (el) {
+      const check = el.querySelector('i');
+      if (opt === type) {
+        el.classList.add('active');
+        if (check) check.classList.remove('d-none');
+      } else {
+        el.classList.remove('active');
+        if (check) check.classList.add('d-none');
+      }
+    }
+  });
+
+  // Trigger filter which will execute sortRooms internally
+  filterRooms();
+}
+
+function sortRooms() {
+  const container = document.getElementById('roomsContainer');
+  if (!container) return;
+
+  const cards = Array.from(container.querySelectorAll('.room-card'));
+  
+  cards.sort((a, b) => {
+    if (state.sortBy === 'price-asc') {
+      const priceA = Number(a.getAttribute('data-price')) || 0;
+      const priceB = Number(b.getAttribute('data-price')) || 0;
+      return priceA - priceB;
+    } else if (state.sortBy === 'price-desc') {
+      const priceA = Number(a.getAttribute('data-price')) || 0;
+      const priceB = Number(b.getAttribute('data-price')) || 0;
+      return priceB - priceA;
+    } else {
+      // newest
+      const timeA = a.getAttribute('data-created-at') || '';
+      const timeB = b.getAttribute('data-created-at') || '';
+      if (timeA && timeB && timeA !== 'undefined' && timeB !== 'undefined') {
+        return new Date(timeB) - new Date(timeA); // Newest first
+      }
+      const idA = Number(a.getAttribute('data-id')) || 0;
+      const idB = Number(b.getAttribute('data-id')) || 0;
+      return idB - idA; // Fallback to higher ID first
+    }
+  });
+
+  // Re-append sorted elements
+  cards.forEach(card => {
+    if (card.id !== 'emptyPlaceholder') {
+      container.appendChild(card);
+    }
+  });
+}
+
+// Helper to format relative time for room postings
+function getRelativeTime(dateString) {
+  if (!dateString) return 'Vừa xong';
+  const now = new Date();
+  const past = new Date(dateString);
+  const diffMs = now - past;
+  
+  if (isNaN(diffMs) || diffMs < 0) return 'Vừa xong';
+  
+  const diffSec = Math.floor(diffMs / 1000);
+  const diffMin = Math.floor(diffSec / 60);
+  const diffHr = Math.floor(diffMin / 60);
+  const diffDay = Math.floor(diffHr / 24);
+  
+  if (diffSec < 60) {
+    return 'Vừa xong';
+  } else if (diffMin < 60) {
+    return `${diffMin} phút trước`;
+  } else if (diffHr < 24) {
+    return `${diffHr} giờ trước`;
+  } else if (diffDay < 30) {
+    return `${diffDay} ngày trước`;
+  } else {
+    const d = past.getDate().toString().padStart(2, '0');
+    const m = (past.getMonth() + 1).toString().padStart(2, '0');
+    const y = past.getFullYear();
+    return `${d}/${m}/${y}`;
+  }
+}
+

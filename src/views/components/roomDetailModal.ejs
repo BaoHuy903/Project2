@@ -1,8 +1,18 @@
   <!-- Room Details Modal -->
   <div class="modal fade" id="roomDetailModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
-      <div class="modal-content border-0 shadow-lg rounded overflow-hidden">
+      <div class="modal-content border-0 shadow-lg rounded overflow-hidden position-relative">
         
+        <!-- Floating Close Button -->
+        <button type="button" class="btn-close position-absolute" data-bs-dismiss="modal" aria-label="Close" style="top: 15px; right: 15px; z-index: 1050; background-color: rgba(255, 255, 255, 0.9) !important; opacity: 1 !important; border-radius: 50%; width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border: 1px solid rgba(0, 0, 0, 0.1); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); backdrop-filter: blur(4px); transition: all 0.2s;"></button>
+        
+        <!-- Floating Favorite Button -->
+        <button class="btn btn-link p-0 text-secondary border-0 btn-fav-toggle position-absolute" 
+                id="detailFavBtn"
+                style="top: 15px; right: 54px; z-index: 1050; background-color: rgba(255, 255, 255, 0.9) !important; opacity: 1 !important; border-radius: 50%; width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border: 1px solid rgba(0, 0, 0, 0.1); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); backdrop-filter: blur(4px); transition: all 0.2s;">
+          <i class="bi bi-heart fs-5"></i>
+        </button>
+         
         <!-- Modal Carousel -->
         <div id="detailCarousel" class="carousel slide bg-dark" data-bs-ride="carousel">
           <div class="carousel-inner" id="carouselInner">
@@ -29,7 +39,6 @@
               <h4 class="fw-bold text-dark mb-1" id="detailTitle">Tiêu đề phòng trọ</h4>
               <p class="text-muted small mb-0" id="detailAddress"><i class="bi bi-geo-alt-fill text-danger me-1"></i> Đà Nẵng</p>
             </div>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
 
           <div class="d-flex flex-wrap gap-2 mb-4">

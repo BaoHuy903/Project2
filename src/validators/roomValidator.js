@@ -1,7 +1,7 @@
 const { ROOM_STATUS_TYPES } = require('../constants');
 
 const validateRoom = (req, res, next) => {
-  const { title, area, price, address, description, deposit, status, phone } = req.body;
+  const { title, area, price, address, description, deposit, status, phone, depositMonth, electricityPrice, waterPrice } = req.body;
   const isEdit = req.originalUrl.includes('/edit');
 
   const renderError = (errorMessage) => {
@@ -22,7 +22,7 @@ const validateRoom = (req, res, next) => {
   };
 
   if (!address) {
-    return renderError('Vui lòng chọn địa chỉ bất động sản.');
+    return renderError('Vui lòng chọn địa chỉ phòng trọ.');
   }
 
   if (!area || Number(area) <= 0) {
@@ -37,8 +37,20 @@ const validateRoom = (req, res, next) => {
     return renderError('Số tiền đặt cọc không được là số âm.');
   }
 
+  if (depositMonth && Number(depositMonth) < 0) {
+    return renderError('Số tháng cọc trước không được là số âm.');
+  }
+
+  if (electricityPrice && Number(electricityPrice) < 0) {
+    return renderError('Tiền điện không được là số âm.');
+  }
+
+  if (waterPrice && Number(waterPrice) < 0) {
+    return renderError('Tiền nước không được là số âm.');
+  }
+
   if (!phone || !/^0[35789]\d{8}$/.test(phone.trim())) {
-    return renderError('Số điện thoại liên hệ không hợp lệ (phải là số điện thoại Việt Nam gồm 10 chữ số).');
+    return renderError('Số điện thoại không hợp lệ.');
   }
 
   if (!status || !ROOM_STATUS_TYPES.includes(status)) {
@@ -50,7 +62,7 @@ const validateRoom = (req, res, next) => {
   }
 
   if (!description || description.trim().length < 30) {
-    return renderError('Mô tả chi tiết phòng trọ phải dài ít nhất 30 ký tự.');
+    return renderError('Mô tả phòng phải dài ít nhất 30 ký tự.');
   }
 
   next();

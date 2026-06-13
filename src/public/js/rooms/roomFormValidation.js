@@ -19,27 +19,132 @@ document.addEventListener('DOMContentLoaded', () => {
     el.addEventListener('input', () => updateHasValue(el));
   });
 
-  const fileInput = document.getElementById('fileInput');
+  // Dynamic Image Upload with Drag-and-Drop and Add-More List
+  let selectedFiles = [];
   const uploadArea = document.getElementById('uploadArea');
-  const uploadContent = document.querySelector('.upload-content');
+  const fileInput = document.getElementById('fileInput');
+  const addMoreBtn = document.getElementById('addMoreImagesBtn');
+  const previewsContainer = document.getElementById('imagePreviewsContainer');
+  const finalImagesInput = document.getElementById('finalImagesInput');
   const uploadGroup = document.getElementById('uploadGroup');
 
-  // Upload box logic
-  if (fileInput && uploadArea && uploadContent) {
-    fileInput.addEventListener('change', function () {
-      if (this.files && this.files.length > 0) {
-        uploadContent.innerHTML = `<i class="bi bi-check-circle-fill text-success" style="font-size: 32px; display: block; margin-bottom: 8px;"></i>
-                                   <div class="upload-text text-success">Đã chọn ${this.files.length} ảnh mới</div>`;
-        uploadArea.style.borderColor = '#198754';
-        uploadArea.style.backgroundColor = '#d1e7dd';
-      } else {
-        const isEdit = form.action.includes('/edit');
-        uploadContent.innerHTML = `<i class="bi bi-images upload-icon"></i>
-                                   <div class="upload-text">${isEdit ? 'Thêm ảnh mới thay thế ảnh cũ' : 'Chọn hình ảnh hoặc kéo thả vào đây'}</div>`;
-        uploadArea.style.borderColor = '#ced4da';
-        uploadArea.style.backgroundColor = '#f8fafc';
+  if (uploadArea && fileInput && finalImagesInput) {
+    const isEdit = form.action.includes('/edit');
+    const uploadContent = document.getElementById('uploadContent');
+    const initialUploadContentHTML = uploadContent ? uploadContent.innerHTML : '';
+
+    // Click on uploadArea triggers file selection
+    uploadArea.addEventListener('click', () => {
+      fileInput.click();
+    });
+
+    // Handle drag and drop events
+    ['dragenter', 'dragover'].forEach(eventName => {
+      uploadArea.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        uploadArea.style.borderColor = '#1e3a8a';
+        uploadArea.style.backgroundColor = '#eff6ff';
+      }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      uploadArea.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        uploadArea.style.borderColor = '#cbd5e1';
+        uploadArea.style.backgroundColor = '#ffffff';
+      }, false);
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+      const dt = e.dataTransfer;
+      const files = dt.files;
+      if (files && files.length > 0) {
+        addFiles(files);
       }
     });
+
+    fileInput.addEventListener('change', function() {
+      if (this.files && this.files.length > 0) {
+        addFiles(this.files);
+      }
+    });
+
+    if (addMoreBtn) {
+      addMoreBtn.addEventListener('click', () => {
+        fileInput.click();
+      });
+    }
+
+    function addFiles(filesList) {
+      for (let i = 0; i < filesList.length; i++) {
+        const file = filesList[i];
+        if (file.type.startsWith('image/')) {
+          selectedFiles.push(file);
+        }
+      }
+      renderPreviews();
+      updateFinalInput();
+    }
+
+    function renderPreviews() {
+      previewsContainer.innerHTML = '';
+      selectedFiles.forEach((file, index) => {
+        const card = document.createElement('div');
+        card.className = 'position-relative border rounded overflow-hidden shadow-sm';
+        card.style.width = '80px';
+        card.style.height = '60px';
+
+        const img = document.createElement('img');
+        img.src = URL.createObjectURL(file);
+        img.className = 'w-100 h-100';
+        img.style.objectFit = 'cover';
+
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'position-absolute top-0 end-0 btn btn-danger p-0 d-flex align-items-center justify-content-center rounded-circle';
+        removeBtn.style.width = '18px';
+        removeBtn.style.height = '18px';
+        removeBtn.style.fontSize = '10px';
+        removeBtn.style.margin = '2px';
+        removeBtn.innerHTML = '&times;';
+        removeBtn.addEventListener('click', (e) => {
+          e.stopPropagation(); // Avoid triggering file selection
+          selectedFiles.splice(index, 1);
+          renderPreviews();
+          updateFinalInput();
+        });
+
+        card.appendChild(img);
+        card.appendChild(removeBtn);
+        previewsContainer.appendChild(card);
+      });
+
+      if (uploadContent) {
+        if (selectedFiles.length > 0) {
+          uploadArea.style.backgroundColor = '#edf7ed';
+          uploadArea.style.borderColor = '#198754';
+          uploadArea.style.borderStyle = 'dashed';
+          uploadContent.innerHTML = `
+            <i class="bi bi-check-circle-fill text-success" style="font-size: 2.2rem; display: block; margin-bottom: 8px;"></i>
+            <div class="upload-text text-success fw-semibold" style="color: #198754 !important;">Đã chọn ${selectedFiles.length} ảnh mới</div>
+          `;
+        } else {
+          uploadArea.style.backgroundColor = '#f8fafc';
+          uploadArea.style.borderColor = '#cbd5e1';
+          uploadArea.style.borderStyle = 'dashed';
+          uploadContent.innerHTML = initialUploadContentHTML;
+        }
+      }
+    }
+
+    function updateFinalInput() {
+      const dt = new DataTransfer();
+      selectedFiles.forEach(file => dt.items.add(file));
+      finalImagesInput.files = dt.files;
+    }
+
+    // Initialize list preview display
+    renderPreviews();
   }
 
   // Character counts initialization
@@ -55,11 +160,54 @@ document.addEventListener('DOMContentLoaded', () => {
   const descriptionInput = document.getElementById('descriptionInput');
   const descCharCount = document.getElementById('descCharCount');
   if (descriptionInput && descCharCount) {
-    descCharCount.textContent = `${descriptionInput.value.length}/1500 kí tự`;
+    descCharCount.textContent = descriptionInput.value.length;
     descriptionInput.addEventListener('input', function () {
-      descCharCount.textContent = `${this.value.length}/1500 kí tự`;
+      descCharCount.textContent = this.value.length;
     });
   }
+
+  // Helper to format string with dots
+  function formatNumberString(val) {
+    if (typeof val !== 'string') val = String(val);
+    const clean = val.replace(/\D/g, '');
+    if (!clean) return '';
+    return Number(clean).toLocaleString('vi-VN');
+  }
+
+  function setupFormattedInput(inputId) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+
+    // Change input type to text to support format
+    input.type = 'text';
+    input.inputMode = 'numeric';
+
+    const updateValue = () => {
+      // Format the input value
+      const cursorSelectionStart = input.selectionStart;
+      const originalLen = input.value.length;
+      
+      const formattedVal = formatNumberString(input.value);
+      input.value = formattedVal;
+
+      // Adjust cursor position
+      const newLen = input.value.length;
+      let newCursorPos = cursorSelectionStart + (newLen - originalLen);
+      input.setSelectionRange(newCursorPos, newCursorPos);
+    };
+
+    // Format prefilled value
+    if (input.value) {
+      input.value = formatNumberString(input.value);
+    }
+
+    input.addEventListener('input', updateValue);
+  }
+
+  setupFormattedInput('priceInput');
+  setupFormattedInput('depositInput');
+  setupFormattedInput('electricityPriceInput');
+  setupFormattedInput('waterPriceInput');
 
   // Form validation on submit
   form.addEventListener('submit', function (e) {
@@ -103,8 +251,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 4. File upload check (Only required for creation, optional for editing)
-    if (fileInput && uploadGroup && !isEdit) {
-      if (!fileInput.files || fileInput.files.length === 0) {
+    if (uploadGroup && !isEdit) {
+      if (selectedFiles.length === 0) {
         uploadGroup.classList.add('error-state');
         isValid = false;
       } else {
@@ -127,7 +275,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const priceInput = document.getElementById('priceInput');
     const priceGroup = document.getElementById('priceGroup');
     if (priceInput && priceGroup) {
-      if (!priceInput.value || Number(priceInput.value) <= 0) {
+      const rawPrice = priceInput.value.replace(/\D/g, '');
+      if (!rawPrice || Number(rawPrice) <= 0) {
         priceGroup.classList.add('error-state');
         isValid = false;
       } else {
@@ -139,11 +288,48 @@ document.addEventListener('DOMContentLoaded', () => {
     const depositInput = document.getElementById('depositInput');
     const depositGroup = document.getElementById('depositGroup');
     if (depositInput && depositGroup) {
-      if (depositInput.value && Number(depositInput.value) < 0) {
+      const rawDeposit = depositInput.value.replace(/\D/g, '');
+      if (rawDeposit && Number(rawDeposit) < 0) {
         depositGroup.classList.add('error-state');
         isValid = false;
       } else {
         depositGroup.classList.remove('error-state');
+      }
+    }
+
+    // New Fields Check
+    const depositMonthInput = document.getElementById('depositMonthInput');
+    const depositMonthGroup = document.getElementById('depositMonthGroup');
+    if (depositMonthInput && depositMonthGroup) {
+      if (depositMonthInput.value && Number(depositMonthInput.value) < 0) {
+        depositMonthGroup.classList.add('error-state');
+        isValid = false;
+      } else {
+        depositMonthGroup.classList.remove('error-state');
+      }
+    }
+
+    const electricityPriceInput = document.getElementById('electricityPriceInput');
+    const electricityPriceGroup = document.getElementById('electricityPriceGroup');
+    if (electricityPriceInput && electricityPriceGroup) {
+      const rawElectricity = electricityPriceInput.value.replace(/\D/g, '');
+      if (rawElectricity && Number(rawElectricity) < 0) {
+        electricityPriceGroup.classList.add('error-state');
+        isValid = false;
+      } else {
+        electricityPriceGroup.classList.remove('error-state');
+      }
+    }
+
+    const waterPriceInput = document.getElementById('waterPriceInput');
+    const waterPriceGroup = document.getElementById('waterPriceGroup');
+    if (waterPriceInput && waterPriceGroup) {
+      const rawWater = waterPriceInput.value.replace(/\D/g, '');
+      if (rawWater && Number(rawWater) < 0) {
+        waterPriceGroup.classList.add('error-state');
+        isValid = false;
+      } else {
+        waterPriceGroup.classList.remove('error-state');
       }
     }
 
@@ -175,9 +361,17 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
       const toastEl = document.getElementById('errorToast');
       if (toastEl) {
-        const toast = new bootstrap.Toast(toastEl);
+        const toast = new bootstrap.Toast(toastEl, { delay: 5000 });
         toast.show();
       }
+    } else {
+      // Strip thousand separators before sending to backend
+      if (priceInput) priceInput.value = priceInput.value.replace(/\D/g, '');
+      if (depositInput) depositInput.value = depositInput.value.replace(/\D/g, '');
+      const electricityPriceInput = document.getElementById('electricityPriceInput');
+      if (electricityPriceInput) electricityPriceInput.value = electricityPriceInput.value.replace(/\D/g, '');
+      const waterPriceInput = document.getElementById('waterPriceInput');
+      if (waterPriceInput) waterPriceInput.value = waterPriceInput.value.replace(/\D/g, '');
     }
   });
 });

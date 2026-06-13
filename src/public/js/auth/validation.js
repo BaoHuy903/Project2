@@ -101,7 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (urlParams.has('registered')) {
     const toastEl = document.getElementById('regToast');
     if (toastEl) {
-      new bootstrap.Toast(toastEl).show();
+      new bootstrap.Toast(toastEl, { delay: 5000 }).show();
       // Xóa query param khỏi URL mà không reload trang
       const cleanUrl = window.location.protocol + '//' + window.location.host + window.location.pathname;
       window.history.pushState({ path: cleanUrl }, '', cleanUrl);

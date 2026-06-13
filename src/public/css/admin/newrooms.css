@@ -87,9 +87,9 @@ body {
 
 .floating-label label {
   position: absolute;
-  top: 50%;
+  top: 14px;
   left: 14px;
-  transform: translateY(-50%);
+  transform: none;
   font-size: 0.88rem;
   color: #64748b;
   transition: all 0.15s ease-in-out;
@@ -146,6 +146,7 @@ textarea.custom-input {
 .floating-label .custom-input.has-value ~ label,
 .floating-label .custom-input:not(:placeholder-shown):not(select) ~ label {
   top: 0;
+  transform: translateY(-50%);
   font-size: 0.75rem;
   color: #2563eb;
   font-weight: 500;
@@ -281,3 +282,14 @@ textarea.custom-input {
   background: #e2e8f0;
   color: #0f172a;
 }
+
+/* Hide up/down spinner arrows on number inputs */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type=number] {
+  -moz-appearance: textfield;
+}
+

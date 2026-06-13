@@ -110,7 +110,14 @@
           <div class="table-container">
             <div class="d-flex justify-content-between align-items-center mb-3">
               <h5 class="fw-bold text-dark mb-0">Danh sách tin đăng phòng trọ</h5>
-              <a href="/rooms/add" class="btn btn-primary btn-sm rounded px-3" style="background-color: #1e3a8a; border-color: #1e3a8a;"><i class="bi bi-plus"></i> Đăng phòng mới</a>
+              <div class="d-flex align-items-center gap-2">
+                <span class="text-secondary small fw-medium text-nowrap">Lọc trạng thái:</span>
+                <select class="form-select form-select-sm" id="statusFilter" style="width: 130px; font-size: 0.85rem;" onchange="filterDashboardRooms()">
+                  <option value="all">Tất cả</option>
+                  <option value="available">Còn trống</option>
+                  <option value="rented">Đã thuê</option>
+                </select>
+              </div>
             </div>
             <div class="table-responsive">
               <table class="table table-hover align-middle mb-0">
@@ -120,14 +127,14 @@
                     <th>Tiêu đề / Địa chỉ</th>
                     <th>Giá / Diện tích</th>
                     <th>Người đăng</th>
-                    <th>Trạng thái</th>
+                    <th class="text-center text-nowrap">Trạng thái</th>
                     <th class="text-center">Hành động</th>
                   </tr>
                 </thead>
                 <tbody>
                   <% if(rooms && rooms.length > 0) { %>
                     <% rooms.forEach(room => { %>
-                      <tr id="room-row-<%= room.id %>">
+                      <tr id="room-row-<%= room.id %>" data-status="<%= room.isAvailable !== false ? 'available' : 'rented' %>">
                         <td class="ps-3">
                           <img src="<%= room.images && room.images.length > 0 ? room.images[0] : 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=120&h=80&q=80' %>" 
                                alt="Room thumbnail" 
@@ -146,7 +153,7 @@
                           <div class="fw-bold text-secondary"><%= room.host ? room.host.username : 'Ẩn danh' %></div>
                           <div class="text-muted small"><%= room.host ? room.host.role : 'Cá nhân' %></div>
                         </td>
-                        <td>
+                        <td class="text-center">
                           <% const isAvail = room.isAvailable !== false; %>
                           <span class="<%= isAvail ? 'badge-status-empty' : 'badge-status-rented' %>" 
                                 id="room-badge-<%= room.id %>">
@@ -188,7 +195,13 @@
         <!-- USERS PANE -->
         <div class="tab-pane fade" id="users-pane" role="tabpanel">
           <div class="table-container">
-            <h5 class="fw-bold text-dark mb-4">Danh sách tài khoản người dùng</h5>
+            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+              <h5 class="fw-bold text-dark mb-0">Danh sách tài khoản người dùng</h5>
+              <div class="d-flex align-items-center" style="max-width: 250px; position: relative;">
+                <i class="bi bi-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #64748b; font-size: 0.85rem;"></i>
+                <input type="text" id="userSearchInput" class="form-control form-control-sm border" placeholder="Tìm theo tên tài khoản..." oninput="filterUsersByName()" style="font-size: 0.85rem; padding-left: 32px !important;">
+              </div>
+            </div>
             <div class="table-responsive">
               <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
@@ -201,7 +214,7 @@
                 </thead>
                 <tbody>
                   <% users.forEach(u => { %>
-                    <tr id="user-row-<%= u.id %>">
+                    <tr id="user-row-<%= u.id %>" data-username="<%= u.username.toLowerCase() %>">
                       <td class="ps-4 text-muted small">#<%= u.id %></td>
                       <td>
                         <div class="d-flex align-items-center">
@@ -225,7 +238,15 @@
                           <span class="badge badge-pill-custom" style="background-color: #f8fafc; color: #475569; border: 1px solid #e2e8f0;"><%= u.role || 'Người dùng' %></span>
                         <% } %>
                       </td>
-                      <td class="text-center">
+                       <td class="text-center text-nowrap">
+                        <% if (u.role === ROLES.LANDLORD) { %>
+                          <button class="btn btn-sm btn-outline-primary rounded me-2" 
+                                  onclick="viewLandlordRooms('<%= u.id %>', '<%= u.username %>')"
+                                  title="Xem danh sách bài đăng"
+                                  style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center;">
+                            <i class="bi bi-journal-text"></i>
+                          </button>
+                        <% } %>
                         <button class="btn btn-sm btn-outline-danger rounded" 
                                 onclick="deleteUser('<%= u.id %>', '<%= u.username %>')"
                                 title="Xóa người dùng"
@@ -246,6 +267,25 @@
   </div>
 </div>
 
+<!-- Confirm Delete Modal -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
+  <div class="modal-dialog modal-dialog-centered" style="max-width: 400px;">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-body p-4 text-center">
+        <div class="text-danger mb-3" style="font-size: 3rem;">
+          <i class="bi bi-exclamation-triangle-fill"></i>
+        </div>
+        <h5 class="fw-bold text-dark mb-2" id="confirmDeleteTitle">Xác nhận xóa</h5>
+        <p class="text-secondary small mb-4" id="confirmDeleteMessage">Bạn có chắc chắn muốn thực hiện hành động này không? Hành động này không thể hoàn tác.</p>
+        <div class="d-flex justify-content-center gap-2">
+          <button type="button" class="btn btn-light px-4 border" data-bs-dismiss="modal">Hủy</button>
+          <button type="button" class="btn btn-danger px-4" id="confirmDeleteBtn">Xác nhận xóa</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Alerts Toasts -->
 <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1050;">
   <div id="toastMessage" class="toast align-items-center text-bg-success border-0 rounded-3" role="alert" aria-live="assertive" aria-atomic="true">
@@ -257,6 +297,40 @@
     </div>
   </div>
 </div>
+
+<!-- Landlord Rooms Modal -->
+<div class="modal fade" id="landlordRoomsModal" tabindex="-1" aria-labelledby="landlordRoomsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header bg-light">
+        <h5 class="modal-title fw-bold" id="landlordRoomsModalLabel">Bài đăng của chủ trọ</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-0">
+        <div class="table-responsive" style="max-height: 450px;">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th class="ps-3">Hình ảnh</th>
+                <th>Tiêu đề / Địa chỉ</th>
+                <th>Giá / Diện tích</th>
+                <th class="text-center">Trạng thái</th>
+                <th class="text-center">Hành động</th>
+              </tr>
+            </thead>
+            <tbody id="landlordRoomsTableBody">
+              <!-- Render động bằng JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const allRooms = <%- JSON.stringify(rooms).replace(/</g, '\\u003c') %>;
+</script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="/js/shared/toast.js"></script>
