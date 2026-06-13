@@ -37,13 +37,78 @@
             <div class="custom-card">
                 <h2 class="card-title">Vị trí bất động sản</h2>
 
+                <% 
+                const danangWards = {
+                  'Hải Châu': [
+                    'Phường Hòa Cường Bắc, Quận Hải Châu',
+                    'Phường Hòa Cường Nam, Quận Hải Châu',
+                    'Phường Hòa Thuận Đông, Quận Hải Châu',
+                    'Phường Hòa Thuận Tây, Quận Hải Châu',
+                    'Phường Hải Châu I, Quận Hải Châu',
+                    'Phường Hải Châu II, Quận Hải Châu',
+                    'Phường Phước Ninh, Quận Hải Châu',
+                    'Phường Nam Dương, Quận Hải Châu',
+                    'Phường Thạch Thang, Quận Hải Châu',
+                    'Phường Thanh Bình, Quận Hải Châu',
+                    'Phường Thuận Phước, Quận Hải Châu',
+                    'Phường Bình Thuận, Quận Hải Châu',
+                    'Phường Bình Hiên, Quận Hải Châu'
+                  ],
+                  'Thanh Khê': [
+                    'Phường Thạc Gián, Quận Thanh Khê',
+                    'Phường Vĩnh Trung, Quận Thanh Khê',
+                    'Phường Tân Lập, Quận Thanh Khê',
+                    'Phường Chính Gián, Quận Thanh Khê',
+                    'Phường Tam Thuận, Quận Thanh Khê',
+                    'Phường Xuân Hà, Quận Thanh Khê',
+                    'Phường An Khê, Quận Thanh Khê',
+                    'Phường Hòa Khê, Quận Thanh Khê',
+                    'Phường Thanh Khê Đông, Quận Thanh Khê',
+                    'Phường Thanh Khê Tây, Quận Thanh Khê'
+                  ],
+                  'Sơn Trà': [
+                    'Phường An Hải Bắc, Quận Sơn Trà',
+                    'Phường An Hải Tây, Quận Sơn Trà',
+                    'Phường An Hải Đông, Quận Sơn Trà',
+                    'Phường Phước Mỹ, Quận Sơn Trà',
+                    'Phường Mân Thái, Quận Sơn Trà',
+                    'Phường Nại Hiên Đông, Quận Sơn Trà',
+                    'Phường Thọ Quang, Quận Sơn Trà'
+                  ],
+                  'Ngũ Hành Sơn': [
+                    'Phường Mỹ An, Quận Ngũ Hành Sơn',
+                    'Phường Khuê Mỹ, Quận Ngũ Hành Sơn',
+                    'Phường Hòa Hải, Quận Ngũ Hành Sơn',
+                    'Phường Hòa Quý, Quận Ngũ Hành Sơn'
+                  ],
+                  'Liên Chiểu': [
+                    'Phường Hòa Minh, Quận Liên Chiểu',
+                    'Phường Hòa Khánh Nam, Quận Liên Chiểu',
+                    'Phường Hòa Khánh Bắc, Quận Liên Chiểu',
+                    'Phường Hòa Hiệp Nam, Quận Liên Chiểu',
+                    'Phường Hòa Hiệp Bắc, Quận Liên Chiểu'
+                  ],
+                  'Cẩm Lệ': [
+                    'Phường Khuê Trung, Quận Cẩm Lệ',
+                    'Phường Hòa An, Quận Cẩm Lệ',
+                    'Phường Hòa Phát, Quận Cẩm Lệ',
+                    'Phường Hòa Thọ Đông, Quận Cẩm Lệ',
+                    'Phường Hòa Thọ Tây, Quận Cẩm Lệ',
+                    'Phường Hòa Xuân, Quận Cẩm Lệ'
+                  ]
+                };
+                %>
+
                 <div class="form-group floating-label" id="addressGroup">
                     <select class="custom-input has-value" name="address" required id="addressInput">
                         <option value="" disabled></option>
-                        <option value="Hải Châu - Đà Nẵng" <%= room.address === 'Hải Châu - Đà Nẵng' ? 'selected' : '' %>>Hải Châu - Đà Nẵng</option>
-                        <option value="Thanh Khê - Đà Nẵng" <%= room.address === 'Thanh Khê - Đà Nẵng' ? 'selected' : '' %>>Thanh Khê - Đà Nẵng</option>
-                        <option value="Sơn Trà - Đà Nẵng" <%= room.address === 'Sơn Trà - Đà Nẵng' ? 'selected' : '' %>>Sơn Trà - Đà Nẵng</option>
-                        <option value="Ngũ Hành Sơn - Đà Nẵng" <%= room.address === 'Ngũ Hành Sơn - Đà Nẵng' ? 'selected' : '' %>>Ngũ Hành Sơn - Đà Nẵng</option>
+                        <% for (const [district, wards] of Object.entries(danangWards)) { %>
+                            <optgroup label="Quận <%= district %>">
+                                <% wards.forEach(ward => { %>
+                                    <option value="<%= ward %>" <%= (room.address && room.address.includes(ward)) ? 'selected' : '' %>><%= ward %></option>
+                                <% }) %>
+                            </optgroup>
+                        <% } %>
                     </select>
                     <label>Địa chỉ <span>*</span></label>
                     <div class="error-msg">Vui lòng chọn địa chỉ bất động sản</div>
