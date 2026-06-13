@@ -1,4 +1,3 @@
-// State management
 const state = {
   filters: {
     location: 'Tất cả',
@@ -10,7 +9,9 @@ const state = {
   },
   sortBy: 'newest',
   showFavoritesOnly: false,
-  favorites: []
+  favorites: [],
+  currentPage: 1,
+  pageSize: 8
 };
 
 // Formatting posting time helper
@@ -171,6 +172,7 @@ function showFavToast(msg) {
 
 function toggleFavoritesOnly() {
   state.showFavoritesOnly = !state.showFavoritesOnly;
+  state.currentPage = 1;
   updateHeartIcons();
   filterRooms();
 }
@@ -181,6 +183,7 @@ const mobileSearchInput = document.getElementById('mobileSearchInput');
 
 const handleSearchInput = (e) => {
   state.filters.search = e.target.value.toLowerCase().trim();
+  state.currentPage = 1;
   filterRooms();
 };
 
@@ -226,6 +229,7 @@ function setFilter(type, value) {
     }
   }
   
+  state.currentPage = 1;
   filterRooms();
 }
 
@@ -260,6 +264,7 @@ function resetAllFilters() {
   const resetBtn = document.getElementById('filterResetBtn');
   if (resetBtn) resetBtn.classList.add('active');
 
+  state.currentPage = 1;
   updateHeartIcons();
   filterRooms();
 }
@@ -321,10 +326,10 @@ function filterRooms() {
     }
 
     if (isMatch) {
-      card.style.setProperty('display', 'flex', 'important');
+      card.dataset.matched = "true";
       visibleCount++;
     } else {
-      card.style.setProperty('display', 'none', 'important');
+      card.dataset.matched = "false";
     }
   });
 
@@ -336,6 +341,12 @@ function filterRooms() {
     } else {
       placeholder.style.display = 'none';
     }
+  }
+
+  // Update room count in hero banner
+  const statRoomCount = document.getElementById('statRoomCount');
+  if (statRoomCount) {
+    statRoomCount.textContent = visibleCount;
   }
   
   // Sort room cards based on the selected criteria
@@ -481,6 +492,7 @@ function handleCardClick(event, element) {
 // Sorting logic
 function setSort(type) {
   state.sortBy = type;
+  state.currentPage = 1;
   
   // Update dropdown button text
   const btn = document.getElementById('sortByBtn');
@@ -545,6 +557,125 @@ function sortRooms() {
       container.appendChild(card);
     }
   });
+
+  // Apply Client-Side Pagination
+  const matchedCards = cards.filter(card => card.dataset.matched === "true");
+  const totalMatched = matchedCards.length;
+  
+  matchedCards.forEach((card, index) => {
+    const isWithinPage = index >= (state.currentPage - 1) * state.pageSize && index < state.currentPage * state.pageSize;
+    if (isWithinPage) {
+      card.style.setProperty('display', 'flex', 'important');
+    } else {
+      card.style.setProperty('display', 'none', 'important');
+    }
+  });
+
+  // Hide non-matched cards just to be sure
+  cards.forEach(card => {
+    if (card.dataset.matched === "false") {
+      card.style.setProperty('display', 'none', 'important');
+    }
+  });
+
+  // Render pagination controls
+  updatePagination(totalMatched);
+}
+
+// Generate pagination controls
+function updatePagination(totalItems) {
+  const container = document.getElementById('paginationContainer');
+  if (!container) return;
+  container.innerHTML = '';
+
+  const totalPages = Math.ceil(totalItems / state.pageSize);
+  if (totalPages <= 1) {
+    return; // No pagination UI needed for 0 or 1 page
+  }
+
+  // Previous Page Button
+  const prevBtn = document.createElement('button');
+  prevBtn.className = `page-btn ${state.currentPage === 1 ? 'disabled' : ''}`;
+  prevBtn.innerHTML = '« Trang trước';
+  if (state.currentPage > 1) {
+    prevBtn.onclick = () => {
+      state.currentPage--;
+      filterRooms();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+  }
+  container.appendChild(prevBtn);
+
+  // Page Numbers
+  const maxButtons = 5;
+  let startPage = Math.max(1, state.currentPage - 2);
+  let endPage = Math.min(totalPages, startPage + maxButtons - 1);
+  if (endPage - startPage < maxButtons - 1) {
+    startPage = Math.max(1, endPage - maxButtons + 1);
+  }
+
+  if (startPage > 1) {
+    const firstBtn = document.createElement('button');
+    firstBtn.className = `page-btn ${state.currentPage === 1 ? 'active' : ''}`;
+    firstBtn.textContent = '1';
+    firstBtn.onclick = () => {
+      state.currentPage = 1;
+      filterRooms();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+    container.appendChild(firstBtn);
+
+    if (startPage > 2) {
+      const dots = document.createElement('span');
+      dots.className = 'px-2 text-muted';
+      dots.textContent = '...';
+      container.appendChild(dots);
+    }
+  }
+
+  for (let i = startPage; i <= endPage; i++) {
+    const pageBtn = document.createElement('button');
+    pageBtn.className = `page-btn ${state.currentPage === i ? 'active' : ''}`;
+    pageBtn.textContent = i;
+    pageBtn.onclick = () => {
+      state.currentPage = i;
+      filterRooms();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+    container.appendChild(pageBtn);
+  }
+
+  if (endPage < totalPages) {
+    if (endPage < totalPages - 1) {
+      const dots = document.createElement('span');
+      dots.className = 'px-2 text-muted';
+      dots.textContent = '...';
+      container.appendChild(dots);
+    }
+
+    const lastBtn = document.createElement('button');
+    lastBtn.className = `page-btn ${state.currentPage === totalPages ? 'active' : ''}`;
+    lastBtn.textContent = totalPages;
+    lastBtn.onclick = () => {
+      state.currentPage = totalPages;
+      filterRooms();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+    container.appendChild(lastBtn);
+  }
+
+  // Next Page Button
+  const nextBtn = document.createElement('button');
+  nextBtn.className = `page-btn ${state.currentPage === totalPages ? 'disabled' : ''}`;
+  nextBtn.innerHTML = 'Trang sau »';
+  if (state.currentPage < totalPages) {
+    nextBtn.onclick = () => {
+      state.currentPage++;
+      filterRooms();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+  }
+  container.appendChild(nextBtn);
 }
 
 // Helper to format relative time for room postings

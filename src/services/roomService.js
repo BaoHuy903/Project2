@@ -35,7 +35,6 @@ const createRoom = async (roomData, files, sessionUser) => {
   // Xử lý hình ảnh
   let imagesArr = [];
   if (files && files.length > 0) {
-    console.log('--- UPLOADED FILES (CREATE) ---', files);
     imagesArr = files.map(file => file.secure_url || file.url || file.path);
   } else {
     // Ảnh mặc định
@@ -104,7 +103,6 @@ const updateRoom = async (roomId, roomData, files, sessionUser) => {
   // Xử lý ảnh: Nếu có tải ảnh mới thì cập nhật, ngược lại giữ nguyên ảnh cũ
   let imagesArr = room.images || [];
   if (files && files.length > 0) {
-    console.log('--- UPLOADED FILES (UPDATE) ---', files);
     imagesArr = files.map(file => file.secure_url || file.url || file.path);
   }
 
@@ -187,8 +185,7 @@ const deleteRoom = async (roomId, sessionUser) => {
           const publicId = lastDot !== -1 ? publicIdWithExt.substring(0, lastDot) : publicIdWithExt;
 
           try {
-            const destroyResult = await cloudinary.v2.uploader.destroy(publicId);
-            console.log(`Deleted Cloudinary image: ${publicId}`, destroyResult);
+            await cloudinary.v2.uploader.destroy(publicId);
           } catch (err) {
             console.error(`Failed to delete Cloudinary image: ${publicId}`, err);
           }
