@@ -507,3 +507,10 @@ input[type="password"]::-ms-reveal,
 input[type="password"]::-ms-clear {
   display: none;
 }
+
+/* Rented room image dimming & blurring */
+.img-rented img {
+  filter: grayscale(80%) blur(2.5px) brightness(0.8);
+  opacity: 0.65;
+}
+

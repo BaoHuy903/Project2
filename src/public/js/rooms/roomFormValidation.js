@@ -644,6 +644,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Submit check (stripping format dots)
   form.addEventListener('submit', function (e) {
+    if (currentStep < maxSteps) {
+      e.preventDefault();
+      validateCurrentStep();
+      return;
+    }
+
+    // Run validations for all steps to make sure no step was bypassed or has invalid values
+    let firstFailedStep = 0;
+    const tempStep = currentStep;
+    for (let s = 1; s <= maxSteps; s++) {
+      currentStep = s;
+      if (!validateCurrentStep()) {
+        firstFailedStep = s;
+        break;
+      }
+    }
+
+    if (firstFailedStep > 0) {
+      e.preventDefault();
+      currentStep = firstFailedStep;
+      updateStepsUI();
+      return;
+    }
+
+    // Restore step state
+    currentStep = tempStep;
+
     const priceInput = document.getElementById('priceInput');
     if (priceInput) priceInput.value = priceInput.value.replace(/\D/g, '');
     const depositInput = document.getElementById('depositInput');
