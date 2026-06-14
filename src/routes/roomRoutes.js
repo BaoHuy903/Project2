@@ -5,10 +5,12 @@ const roomCtrl = require('../controllers/roomController');
 const { requireLogin, isLandlordOrAdmin } = require('../middleware/auth');
 const roomValidator = require('../validators/roomValidator');
 const multer = require('multer');
-const cloudinary = require('cloudinary');
-const cloudinaryStorage = require('multer-storage-cloudinary');
+const cloudinaryModule = require('cloudinary');
+const cloudinary = cloudinaryModule.v2;
+const CloudinaryStorageModule = require('multer-storage-cloudinary');
+const CloudinaryStorage = CloudinaryStorageModule.CloudinaryStorage || CloudinaryStorageModule;
 
-// Cấu hình Cloudinary
+// Cấu hình Cloudinary v2
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
@@ -16,10 +18,13 @@ cloudinary.config({
 });
 
 // Cấu hình Cloudinary Storage cho Multer
-const storage = cloudinaryStorage({
-  cloudinary: cloudinary,
-  folder: 'trovip',
-  allowedFormats: ['jpg', 'png', 'jpeg', 'webp']
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinaryModule, // truyền full module (có .v2 bên trong)
+  params: {
+    folder: 'trovip',
+    allowed_formats: ['jpg', 'png', 'jpeg', 'webp'],
+    transformation: [{ width: 1280, height: 800, crop: 'limit', quality: 'auto' }]
+  }
 });
 
 const upload = multer({ 

@@ -288,7 +288,7 @@ async function seed() {
         const shuffledImages = [...sampleImages].sort(() => 0.5 - Math.random());
         const images = shuffledImages.slice(0, Math.floor(Math.random() * 2) + 1);
 
-        const amenityKeys = ['wifi', 'air_conditioner', 'parking', 'wc_private', 'washing_machine', 'kitchen', 'camera', 'elevator', 'pet_allowed', 'no_shared_owner', 'free_schedule'];
+        const amenityKeys = ['wifi', 'air_conditioner', 'parking', 'private_wc', 'washing_machine', 'kitchen', 'camera', 'elevator', 'pet_allowed', 'no_shared_owner', 'free_schedule'];
         const shuffledAmenities = [...amenityKeys].sort(() => 0.5 - Math.random());
         const randomAmenities = shuffledAmenities.slice(0, Math.floor(Math.random() * 5) + 2); // 2 to 6 amenities
 

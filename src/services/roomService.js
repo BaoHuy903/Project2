@@ -1,8 +1,8 @@
 const roomRepository = require('../repositories/roomRepository');
 const { ROLES, DEFAULT_HOTLINE } = require('../constants');
-const cloudinary = require('cloudinary');
+const cloudinary = require('cloudinary').v2;
 
-// Cấu hình Cloudinary
+// Cấu hình Cloudinary v2
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
@@ -66,6 +66,7 @@ const createRoom = async (roomData, files, sessionUser) => {
     parking: roomData.parking ? roomData.parking.trim() : '',
     electricityPrice: roomData.electricityPrice ? Number(roomData.electricityPrice) : null,
     waterPrice: roomData.waterPrice ? Number(roomData.waterPrice) : null,
+    availableFrom: roomData.availableFrom ? roomData.availableFrom : null,
     amenities: amenitiesArr,
     host: {
       id: sessionUser.id,
@@ -111,14 +112,24 @@ const updateRoom = async (roomId, roomData, files, sessionUser) => {
     throw new Error('Bạn không có quyền chỉnh sửa phòng trọ này.');
   }
 
-  // Xử lý ảnh: Nếu có tải ảnh mới thì cập nhật, ngược lại giữ nguyên ảnh cũ
-  let imagesArr = room.images || [];
+  // Xử lý ảnh: Nếu có danh sách ảnh cũ được giữ lại thì dùng nó, nếu không dùng toàn bộ ảnh cũ
+  let imagesArr = [];
+  if (Object.prototype.hasOwnProperty.call(roomData, 'keepImages')) {
+    imagesArr = roomData.keepImages
+      ? roomData.keepImages.split(',').map(img => img.trim()).filter(Boolean)
+      : [];
+  } else {
+    imagesArr = room.images || [];
+  }
+
+  // Nếu có tải thêm ảnh mới thì thêm vào danh sách
   if (files && files.length > 0) {
-    imagesArr = files.map(file => file.secure_url || file.url || file.path);
+    const newImgs = files.map(file => file.secure_url || file.url || file.path);
+    imagesArr = [...imagesArr, ...newImgs];
   }
 
   // Xử lý tiện ích
-  let amenitiesArr = room.amenities || [];
+  let amenitiesArr = [];
   if (roomData.amenities) {
     if (Array.isArray(roomData.amenities)) {
       amenitiesArr = roomData.amenities;
@@ -143,6 +154,7 @@ const updateRoom = async (roomId, roomData, files, sessionUser) => {
     parking: roomData.parking ? roomData.parking.trim() : '',
     electricityPrice: roomData.electricityPrice ? Number(roomData.electricityPrice) : null,
     waterPrice: roomData.waterPrice ? Number(roomData.waterPrice) : null,
+    availableFrom: roomData.availableFrom ? roomData.availableFrom : null,
     amenities: amenitiesArr,
     images: imagesArr
   };
@@ -207,7 +219,7 @@ const deleteRoom = async (roomId, sessionUser) => {
           const publicId = lastDot !== -1 ? publicIdWithExt.substring(0, lastDot) : publicIdWithExt;
 
           try {
-            await cloudinary.v2.uploader.destroy(publicId);
+            await cloudinary.uploader.destroy(publicId);
           } catch (err) {
             console.error(`Failed to delete Cloudinary image: ${publicId}`, err);
           }

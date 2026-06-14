@@ -191,9 +191,17 @@
           <div class="db-card">
             <div class="db-card-header flex-wrap gap-2">
               <h5 class="db-card-title">Danh sách tài khoản người dùng</h5>
-              <div class="d-flex align-items-center" style="max-width: 250px; position: relative;">
-                <i class="bi bi-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--color-text-muted); font-size: 0.85rem;"></i>
-                <input type="text" id="userSearchInput" class="form-control form-control-sm border" placeholder="Tìm theo tên..." oninput="filterUsersByName()" style="font-size: 0.85rem; padding-left: 32px !important;">
+              <div class="d-flex align-items-center gap-2">
+                <div class="d-flex align-items-center" style="max-width: 200px; position: relative;">
+                  <i class="bi bi-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--color-text-muted); font-size: 0.85rem;"></i>
+                  <input type="text" id="userSearchInput" class="form-control form-control-sm border" placeholder="Tìm theo tên..." oninput="filterUsers()" style="font-size: 0.85rem; padding-left: 32px !important;">
+                </div>
+                <select class="form-select form-select-sm border" id="userRoleFilter" onchange="filterUsers()" style="width: 140px; font-size: 0.85rem;">
+                  <option value="all">Tất cả vai trò</option>
+                  <option value="<%= ROLES.ADMIN %>">Quản trị viên</option>
+                  <option value="<%= ROLES.LANDLORD %>">Chủ trọ</option>
+                  <option value="<%= ROLES.TENANT %>">Khách thuê</option>
+                </select>
               </div>
             </div>
             <div class="table-responsive">
@@ -208,7 +216,7 @@
                 </thead>
                 <tbody>
                   <% users.forEach(u => { %>
-                    <tr id="user-row-<%= u.id %>" data-username="<%= u.username.toLowerCase() %>">
+                    <tr id="user-row-<%= u.id %>" data-username="<%= u.username.toLowerCase() %>" data-role="<%= u.role %>">
                       <td class="ps-4 text-muted small">#<%= u.id %></td>
                       <td>
                         <div class="d-flex align-items-center">
@@ -245,8 +253,8 @@
                                 id="btn-delete-user-<%= u.id %>"
                                 onclick="deleteUser('<%= u.id %>', '<%= u.username %>')"
                                 title="Xóa người dùng"
-                                style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center;"
-                                <% if (u.id === user.id) { %>disabled style="opacity: 0.5; cursor: not-allowed;"<% } %> >
+                                style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center;<%= u.id === user.id ? ' opacity: 0.5; cursor: not-allowed;' : '' %>"
+                                <%= u.id === user.id ? 'disabled' : '' %>>
                           <i class="bi bi-trash"></i>
                         </button>
                       </td>

@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ── Multi-step Form State & Navigation ──
   let currentStep = 1;
-  const maxSteps = 7;
+  const maxSteps = 6;
   const btnNext = document.getElementById('btnNext');
   const btnPrev = document.getElementById('btnPrev');
   const btnSubmitReal = document.getElementById('btnSubmitReal');
@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (currentStep === 1) {
-      // Step 1: Title, type (status), phone, description
+      // Step 1: Title, occupancy (status), phone, description
       const titleInput = document.getElementById('titleInput');
       const titleGroup = document.getElementById('titleGroup');
       if (titleInput && titleGroup) {
@@ -110,7 +110,16 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     } 
     else if (currentStep === 2) {
-      // Step 2: Address
+      // Step 2: District and Ward selects
+      const districtInput = document.getElementById('districtInput');
+      const districtGroup = document.getElementById('districtGroup');
+      if (districtInput && districtGroup) {
+        if (!districtInput.value) {
+          districtGroup.classList.add('error-state');
+          isValid = false;
+        }
+      }
+
       const addressInput = document.getElementById('addressInput');
       const addressGroup = document.getElementById('addressGroup');
       if (addressInput && addressGroup) {
@@ -161,7 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     } 
     else if (currentStep === 4) {
-      // Step 4: category, parking, electricityPrice, waterPrice (non-negatives if provided)
+      // Step 4: category, electricityPrice, waterPrice (non-negatives if provided)
       const electricityPriceInput = document.getElementById('electricityPriceInput');
       const electricityPriceGroup = document.getElementById('electricityPriceGroup');
       if (electricityPriceInput && electricityPriceGroup) {
@@ -182,13 +191,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
     } 
-    else if (currentStep === 6) {
-      // Step 6: Images (Required on creation, optional on edit)
+    else if (currentStep === 5) {
+      // Step 5: Images (Required on creation, must have at least 1 total on edit)
       const uploadGroup = document.getElementById('uploadGroup');
-      if (uploadGroup && !isEdit) {
-        if (selectedFiles.length === 0) {
-          uploadGroup.classList.add('error-state');
-          isValid = false;
+      if (uploadGroup) {
+        if (!isEdit) {
+          if (selectedFiles.length === 0) {
+            uploadGroup.classList.add('error-state');
+            isValid = false;
+          }
+        } else {
+          const keepInput = document.getElementById('keepImagesInput');
+          const remainingOldImages = keepInput && keepInput.value ? keepInput.value.split(',').filter(Boolean).length : 0;
+          if (remainingOldImages === 0 && selectedFiles.length === 0) {
+            uploadGroup.classList.add('error-state');
+            isValid = false;
+          }
         }
       }
     }
@@ -241,7 +259,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const depositMonth = document.getElementById('depositMonthInput')?.value || '';
     const paymentCycle = document.getElementById('paymentCycleInput')?.value || '';
     const category = document.getElementById('categoryInput')?.value || 'Không có';
-    const parking = document.getElementById('parkingInput')?.value || 'Chưa rõ';
     const electricity = document.getElementById('electricityPriceInput')?.value || '';
     const water = document.getElementById('waterPriceInput')?.value || '';
     
@@ -255,16 +272,24 @@ document.addEventListener('DOMContentLoaded', () => {
     let imagesCount = selectedFiles.length;
     const isEdit = form.action.includes('/edit');
 
+    // Human-readable status mapping
+    let statusText = status;
+    if (status === '1') statusText = 'Ở đơn';
+    else if (status === '2') statusText = 'Ở ghép';
+    else if (status === 'available') statusText = 'Còn trống';
+    else if (status === 'rented') statusText = 'Đã thuê';
+
     let summaryHTML = `
       <div class="row g-3">
+        <!-- Cột trái -->
         <div class="col-md-6">
           <div class="summary-item">
             <div class="summary-label">Tiêu đề:</div>
-            <div class="summary-value fw-semibold">${title}</div>
+            <div class="summary-value text-dark fw-bold">${title}</div>
           </div>
           <div class="summary-item">
-            <div class="summary-label">Loại phòng:</div>
-            <div class="summary-value">${status}</div>
+            <div class="summary-label">Số lượng người:</div>
+            <div class="summary-value">${statusText}</div>
           </div>
           <div class="summary-item">
             <div class="summary-label">SĐT liên hệ:</div>
@@ -275,6 +300,8 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="summary-value">${address}</div>
           </div>
         </div>
+
+        <!-- Cột phải -->
         <div class="col-md-6">
           <div class="summary-item">
             <div class="summary-label">Giá thuê:</div>
@@ -282,26 +309,26 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
           <div class="summary-item">
             <div class="summary-label">Diện tích:</div>
-            <div class="summary-value">${area} m²</div>
+            <div class="summary-value fw-semibold">${area} m²</div>
           </div>
           <div class="summary-item">
             <div class="summary-label">Tiền đặt cọc:</div>
-            <div class="summary-value">${deposit} đ ${depositMonth ? `(${depositMonth} tháng)` : ''}</div>
+            <div class="summary-value">${deposit && deposit !== '0' ? `${deposit} đ` : '0 đ'} ${depositMonth ? `(${depositMonth} tháng)` : ''}</div>
           </div>
           <div class="summary-item">
             <div class="summary-label">Chu kỳ đóng tiền:</div>
-            <div class="summary-value">${paymentCycle || 'Chưa cập nhật'}</div>
+            <div class="summary-value">${paymentCycle ? `${paymentCycle} tháng` : 'Chưa cập nhật'}</div>
           </div>
         </div>
-        <div class="col-12"><hr class="my-2" style="border-color: var(--color-border);"></div>
+
+        <!-- Đường gạch ngang phân chia -->
+        <div class="col-12"><hr class="my-2" style="border-color: #e2e8f0; opacity: 0.8;"></div>
+
+        <!-- Dưới cột trái -->
         <div class="col-md-6">
           <div class="summary-item">
             <div class="summary-label">Nội thất:</div>
             <div class="summary-value">${category}</div>
-          </div>
-          <div class="summary-item">
-            <div class="summary-label">Bãi giữ xe:</div>
-            <div class="summary-value">${parking}</div>
           </div>
           <div class="summary-item">
             <div class="summary-label">Tiền điện:</div>
@@ -312,18 +339,37 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="summary-value">${water ? `${water} đ/m³` : 'Chưa cập nhật'}</div>
           </div>
         </div>
+
+        <!-- Dưới cột phải -->
         <div class="col-md-6">
           <div class="summary-item">
             <div class="summary-label">Tiện ích đã chọn:</div>
             <div class="summary-value">
-              ${checkedAmenityLabels.length > 0 ? checkedAmenityLabels.map(l => `<span class="badge bg-secondary-subtle text-secondary border px-2 py-1 me-1 mb-1 small">${l}</span>`).join('') : 'Không có tiện ích nào'}
+              ${checkedAmenityLabels.length > 0 ? checkedAmenityLabels.map(l => `<span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-0.5 me-1 mb-1 small fw-semibold">${l}</span>`).join('') : '<span class="text-muted">Không có tiện ích nào</span>'}
             </div>
           </div>
           <div class="summary-item">
             <div class="summary-label">Hình ảnh phòng:</div>
             <div class="summary-value">
-              ${imagesCount > 0 ? `<span class="text-success"><i class="bi bi-check-circle-fill"></i> Sẽ tải lên ${imagesCount} hình ảnh mới</span>` : 
-                (isEdit ? `<span class="text-muted"><i class="bi bi-info-circle"></i> Giữ nguyên hình ảnh cũ</span>` : `<span class="text-danger">Chưa chọn hình ảnh</span>`)}
+              ${(() => {
+                const keepInput = document.getElementById('keepImagesInput');
+                const remainingOldImages = keepInput && keepInput.value ? keepInput.value.split(',').filter(Boolean).length : 0;
+                if (!isEdit) {
+                  return imagesCount > 0 
+                    ? `<span class="text-success fw-semibold"><i class="bi bi-check-circle-fill me-1"></i> Tải lên ${imagesCount} hình ảnh</span>`
+                    : `<span class="text-danger fw-semibold">Chưa chọn hình ảnh</span>`;
+                } else {
+                  if (remainingOldImages > 0 && imagesCount > 0) {
+                    return `<span class="text-success fw-semibold"><i class="bi bi-check-circle-fill me-1"></i> Giữ ${remainingOldImages} ảnh cũ & thêm ${imagesCount} ảnh mới</span>`;
+                  } else if (remainingOldImages > 0 && imagesCount === 0) {
+                    return `<span class="text-primary fw-semibold"><i class="bi bi-info-circle me-1"></i> Giữ nguyên hình ảnh cũ</span>`;
+                  } else if (remainingOldImages === 0 && imagesCount > 0) {
+                    return `<span class="text-success fw-semibold"><i class="bi bi-check-circle-fill me-1"></i> Thay thế bằng ${imagesCount} ảnh mới</span>`;
+                  } else {
+                    return `<span class="text-danger fw-semibold"><i class="bi bi-exclamation-triangle me-1"></i> Không có hình ảnh nào</span>`;
+                  }
+                }
+              })()}
             </div>
           </div>
         </div>
@@ -362,6 +408,56 @@ document.addEventListener('DOMContentLoaded', () => {
     el.addEventListener('change', () => updateHasValue(el));
     el.addEventListener('input', () => updateHasValue(el));
   });
+
+  // Dynamic District -> Ward selector population logic
+  const districtInput = document.getElementById('districtInput');
+  const addressInput = document.getElementById('addressInput');
+  
+  if (districtInput && addressInput) {
+    districtInput.addEventListener('change', () => {
+      const dist = districtInput.value;
+      addressInput.innerHTML = '<option value="" selected disabled></option>';
+      if (dist && typeof DANANG_WARDS !== 'undefined' && DANANG_WARDS[dist]) {
+        DANANG_WARDS[dist].forEach(ward => {
+          const opt = document.createElement('option');
+          opt.value = ward;
+          opt.textContent = ward.split(',')[0].trim();
+          addressInput.appendChild(opt);
+        });
+      }
+      addressInput.classList.remove('has-value');
+      updateHasValue(addressInput);
+      updateHasValue(districtInput);
+    });
+  }
+
+  // Parse existing address during edit
+  if (typeof EXISTING_ADDRESS_VAL !== 'undefined' && EXISTING_ADDRESS_VAL && districtInput && addressInput && typeof DANANG_WARDS !== 'undefined') {
+    let foundDistrict = '';
+    for (const district of Object.keys(DANANG_WARDS)) {
+      if (EXISTING_ADDRESS_VAL.includes(district)) {
+        foundDistrict = district;
+        break;
+      }
+    }
+    if (foundDistrict) {
+      districtInput.value = foundDistrict;
+      districtInput.classList.add('has-value');
+      
+      // Populate wards
+      addressInput.innerHTML = '<option value="" disabled></option>';
+      DANANG_WARDS[foundDistrict].forEach(ward => {
+        const opt = document.createElement('option');
+        opt.value = ward;
+        opt.textContent = ward.split(',')[0].trim();
+        if (EXISTING_ADDRESS_VAL.includes(ward)) {
+          opt.selected = true;
+          addressInput.classList.add('has-value');
+        }
+        addressInput.appendChild(opt);
+      });
+    }
+  }
 
   // Dynamic Image Upload with Drag-and-Drop and Add-More List
   let selectedFiles = [];

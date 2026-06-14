@@ -84,7 +84,7 @@
 
         <!-- Location -->
         <div class="dropdown">
-          <button class="filter-pill" data-bs-toggle="dropdown" id="btnFilterLocation">
+          <button class="filter-pill" data-bs-toggle="dropdown" data-bs-boundary="viewport" id="btnFilterLocation">
             <i class="bi bi-geo-alt"></i> Khu vực
           </button>
           <ul class="dropdown-menu tv-dropdown">
@@ -100,7 +100,7 @@
 
         <!-- Price -->
         <div class="dropdown">
-          <button class="filter-pill" data-bs-toggle="dropdown" id="btnFilterPrice">
+          <button class="filter-pill" data-bs-toggle="dropdown" data-bs-boundary="viewport" id="btnFilterPrice">
             <i class="bi bi-cash"></i> Giá thuê
           </button>
           <ul class="dropdown-menu tv-dropdown">
@@ -114,7 +114,7 @@
 
         <!-- Area -->
         <div class="dropdown">
-          <button class="filter-pill" data-bs-toggle="dropdown" id="btnFilterArea">
+          <button class="filter-pill" data-bs-toggle="dropdown" data-bs-boundary="viewport" id="btnFilterArea">
             <i class="bi bi-rulers"></i> Diện tích
           </button>
           <ul class="dropdown-menu tv-dropdown">
@@ -127,7 +127,7 @@
 
         <!-- Room Type -->
         <div class="dropdown">
-          <button class="filter-pill" data-bs-toggle="dropdown" id="btnFilterStatus">
+          <button class="filter-pill" data-bs-toggle="dropdown" data-bs-boundary="viewport" id="btnFilterStatus">
             <i class="bi bi-door-open"></i> Loại phòng
           </button>
           <ul class="dropdown-menu tv-dropdown">
@@ -139,7 +139,7 @@
 
         <!-- Category -->
         <div class="dropdown">
-          <button class="filter-pill" data-bs-toggle="dropdown" id="btnFilterCategory">
+          <button class="filter-pill" data-bs-toggle="dropdown" data-bs-boundary="viewport" id="btnFilterCategory">
             <i class="bi bi-lamp"></i> Nội thất
           </button>
           <ul class="dropdown-menu tv-dropdown">
@@ -157,8 +157,8 @@
           </button>
           <ul class="dropdown-menu dropdown-menu-end tv-dropdown">
             <li><a class="dropdown-item" id="sort-newest" onclick="setSort('newest')">Tin mới nhất <i class="bi bi-check2 ms-auto"></i></a></li>
-            <li><a class="dropdown-item" id="sort-price-asc" onclick="setSort('price-asc')">Giá thấp trước <i class="bi bi-check2 ms-auto d-none"></i></a></li>
-            <li><a class="dropdown-item" id="sort-price-desc" onclick="setSort('price-desc')">Giá cao trước <i class="bi bi-check2 ms-auto d-none"></i></a></li>
+            <li><a class="dropdown-item" id="sort-price-asc" onclick="setSort('price-asc')">Giá Thấp - Cao <i class="bi bi-check2 ms-auto d-none"></i></a></li>
+            <li><a class="dropdown-item" id="sort-price-desc" onclick="setSort('price-desc')">Giá Cao - Thấp <i class="bi bi-check2 ms-auto d-none"></i></a></li>
           </ul>
         </div>
       </div>
@@ -202,7 +202,7 @@
              data-room="<%= encodeURIComponent(JSON.stringify(room)) %>"
              onclick="handleCardClick(event, this)">
 
-          <div class="tv-card-img">
+          <div class="tv-card-img<%= room.isAvailable === false ? ' img-rented' : '' %>">
             <img src="<%= room.images && room.images.length > 0 ? room.images[0] : 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=400&h=280&q=80' %>" alt="<%= room.title %>" loading="lazy">
             <% if (room.isAvailable !== false) { %>
               <span class="tv-badge-available">Còn trống</span>
@@ -264,6 +264,51 @@
     </div>
   </main>
 
+  <!-- Footer -->
+  <footer class="landing-footer">
+    <div class="container">
+      <div class="row g-4">
+        <div class="col-lg-4 col-md-6">
+          <h5 class="footer-brand"><i class="bi bi-house-door me-2"></i>TrọVíp</h5>
+          <p class="footer-desc">Hệ thống đăng tin và tìm kiếm phòng trọ hàng đầu Đà Nẵng. Mang đến giải pháp nhanh chóng, uy tín và tiện lợi cho chủ trọ và khách thuê.</p>
+          <div class="footer-socials">
+            <a href="#"><i class="bi bi-facebook"></i></a>
+            <a href="#"><i class="bi bi-chat-text-fill"></i></a>
+            <a href="#"><i class="bi bi-youtube"></i></a>
+          </div>
+        </div>
+        <div class="col-lg-2 col-md-6">
+          <h6 class="footer-heading">Khu vực</h6>
+          <ul class="footer-links">
+            <li><a href="/rooms?district=Hải+Châu">Hải Châu</a></li>
+            <li><a href="/rooms?district=Thanh+Khê">Thanh Khê</a></li>
+            <li><a href="/rooms?district=Sơn+Trà">Sơn Trà</a></li>
+            <li><a href="/rooms?district=Liên+Chiểu">Liên Chiểu</a></li>
+          </ul>
+        </div>
+        <div class="col-lg-2 col-md-6">
+          <h6 class="footer-heading">Liên kết</h6>
+          <ul class="footer-links">
+            <li><a href="/rooms">Tìm phòng</a></li>
+            <li><a href="/users/register">Đăng ký</a></li>
+            <li><a href="/users/login">Đăng nhập</a></li>
+          </ul>
+        </div>
+        <div class="col-lg-4 col-md-6">
+          <h6 class="footer-heading">Liên hệ</h6>
+          <ul class="footer-contact">
+            <li><i class="bi bi-telephone"></i> Hotline: 0704699523</li>
+            <li><i class="bi bi-envelope"></i> huyho.09032005@gmail.com</li>
+            <li><i class="bi bi-geo-alt"></i> 87 Bùi Bình Uyên, Ngũ Hành Sơn, Đà Nẵng</li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2026 TrọVíp. Bảo lưu mọi quyền.</p>
+      </div>
+    </div>
+  </footer>
+
   <!-- ========== ROOM DETAIL MODAL ========== -->
   <div class="modal fade" id="roomDetailModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -272,7 +317,7 @@
         <button type="button" class="btn-close tv-modal-close-btn" data-bs-dismiss="modal" aria-label="Close"></button>
 
         <!-- Carousel -->
-        <div class="tv-modal-carousel" id="detailCarousel">
+        <div class="tv-modal-carousel carousel slide" id="detailCarousel">
           <div id="carouselInner" class="carousel-inner"></div>
           <button class="carousel-control-prev" type="button" data-bs-target="#detailCarousel" data-bs-slide="prev">
             <span class="carousel-control-prev-icon"></span>
@@ -345,12 +390,13 @@
               </div>
             </div>
             <div class="tv-info-item">
-              <i class="bi bi-p-circle"></i>
+              <i class="bi bi-calendar-check"></i>
               <div>
-                <span class="tv-info-label">Chỗ để xe</span>
-                <span class="tv-info-value" id="detailParking">Chưa cập nhật</span>
+                <span class="tv-info-label">Có thể vào ở từ</span>
+                <span class="tv-info-value" id="detailAvailableFrom">Chưa cập nhật</span>
               </div>
             </div>
+
           </div>
 
           <!-- Utility Costs -->
@@ -427,6 +473,7 @@
       const INITIAL_FAVORITES = [];
     <% } %>
     const AMENITIES_DATA = <%- JSON.stringify(typeof AMENITIES !== 'undefined' ? AMENITIES : []) %>;
+    const PRE_FILTER = <%- JSON.stringify(typeof preFilter !== 'undefined' ? preFilter : {}) %>;
   </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="/js/rooms/index.js"></script>

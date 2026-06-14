@@ -22,8 +22,36 @@
         <a href="/rooms" class="btn-tv btn-tv-ghost btn-tv-sm d-none d-sm-inline-flex">
           <i class="bi bi-search"></i> Tìm phòng
         </a>
-        <a href="/users/login" class="btn-tv btn-tv-outline btn-tv-sm">Đăng nhập</a>
-        <a href="/users/register" class="btn-tv btn-tv-primary btn-tv-sm">Đăng ký</a>
+        <% if (user) { %>
+          <% if (user.role === ROLES.LANDLORD || user.role === ROLES.ADMIN) { %>
+            <a href="/rooms/add" class="btn-tv btn-tv-accent btn-tv-sm">
+              <i class="bi bi-plus-lg"></i> <span class="d-none d-sm-inline">Đăng tin</span>
+            </a>
+          <% } %>
+          <div class="dropdown">
+            <button class="tv-avatar-btn btn btn-link text-decoration-none p-0 border-0" data-bs-toggle="dropdown" style="font-size: 1.5rem; color: var(--color-primary); line-height: 1; display: block;">
+              <i class="bi bi-person-circle"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2" style="border-radius: var(--radius-md); min-width: 200px;">
+              <li class="dropdown-header py-2.5 px-3">
+                <strong class="d-block text-dark"><%= user.username %></strong>
+                <small class="text-muted"><%= user.role %></small>
+              </li>
+              <li><hr class="dropdown-divider my-1"></li>
+              <% if (user.role === ROLES.ADMIN) { %>
+                <li><a class="dropdown-item py-2" href="/admin"><i class="bi bi-speedometer2 me-2"></i>Admin Dashboard</a></li>
+              <% } else if (user.role === ROLES.LANDLORD) { %>
+                <li><a class="dropdown-item py-2" href="/rooms/dashboard"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a></li>
+              <% } %>
+              <li><a class="dropdown-item py-2" href="/users/change-password"><i class="bi bi-key me-2"></i>Đổi mật khẩu</a></li>
+              <li><hr class="dropdown-divider my-1"></li>
+              <li><a class="dropdown-item py-2 text-danger" href="/users/logout"><i class="bi bi-box-arrow-left me-2"></i>Đăng xuất</a></li>
+            </ul>
+          </div>
+        <% } else { %>
+          <a href="/users/login" class="btn-tv btn-tv-outline btn-tv-sm">Đăng nhập</a>
+          <a href="/users/register" class="btn-tv btn-tv-primary btn-tv-sm">Đăng ký</a>
+        <% } %>
       </div>
     </div>
   </nav>
@@ -60,22 +88,22 @@
 
         <!-- Quick Filters -->
         <div class="quick-filters animate-fade-in-up">
-          <a href="/rooms" class="quick-filter-chip">
+          <a href="/rooms?district=Hải+Châu" class="quick-filter-chip">
             <i class="bi bi-buildings"></i> Hải Châu
           </a>
-          <a href="/rooms" class="quick-filter-chip">
+          <a href="/rooms?district=Thanh+Khê" class="quick-filter-chip">
             <i class="bi bi-buildings"></i> Thanh Khê
           </a>
-          <a href="/rooms" class="quick-filter-chip">
+          <a href="/rooms?district=Sơn+Trà" class="quick-filter-chip">
             <i class="bi bi-buildings"></i> Sơn Trà
           </a>
-          <a href="/rooms" class="quick-filter-chip">
+          <a href="/rooms?district=Liên+Chiểu" class="quick-filter-chip">
             <i class="bi bi-buildings"></i> Liên Chiểu
           </a>
-          <a href="/rooms" class="quick-filter-chip d-none d-md-inline-flex">
+          <a href="/rooms?district=Ngũ+Hành+Sơn" class="quick-filter-chip d-none d-md-inline-flex">
             <i class="bi bi-buildings"></i> Ngũ Hành Sơn
           </a>
-          <a href="/rooms" class="quick-filter-chip d-none d-md-inline-flex">
+          <a href="/rooms?district=Cẩm+Lệ" class="quick-filter-chip d-none d-md-inline-flex">
             <i class="bi bi-buildings"></i> Cẩm Lệ
           </a>
         </div>
@@ -126,7 +154,7 @@
              data-room="<%= encodeURIComponent(JSON.stringify(room)) %>"
              style="animation-delay: <%= idx * 0.08 %>s"
              onclick="handleCardClick(event, this)">
-          <div class="room-card-img">
+          <div class="room-card-img<%= room.isAvailable === false ? ' img-rented' : '' %>">
             <img src="<%= room.images && room.images.length > 0 ? room.images[0] : 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=400&h=280&q=80' %>" alt="<%= room.title %>" loading="lazy">
             <% if (room.isAvailable !== false) { %>
               <span class="room-status-badge available">Còn trống</span>
@@ -188,6 +216,7 @@
     </div>
   </section>
 
+
   <!-- CTA Section -->
   <section class="cta-section">
     <div class="container">
@@ -225,7 +254,7 @@
         <button type="button" class="btn-close tv-modal-close-btn" data-bs-dismiss="modal" aria-label="Close"></button>
 
         <!-- Carousel -->
-        <div class="tv-modal-carousel" id="detailCarousel">
+        <div class="tv-modal-carousel carousel slide" id="detailCarousel">
           <div id="carouselInner" class="carousel-inner"></div>
           <button class="carousel-control-prev" type="button" data-bs-target="#detailCarousel" data-bs-slide="prev">
             <span class="carousel-control-prev-icon"></span>
@@ -298,12 +327,13 @@
               </div>
             </div>
             <div class="tv-info-item">
-              <i class="bi bi-p-circle"></i>
+              <i class="bi bi-calendar-check"></i>
               <div>
-                <span class="tv-info-label">Chỗ để xe</span>
-                <span class="tv-info-value" id="detailParking">Chưa cập nhật</span>
+                <span class="tv-info-label">Có thể vào ở từ</span>
+                <span class="tv-info-value" id="detailAvailableFrom">Chưa cập nhật</span>
               </div>
             </div>
+
           </div>
 
           <!-- Utility Costs -->
@@ -376,10 +406,10 @@
         <div class="col-lg-2 col-md-6">
           <h6 class="footer-heading">Khu vực</h6>
           <ul class="footer-links">
-            <li><a href="/rooms">Hải Châu</a></li>
-            <li><a href="/rooms">Thanh Khê</a></li>
-            <li><a href="/rooms">Sơn Trà</a></li>
-            <li><a href="/rooms">Liên Chiểu</a></li>
+            <li><a href="/rooms?district=Hải+Châu">Hải Châu</a></li>
+            <li><a href="/rooms?district=Thanh+Khê">Thanh Khê</a></li>
+            <li><a href="/rooms?district=Sơn+Trà">Sơn Trà</a></li>
+            <li><a href="/rooms?district=Liên+Chiểu">Liên Chiểu</a></li>
           </ul>
         </div>
         <div class="col-lg-2 col-md-6">
@@ -407,6 +437,27 @@
 
   <script>
     const AMENITIES_DATA = <%- JSON.stringify(typeof AMENITIES !== 'undefined' ? AMENITIES : []) %>;
+    
+    // FAQ Toggle
+    function toggleFaq(btn) {
+      const item = btn.closest('.faq-item');
+      const answer = item.querySelector('.faq-answer');
+      const icon = btn.querySelector('.faq-icon');
+      const isOpen = item.classList.contains('open');
+      
+      // Close all
+      document.querySelectorAll('.faq-item.open').forEach(el => {
+        el.classList.remove('open');
+        el.querySelector('.faq-answer').style.maxHeight = null;
+        el.querySelector('.faq-icon').className = 'bi bi-plus-lg faq-icon';
+      });
+      
+      if (!isOpen) {
+        item.classList.add('open');
+        answer.style.maxHeight = answer.scrollHeight + 'px';
+        icon.className = 'bi bi-dash-lg faq-icon';
+      }
+    }
     
     function formatTimeSince(dateString) {
       if (!dateString || dateString === 'undefined') return 'Vừa xong';
@@ -454,9 +505,18 @@
 
       document.getElementById('detailDepositMonth').textContent = room.depositMonth !== undefined && room.depositMonth !== null ? `${room.depositMonth} tháng` : 'Chưa cập nhật';
       document.getElementById('detailPaymentCycle').textContent = room.paymentCycle || 'Chưa cập nhật';
-      document.getElementById('detailParking').textContent = room.parking || 'Chưa cập nhật';
+      const availableFromEl = document.getElementById('detailAvailableFrom');
+      if (availableFromEl) {
+        if (room.availableFrom) {
+          const d = new Date(room.availableFrom);
+          availableFromEl.textContent = d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        } else {
+          availableFromEl.textContent = 'Chưa cập nhật';
+        }
+      }
       document.getElementById('detailElectricity').textContent = room.electricityPrice !== undefined && room.electricityPrice !== null ? `${room.electricityPrice.toLocaleString('vi-VN')} đ/kWh` : 'Chưa cập nhật';
       document.getElementById('detailWater').textContent = room.waterPrice !== undefined && room.waterPrice !== null ? `${room.waterPrice.toLocaleString('vi-VN')} đ/m³` : 'Chưa cập nhật';
+
 
       const statusBadge = document.getElementById('detailBadgeStatus');
       if (statusBadge) {

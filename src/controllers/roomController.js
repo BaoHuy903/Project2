@@ -27,11 +27,17 @@ function redirectToDashboard(res, user) {
 exports.index = async (req, res) => {
   try {
     const { rooms } = await roomService.getRoomsHome();
+    // Pass query params to view for client-side pre-filtering
+    const preFilter = {
+      district: req.query.district || '',
+      q: req.query.q || ''
+    };
 
     res.render('rooms/index', {
-      title: 'TrọVíp - Trang chủ',
+      title: 'TrọVíp - Tìm phòng trọ Đà Nẵng',
       rooms,
-      user: req.session.user
+      user: req.session.user || null,
+      preFilter
     });
   } catch (err) {
     res.status(500).send('Lỗi máy chủ khi tải danh sách phòng: ' + err.message);
@@ -74,7 +80,7 @@ exports.landlordDashboard = async (req, res) => {
 
     res.render('rooms/dashboard', {
       title: 'Bảng điều khiển Chủ trọ',
-      rooms: landlordRooms,
+      rooms: landlordRooms || [],
       user: req.session.user
     });
   } catch (err) {
