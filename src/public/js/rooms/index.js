@@ -5,7 +5,8 @@ const state = {
     price: 'Tất cả',
     area: 'Tất cả',
     category: 'Tất cả',
-    search: ''
+    search: '',
+    amenities: []
   },
   sortBy: 'newest',
   showFavoritesOnly: false,
@@ -61,6 +62,19 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   filterRooms();
+
+  // Open modal if room query parameter is present (supports clicking from Landing Page)
+  const params = new URLSearchParams(window.location.search);
+  const roomId = params.get('room') || params.get('id');
+  if (roomId) {
+    // If the room might be on another page, let's find the card
+    const card = document.querySelector(`.room-card[data-id="${roomId}"]`);
+    if (card) {
+      setTimeout(() => {
+        card.click();
+      }, 150);
+    }
+  }
 
   // Synchronize thumbnail active state with carousel sliding
   const carouselEl = document.getElementById('detailCarousel');
@@ -233,6 +247,20 @@ function setFilter(type, value) {
   filterRooms();
 }
 
+// Toggle amenity filter
+function toggleAmenityFilter(btn, key) {
+  const index = state.filters.amenities.indexOf(key);
+  if (index === -1) {
+    state.filters.amenities.push(key);
+    btn.classList.add('active');
+  } else {
+    state.filters.amenities.splice(index, 1);
+    btn.classList.remove('active');
+  }
+  state.currentPage = 1;
+  filterRooms();
+}
+
 // Reset filters
 function resetAllFilters() {
   state.filters = {
@@ -241,7 +269,8 @@ function resetAllFilters() {
     price: 'Tất cả',
     area: 'Tất cả',
     category: 'Tất cả',
-    search: ''
+    search: '',
+    amenities: []
   };
   state.showFavoritesOnly = false;
   
@@ -261,6 +290,7 @@ function resetAllFilters() {
   if (catBtn) catBtn.textContent = 'Nội thất: Tất cả';
 
   document.querySelectorAll('.filter-bar button').forEach(btn => btn.classList.remove('active'));
+  document.querySelectorAll('.tv-amenity-filters .amenity-chip').forEach(btn => btn.classList.remove('active'));
   const resetBtn = document.getElementById('filterResetBtn');
   if (resetBtn) resetBtn.classList.add('active');
 
@@ -283,7 +313,18 @@ function filterRooms() {
     const category = card.getAttribute('data-category');
     const status = card.getAttribute('data-status');
 
+    const cardAmenitiesStr = card.getAttribute('data-amenities') || '';
+    const cardAmenities = cardAmenitiesStr ? cardAmenitiesStr.split(',') : [];
+
     let isMatch = true;
+
+    // Amenities Filter
+    if (state.filters.amenities.length > 0) {
+      const matchesAllAmenities = state.filters.amenities.every(amenity => cardAmenities.includes(amenity));
+      if (!matchesAllAmenities) {
+        isMatch = false;
+      }
+    }
 
     // Search Filter
     if (state.filters.search && !title.includes(state.filters.search) && !address.includes(state.filters.search)) {
@@ -483,6 +524,27 @@ function handleCardClick(event, element) {
 
   document.getElementById('btnCallHost').href = `tel:${contactPhone}`;
   document.getElementById('btnZaloHost').href = `https://zalo.me/${contactPhone}`;
+
+  // Populate Amenities
+  const detailAmenitiesContainer = document.getElementById('detailAmenities');
+  const detailAmenitiesList = document.getElementById('detailAmenitiesList');
+  if (detailAmenitiesContainer && detailAmenitiesList) {
+    detailAmenitiesList.innerHTML = '';
+    if (room.amenities && room.amenities.length > 0 && typeof AMENITIES_DATA !== 'undefined') {
+      detailAmenitiesContainer.style.display = 'block';
+      room.amenities.forEach(ak => {
+        const found = AMENITIES_DATA.find(a => a.key === ak);
+        if (found) {
+          const item = document.createElement('div');
+          item.className = 'tv-amenity-detail-item';
+          item.innerHTML = `<i class="bi ${found.icon}"></i> <span>${found.label}</span>`;
+          detailAmenitiesList.appendChild(item);
+        }
+      });
+    } else {
+      detailAmenitiesContainer.style.display = 'none';
+    }
+  }
 
   // Open Modal
   const modal = new bootstrap.Modal(document.getElementById('roomDetailModal'));

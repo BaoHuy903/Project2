@@ -1,4 +1,4 @@
-const { ROLES } = require('../constants');
+const { ROLES, AMENITIES } = require('../constants');
 
 /**
  * Middleware: Inject các biến dùng chung vào res.locals
@@ -8,6 +8,9 @@ const { ROLES } = require('../constants');
 const injectLocals = (req, res, next) => {
   // Inject ROLES constants để views không cần hardcode chuỗi
   res.locals.ROLES = ROLES;
+
+  // Inject AMENITIES constants
+  res.locals.AMENITIES = AMENITIES;
 
   // Inject user session (tiện lợi, không cần truyền qua từng controller)
   res.locals.sessionUser = req.session.user || null;

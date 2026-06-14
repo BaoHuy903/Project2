@@ -1,0 +1,246 @@
+/* ============================================= */
+/* Auth Layouts - TrọVíp                         */
+/* Modern Minimalist split screen & card design  */
+/* ============================================= */
+
+.auth-wrapper {
+  min-height: 100vh;
+  display: flex;
+  background-color: var(--color-bg);
+}
+
+.auth-sidebar {
+  flex: 1;
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.9) 0%, rgba(29, 78, 216, 0.95) 100%), 
+              url('https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=1200&q=80');
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: var(--space-12);
+  color: #ffffff;
+}
+
+.auth-sidebar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.1) 0%, rgba(15, 23, 42, 0.6) 100%);
+  z-index: 1;
+}
+
+.auth-sidebar-content {
+  position: relative;
+  z-index: 2;
+  max-width: 480px;
+}
+
+.auth-sidebar-brand {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: 800;
+  color: #ffffff;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-16);
+}
+
+.auth-sidebar-title {
+  font-size: var(--text-4xl);
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: var(--space-4);
+  color: #ffffff;
+}
+
+.auth-sidebar-desc {
+  font-size: var(--text-base);
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.6;
+}
+
+.auth-sidebar-footer {
+  position: relative;
+  z-index: 2;
+  font-size: var(--text-xs);
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.auth-main {
+  width: 100%;
+  max-width: 520px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: var(--space-12) var(--space-16);
+  background-color: var(--color-bg-white);
+  box-shadow: var(--shadow-xl);
+  z-index: 2;
+}
+
+.auth-main-header {
+  margin-bottom: var(--space-8);
+}
+
+.auth-brand-mobile {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: 800;
+  color: var(--color-primary);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-6);
+}
+
+.auth-title {
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: var(--space-2);
+}
+
+.auth-subtitle {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+/* Auth Cards (used for standalone centered auth pages like change password/forgot password) */
+.auth-center-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+  background-color: var(--color-bg);
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 480px;
+  background-color: var(--color-bg-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-10) var(--space-8);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Custom form elements for auth */
+.auth-input-wrapper {
+  position: relative;
+  margin-bottom: var(--space-4);
+}
+
+.auth-input-wrapper i.input-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-muted);
+  font-size: 1rem;
+  z-index: 5;
+  transition: color var(--transition-fast);
+}
+
+.auth-input-wrapper input {
+  padding-left: 42px;
+  padding-right: 42px;
+  height: 48px;
+}
+
+.auth-input-wrapper:focus-within i.input-icon {
+  color: var(--color-primary);
+}
+
+.auth-input-wrapper .eye-toggle {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  z-index: 5;
+  font-size: 1rem;
+}
+
+.auth-input-wrapper .eye-toggle:hover {
+  color: var(--color-primary);
+}
+
+/* Role Selection Design for Register */
+.role-selection-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.role-card {
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  text-align: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  position: relative;
+}
+
+.role-card:hover {
+  border-color: var(--color-border-hover);
+  background-color: var(--color-bg-subtle);
+}
+
+.role-card input[type="radio"] {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  accent-color: var(--color-primary);
+}
+
+.role-card i {
+  font-size: 1.8rem;
+  color: var(--color-text-muted);
+  display: block;
+  margin-bottom: var(--space-2);
+  transition: color var(--transition-fast);
+}
+
+.role-card div {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.role-card input[type="radio"]:checked + i,
+.role-card.selected i {
+  color: var(--color-primary);
+}
+
+.role-card input[type="radio"]:checked ~ div,
+.role-card.selected div {
+  color: var(--color-primary);
+}
+
+.role-card.selected {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary-bg);
+}
+
+/* Responsive auth styles */
+@media (max-width: 991.98px) {
+  .auth-sidebar {
+    display: none;
+  }
+  .auth-main {
+    max-width: 100%;
+    padding: var(--space-8) var(--space-6);
+  }
+}

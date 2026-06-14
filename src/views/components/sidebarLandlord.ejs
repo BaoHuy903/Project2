@@ -1,21 +1,36 @@
-<div class="col-md-2 d-none d-md-block sidebar p-0">
-  <div class="p-4">
-    <h4 class="brand-title"><i class="bi bi-house-gear me-2"></i>TRỌVÍP HOST</h4>
+<div class="col-md-2 p-0 db-sidebar border-0">
+  <div class="db-sidebar-header">
+    <a href="/" class="db-sidebar-brand">
+      <i class="bi bi-house-gear-fill text-primary"></i> TRỌVÍP HOST
+    </a>
   </div>
-  <nav class="mt-2">
-    <a href="/rooms/dashboard" class="<%= activeTab === 'dashboard' ? 'active' : '' %>">
+
+  <% if (typeof user !== 'undefined' && user) { %>
+    <div class="db-sidebar-user">
+      <div class="db-sidebar-avatar">
+        <%= user.username.charAt(0).toUpperCase() %>
+      </div>
+      <div>
+        <div class="db-sidebar-username text-truncate" style="max-width: 140px;"><%= user.username %></div>
+        <div class="db-sidebar-role">Chủ trọ</div>
+      </div>
+    </div>
+  <% } %>
+
+  <nav class="db-sidebar-nav">
+    <a href="/rooms/dashboard" class="db-sidebar-link <%= activeTab === 'dashboard' ? 'active' : '' %>">
       <i class="bi bi-speedometer2"></i> Bảng điều khiển
     </a>
-    <a href="/rooms/add">
-      <i class="bi bi-house-add"></i> Đăng phòng trọ
+    <a href="/rooms/add" class="db-sidebar-link <%= activeTab === 'add' ? 'active' : '' %>">
+      <i class="bi bi-plus-circle"></i> Đăng phòng trọ
     </a>
-    <a href="/rooms">
-      <i class="bi bi-house"></i> Trang chủ (User)
+    <a href="/rooms" class="db-sidebar-link">
+      <i class="bi bi-house"></i> Xem trang chủ
     </a>
-    <a href="/users/change-password">
+    <a href="/users/change-password" class="db-sidebar-link <%= activeTab === 'password' ? 'active' : '' %>">
       <i class="bi bi-key"></i> Đổi mật khẩu
     </a>
-    <a href="/users/logout">
+    <a href="/users/logout" class="db-sidebar-link text-danger">
       <i class="bi bi-box-arrow-left"></i> Đăng xuất
     </a>
   </nav>

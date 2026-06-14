@@ -2,8 +2,352 @@ document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('roomForm');
   if (!form) return;
 
+  // ── Multi-step Form State & Navigation ──
+  let currentStep = 1;
+  const maxSteps = 7;
+  const btnNext = document.getElementById('btnNext');
+  const btnPrev = document.getElementById('btnPrev');
+  const btnSubmitReal = document.getElementById('btnSubmitReal');
+  const stepIndicatorText = document.getElementById('stepIndicatorText');
+
+  // Handle step updates
+  function updateStepsUI() {
+    // Hide all step panes
+    document.querySelectorAll('.step-pane').forEach(pane => {
+      pane.classList.remove('active');
+    });
+    // Show current step pane
+    const currentPane = document.getElementById(`stepPane-${currentStep}`);
+    if (currentPane) {
+      currentPane.classList.add('active');
+    }
+
+    // Update Stepper Header active/completed states
+    document.querySelectorAll('.stepper-step').forEach(step => {
+      const stepNum = parseInt(step.getAttribute('data-step'));
+      if (stepNum === currentStep) {
+        step.className = 'stepper-step active';
+      } else if (stepNum < currentStep) {
+        step.className = 'stepper-step completed';
+      } else {
+        step.className = 'stepper-step';
+      }
+    });
+
+    // Update step indicator label
+    if (stepIndicatorText) {
+      stepIndicatorText.textContent = `Bước ${currentStep} trên ${maxSteps}`;
+    }
+
+    // Manage buttons visibility
+    if (currentStep === 1) {
+      if (btnPrev) btnPrev.style.display = 'none';
+    } else {
+      if (btnPrev) btnPrev.style.display = 'inline-flex';
+    }
+
+    if (currentStep === maxSteps) {
+      if (btnNext) btnNext.style.display = 'none';
+      if (btnSubmitReal) btnSubmitReal.style.display = 'inline-flex';
+      buildFormSummary();
+    } else {
+      if (btnNext) btnNext.style.display = 'inline-flex';
+      if (btnSubmitReal) btnSubmitReal.style.display = 'none';
+    }
+
+    // Scroll to top of form smoothly on step change
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // Validate the current step fields
+  function validateCurrentStep() {
+    let isValid = true;
+    const isEdit = form.action.includes('/edit');
+
+    // Remove any previous error indicators in the current step pane
+    const currentPane = document.getElementById(`stepPane-${currentStep}`);
+    if (currentPane) {
+      currentPane.querySelectorAll('.error-state').forEach(el => el.classList.remove('error-state'));
+    }
+
+    if (currentStep === 1) {
+      // Step 1: Title, type (status), phone, description
+      const titleInput = document.getElementById('titleInput');
+      const titleGroup = document.getElementById('titleGroup');
+      if (titleInput && titleGroup) {
+        if (!titleInput.value || titleInput.value.trim().length < 10 || titleInput.value.trim().length > 70) {
+          titleGroup.classList.add('error-state');
+          isValid = false;
+        }
+      }
+
+      const statusInput = document.getElementById('statusInput');
+      const statusGroup = document.getElementById('statusGroup');
+      if (statusInput && statusGroup) {
+        if (!statusInput.value) {
+          statusGroup.classList.add('error-state');
+          isValid = false;
+        }
+      }
+
+      const phoneInput = document.getElementById('phoneInput');
+      const phoneGroup = document.getElementById('phoneGroup');
+      const phoneRegex = /^0[35789]\d{8}$/;
+      if (phoneInput && phoneGroup) {
+        if (!phoneInput.value || !phoneRegex.test(phoneInput.value.trim())) {
+          phoneGroup.classList.add('error-state');
+          isValid = false;
+        }
+      }
+
+      const descriptionInput = document.getElementById('descriptionInput');
+      const descriptionGroup = document.getElementById('descriptionGroup');
+      if (descriptionInput && descriptionGroup) {
+        if (!descriptionInput.value || descriptionInput.value.trim().length < 30 || descriptionInput.value.trim().length > 1500) {
+          descriptionGroup.classList.add('error-state');
+          isValid = false;
+        }
+      }
+    } 
+    else if (currentStep === 2) {
+      // Step 2: Address
+      const addressInput = document.getElementById('addressInput');
+      const addressGroup = document.getElementById('addressGroup');
+      if (addressInput && addressGroup) {
+        if (!addressInput.value) {
+          addressGroup.classList.add('error-state');
+          isValid = false;
+        }
+      }
+    } 
+    else if (currentStep === 3) {
+      // Step 3: Price, area, deposit, depositMonth
+      const priceInput = document.getElementById('priceInput');
+      const priceGroup = document.getElementById('priceGroup');
+      if (priceInput && priceGroup) {
+        const rawPrice = priceInput.value.replace(/\D/g, '');
+        if (!rawPrice || Number(rawPrice) <= 0) {
+          priceGroup.classList.add('error-state');
+          isValid = false;
+        }
+      }
+
+      const areaInput = document.getElementById('areaInput');
+      const areaGroup = document.getElementById('areaGroup');
+      if (areaInput && areaGroup) {
+        if (!areaInput.value || Number(areaInput.value) <= 0) {
+          areaGroup.classList.add('error-state');
+          isValid = false;
+        }
+      }
+
+      const depositInput = document.getElementById('depositInput');
+      const depositGroup = document.getElementById('depositGroup');
+      if (depositInput && depositGroup) {
+        const rawDeposit = depositInput.value.replace(/\D/g, '');
+        if (rawDeposit && Number(rawDeposit) < 0) {
+          depositGroup.classList.add('error-state');
+          isValid = false;
+        }
+      }
+
+      const depositMonthInput = document.getElementById('depositMonthInput');
+      const depositMonthGroup = document.getElementById('depositMonthGroup');
+      if (depositMonthInput && depositMonthGroup) {
+        if (depositMonthInput.value && Number(depositMonthInput.value) < 0) {
+          depositMonthGroup.classList.add('error-state');
+          isValid = false;
+        }
+      }
+    } 
+    else if (currentStep === 4) {
+      // Step 4: category, parking, electricityPrice, waterPrice (non-negatives if provided)
+      const electricityPriceInput = document.getElementById('electricityPriceInput');
+      const electricityPriceGroup = document.getElementById('electricityPriceGroup');
+      if (electricityPriceInput && electricityPriceGroup) {
+        const rawElectricity = electricityPriceInput.value.replace(/\D/g, '');
+        if (rawElectricity && Number(rawElectricity) < 0) {
+          electricityPriceGroup.classList.add('error-state');
+          isValid = false;
+        }
+      }
+
+      const waterPriceInput = document.getElementById('waterPriceInput');
+      const waterPriceGroup = document.getElementById('waterPriceGroup');
+      if (waterPriceInput && waterPriceGroup) {
+        const rawWater = waterPriceInput.value.replace(/\D/g, '');
+        if (rawWater && Number(rawWater) < 0) {
+          waterPriceGroup.classList.add('error-state');
+          isValid = false;
+        }
+      }
+    } 
+    else if (currentStep === 6) {
+      // Step 6: Images (Required on creation, optional on edit)
+      const uploadGroup = document.getElementById('uploadGroup');
+      if (uploadGroup && !isEdit) {
+        if (selectedFiles.length === 0) {
+          uploadGroup.classList.add('error-state');
+          isValid = false;
+        }
+      }
+    }
+
+    if (!isValid) {
+      const toastEl = document.getElementById('errorToast');
+      if (toastEl) {
+        const toast = new bootstrap.Toast(toastEl, { delay: 5000 });
+        toast.show();
+      }
+    }
+
+    return isValid;
+  }
+
+  // Next step click
+  if (btnNext) {
+    btnNext.addEventListener('click', () => {
+      if (validateCurrentStep()) {
+        if (currentStep < maxSteps) {
+          currentStep++;
+          updateStepsUI();
+        }
+      }
+    });
+  }
+
+  // Prev step click
+  if (btnPrev) {
+    btnPrev.addEventListener('click', () => {
+      if (currentStep > 1) {
+        currentStep--;
+        updateStepsUI();
+      }
+    });
+  }
+
+  // Form Summary builder
+  function buildFormSummary() {
+    const summaryContainer = document.getElementById('formSummary');
+    if (!summaryContainer) return;
+
+    const title = document.getElementById('titleInput')?.value || '';
+    const status = document.getElementById('statusInput')?.value || '';
+    const phone = document.getElementById('phoneInput')?.value || '';
+    const address = document.getElementById('addressInput')?.value || '';
+    const price = document.getElementById('priceInput')?.value || 'Thỏa thuận';
+    const area = document.getElementById('areaInput')?.value || '0';
+    const deposit = document.getElementById('depositInput')?.value || '0';
+    const depositMonth = document.getElementById('depositMonthInput')?.value || '';
+    const paymentCycle = document.getElementById('paymentCycleInput')?.value || '';
+    const category = document.getElementById('categoryInput')?.value || 'Không có';
+    const parking = document.getElementById('parkingInput')?.value || 'Chưa rõ';
+    const electricity = document.getElementById('electricityPriceInput')?.value || '';
+    const water = document.getElementById('waterPriceInput')?.value || '';
+    
+    // Checked amenities
+    const checkedAmenityLabels = [];
+    document.querySelectorAll('.amenities-grid-form input[type="checkbox"]:checked').forEach(cb => {
+      const span = cb.nextElementSibling.nextElementSibling;
+      if (span) checkedAmenityLabels.push(span.textContent);
+    });
+
+    let imagesCount = selectedFiles.length;
+    const isEdit = form.action.includes('/edit');
+
+    let summaryHTML = `
+      <div class="row g-3">
+        <div class="col-md-6">
+          <div class="summary-item">
+            <div class="summary-label">Tiêu đề:</div>
+            <div class="summary-value fw-semibold">${title}</div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-label">Loại phòng:</div>
+            <div class="summary-value">${status}</div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-label">SĐT liên hệ:</div>
+            <div class="summary-value">${phone}</div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-label">Địa chỉ:</div>
+            <div class="summary-value">${address}</div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="summary-item">
+            <div class="summary-label">Giá thuê:</div>
+            <div class="summary-value text-danger fw-bold">${price && price !== 'Thỏa thuận' ? `${price} đ/tháng` : 'Thỏa thuận'}</div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-label">Diện tích:</div>
+            <div class="summary-value">${area} m²</div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-label">Tiền đặt cọc:</div>
+            <div class="summary-value">${deposit} đ ${depositMonth ? `(${depositMonth} tháng)` : ''}</div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-label">Chu kỳ đóng tiền:</div>
+            <div class="summary-value">${paymentCycle || 'Chưa cập nhật'}</div>
+          </div>
+        </div>
+        <div class="col-12"><hr class="my-2" style="border-color: var(--color-border);"></div>
+        <div class="col-md-6">
+          <div class="summary-item">
+            <div class="summary-label">Nội thất:</div>
+            <div class="summary-value">${category}</div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-label">Bãi giữ xe:</div>
+            <div class="summary-value">${parking}</div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-label">Tiền điện:</div>
+            <div class="summary-value">${electricity ? `${electricity} đ/kWh` : 'Chưa cập nhật'}</div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-label">Tiền nước:</div>
+            <div class="summary-value">${water ? `${water} đ/m³` : 'Chưa cập nhật'}</div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="summary-item">
+            <div class="summary-label">Tiện ích đã chọn:</div>
+            <div class="summary-value">
+              ${checkedAmenityLabels.length > 0 ? checkedAmenityLabels.map(l => `<span class="badge bg-secondary-subtle text-secondary border px-2 py-1 me-1 mb-1 small">${l}</span>`).join('') : 'Không có tiện ích nào'}
+            </div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-label">Hình ảnh phòng:</div>
+            <div class="summary-value">
+              ${imagesCount > 0 ? `<span class="text-success"><i class="bi bi-check-circle-fill"></i> Sẽ tải lên ${imagesCount} hình ảnh mới</span>` : 
+                (isEdit ? `<span class="text-muted"><i class="bi bi-info-circle"></i> Giữ nguyên hình ảnh cũ</span>` : `<span class="text-danger">Chưa chọn hình ảnh</span>`)}
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    summaryContainer.innerHTML = summaryHTML;
+  }
+
+  // Amenity Checkbox custom click
+  window.toggleFormAmenity = function(card) {
+    const checkbox = card.querySelector('input[type="checkbox"]');
+    if (checkbox) {
+      checkbox.checked = !checkbox.checked;
+      if (checkbox.checked) {
+        card.classList.add('selected');
+      } else {
+        card.classList.remove('selected');
+      }
+    }
+  };
+
+
   // ── Floating Label: has-value class management ──
-  // Ensures labels stay floated when inputs/selects have values
   function updateHasValue(el) {
     if (el.value && el.value.trim() !== '') {
       el.classList.add('has-value');
@@ -29,7 +373,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const uploadGroup = document.getElementById('uploadGroup');
 
   if (uploadArea && fileInput && finalImagesInput) {
-    const isEdit = form.action.includes('/edit');
     const uploadContent = document.getElementById('uploadContent');
     const initialUploadContentHTML = uploadContent ? uploadContent.innerHTML : '';
 
@@ -42,16 +385,16 @@ document.addEventListener('DOMContentLoaded', () => {
     ['dragenter', 'dragover'].forEach(eventName => {
       uploadArea.addEventListener(eventName, (e) => {
         e.preventDefault();
-        uploadArea.style.borderColor = '#1e3a8a';
-        uploadArea.style.backgroundColor = '#eff6ff';
+        uploadArea.style.borderColor = 'var(--color-primary)';
+        uploadArea.style.backgroundColor = 'var(--color-primary-bg)';
       }, false);
     });
 
     ['dragleave', 'drop'].forEach(eventName => {
       uploadArea.addEventListener(eventName, (e) => {
         e.preventDefault();
-        uploadArea.style.borderColor = '#cbd5e1';
-        uploadArea.style.backgroundColor = '#ffffff';
+        uploadArea.style.borderColor = 'var(--color-border)';
+        uploadArea.style.backgroundColor = 'var(--color-bg-subtle)';
       }, false);
     });
 
@@ -70,7 +413,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     if (addMoreBtn) {
-      addMoreBtn.addEventListener('click', () => {
+      addMoreBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
         fileInput.click();
       });
     }
@@ -121,17 +465,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (uploadContent) {
         if (selectedFiles.length > 0) {
-          uploadArea.style.backgroundColor = '#edf7ed';
-          uploadArea.style.borderColor = '#198754';
-          uploadArea.style.borderStyle = 'dashed';
+          uploadArea.style.backgroundColor = 'var(--color-success-bg)';
+          uploadArea.style.borderColor = 'var(--color-success)';
           uploadContent.innerHTML = `
             <i class="bi bi-check-circle-fill text-success" style="font-size: 2.2rem; display: block; margin-bottom: 8px;"></i>
-            <div class="upload-text text-success fw-semibold" style="color: #198754 !important;">Đã chọn ${selectedFiles.length} ảnh mới</div>
+            <div class="upload-text text-success fw-semibold">Đã chọn ${selectedFiles.length} ảnh mới</div>
           `;
         } else {
-          uploadArea.style.backgroundColor = '#f8fafc';
-          uploadArea.style.borderColor = '#cbd5e1';
-          uploadArea.style.borderStyle = 'dashed';
+          uploadArea.style.backgroundColor = 'var(--color-bg-subtle)';
+          uploadArea.style.borderColor = 'var(--color-border)';
           uploadContent.innerHTML = initialUploadContentHTML;
         }
       }
@@ -143,7 +485,6 @@ document.addEventListener('DOMContentLoaded', () => {
       finalImagesInput.files = dt.files;
     }
 
-    // Initialize list preview display
     renderPreviews();
   }
 
@@ -178,25 +519,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const input = document.getElementById(inputId);
     if (!input) return;
 
-    // Change input type to text to support format
     input.type = 'text';
     input.inputMode = 'numeric';
 
     const updateValue = () => {
-      // Format the input value
       const cursorSelectionStart = input.selectionStart;
       const originalLen = input.value.length;
       
       const formattedVal = formatNumberString(input.value);
       input.value = formattedVal;
 
-      // Adjust cursor position
       const newLen = input.value.length;
       let newCursorPos = cursorSelectionStart + (newLen - originalLen);
       input.setSelectionRange(newCursorPos, newCursorPos);
     };
 
-    // Format prefilled value
     if (input.value) {
       input.value = formatNumberString(input.value);
     }
@@ -209,169 +546,18 @@ document.addEventListener('DOMContentLoaded', () => {
   setupFormattedInput('electricityPriceInput');
   setupFormattedInput('waterPriceInput');
 
-  // Form validation on submit
+  // Submit check (stripping format dots)
   form.addEventListener('submit', function (e) {
-    let isValid = true;
-    const isEdit = form.action.includes('/edit');
-
-    // 1. Address check
-    const addressInput = document.getElementById('addressInput');
-    const addressGroup = document.getElementById('addressGroup');
-    if (addressInput && addressGroup) {
-      if (!addressInput.value) {
-        addressGroup.classList.add('error-state');
-        isValid = false;
-      } else {
-        addressGroup.classList.remove('error-state');
-      }
-    }
-
-    // 2. Area check
-    const areaInput = document.getElementById('areaInput');
-    const areaGroup = document.getElementById('areaGroup');
-    if (areaInput && areaGroup) {
-      if (!areaInput.value || Number(areaInput.value) <= 0) {
-        areaGroup.classList.add('error-state');
-        isValid = false;
-      } else {
-        areaGroup.classList.remove('error-state');
-      }
-    }
-
-    // 3. Status check
-    const statusInput = document.getElementById('statusInput');
-    const statusGroup = document.getElementById('statusGroup');
-    if (statusInput && statusGroup) {
-      if (!statusInput.value) {
-        statusGroup.classList.add('error-state');
-        isValid = false;
-      } else {
-        statusGroup.classList.remove('error-state');
-      }
-    }
-
-    // 4. File upload check (Only required for creation, optional for editing)
-    if (uploadGroup && !isEdit) {
-      if (selectedFiles.length === 0) {
-        uploadGroup.classList.add('error-state');
-        isValid = false;
-      } else {
-        uploadGroup.classList.remove('error-state');
-      }
-    }
-
-    // 5. Title check
-    const titleGroup = document.getElementById('titleGroup');
-    if (titleInput && titleGroup) {
-      if (!titleInput.value || titleInput.value.trim().length < 10 || titleInput.value.trim().length > 70) {
-        titleGroup.classList.add('error-state');
-        isValid = false;
-      } else {
-        titleGroup.classList.remove('error-state');
-      }
-    }
-
-    // 6. Price check
     const priceInput = document.getElementById('priceInput');
-    const priceGroup = document.getElementById('priceGroup');
-    if (priceInput && priceGroup) {
-      const rawPrice = priceInput.value.replace(/\D/g, '');
-      if (!rawPrice || Number(rawPrice) <= 0) {
-        priceGroup.classList.add('error-state');
-        isValid = false;
-      } else {
-        priceGroup.classList.remove('error-state');
-      }
-    }
-
-    // 7. Deposit check
+    if (priceInput) priceInput.value = priceInput.value.replace(/\D/g, '');
     const depositInput = document.getElementById('depositInput');
-    const depositGroup = document.getElementById('depositGroup');
-    if (depositInput && depositGroup) {
-      const rawDeposit = depositInput.value.replace(/\D/g, '');
-      if (rawDeposit && Number(rawDeposit) < 0) {
-        depositGroup.classList.add('error-state');
-        isValid = false;
-      } else {
-        depositGroup.classList.remove('error-state');
-      }
-    }
-
-    // New Fields Check
-    const depositMonthInput = document.getElementById('depositMonthInput');
-    const depositMonthGroup = document.getElementById('depositMonthGroup');
-    if (depositMonthInput && depositMonthGroup) {
-      if (depositMonthInput.value && Number(depositMonthInput.value) < 0) {
-        depositMonthGroup.classList.add('error-state');
-        isValid = false;
-      } else {
-        depositMonthGroup.classList.remove('error-state');
-      }
-    }
-
+    if (depositInput) depositInput.value = depositInput.value.replace(/\D/g, '');
     const electricityPriceInput = document.getElementById('electricityPriceInput');
-    const electricityPriceGroup = document.getElementById('electricityPriceGroup');
-    if (electricityPriceInput && electricityPriceGroup) {
-      const rawElectricity = electricityPriceInput.value.replace(/\D/g, '');
-      if (rawElectricity && Number(rawElectricity) < 0) {
-        electricityPriceGroup.classList.add('error-state');
-        isValid = false;
-      } else {
-        electricityPriceGroup.classList.remove('error-state');
-      }
-    }
-
+    if (electricityPriceInput) electricityPriceInput.value = electricityPriceInput.value.replace(/\D/g, '');
     const waterPriceInput = document.getElementById('waterPriceInput');
-    const waterPriceGroup = document.getElementById('waterPriceGroup');
-    if (waterPriceInput && waterPriceGroup) {
-      const rawWater = waterPriceInput.value.replace(/\D/g, '');
-      if (rawWater && Number(rawWater) < 0) {
-        waterPriceGroup.classList.add('error-state');
-        isValid = false;
-      } else {
-        waterPriceGroup.classList.remove('error-state');
-      }
-    }
-
-    // Phone check
-    const phoneInput = document.getElementById('phoneInput');
-    const phoneGroup = document.getElementById('phoneGroup');
-    const phoneRegex = /^0[35789]\d{8}$/;
-    if (phoneInput && phoneGroup) {
-      if (!phoneInput.value || !phoneRegex.test(phoneInput.value.trim())) {
-        phoneGroup.classList.add('error-state');
-        isValid = false;
-      } else {
-        phoneGroup.classList.remove('error-state');
-      }
-    }
-
-    // 8. Description check
-    const descriptionGroup = document.getElementById('descriptionGroup');
-    if (descriptionInput && descriptionGroup) {
-      if (!descriptionInput.value || descriptionInput.value.trim().length < 30 || descriptionInput.value.trim().length > 1500) {
-        descriptionGroup.classList.add('error-state');
-        isValid = false;
-      } else {
-        descriptionGroup.classList.remove('error-state');
-      }
-    }
-
-    if (!isValid) {
-      e.preventDefault();
-      const toastEl = document.getElementById('errorToast');
-      if (toastEl) {
-        const toast = new bootstrap.Toast(toastEl, { delay: 5000 });
-        toast.show();
-      }
-    } else {
-      // Strip thousand separators before sending to backend
-      if (priceInput) priceInput.value = priceInput.value.replace(/\D/g, '');
-      if (depositInput) depositInput.value = depositInput.value.replace(/\D/g, '');
-      const electricityPriceInput = document.getElementById('electricityPriceInput');
-      if (electricityPriceInput) electricityPriceInput.value = electricityPriceInput.value.replace(/\D/g, '');
-      const waterPriceInput = document.getElementById('waterPriceInput');
-      if (waterPriceInput) waterPriceInput.value = waterPriceInput.value.replace(/\D/g, '');
-    }
+    if (waterPriceInput) waterPriceInput.value = waterPriceInput.value.replace(/\D/g, '');
   });
+
+  // Initialize view
+  updateStepsUI();
 });

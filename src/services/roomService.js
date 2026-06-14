@@ -41,6 +41,16 @@ const createRoom = async (roomData, files, sessionUser) => {
     imagesArr = ['https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=600&h=400&q=80'];
   }
 
+  // Xử lý tiện ích
+  let amenitiesArr = [];
+  if (roomData.amenities) {
+    if (Array.isArray(roomData.amenities)) {
+      amenitiesArr = roomData.amenities;
+    } else if (typeof roomData.amenities === 'string') {
+      amenitiesArr = roomData.amenities.split(',').map(a => a.trim()).filter(Boolean);
+    }
+  }
+
   const newRoom = {
     title: roomData.title.trim(),
     area: Number(roomData.area),
@@ -56,6 +66,7 @@ const createRoom = async (roomData, files, sessionUser) => {
     parking: roomData.parking ? roomData.parking.trim() : '',
     electricityPrice: roomData.electricityPrice ? Number(roomData.electricityPrice) : null,
     waterPrice: roomData.waterPrice ? Number(roomData.waterPrice) : null,
+    amenities: amenitiesArr,
     host: {
       id: sessionUser.id,
       username: sessionUser.username,
@@ -106,6 +117,16 @@ const updateRoom = async (roomId, roomData, files, sessionUser) => {
     imagesArr = files.map(file => file.secure_url || file.url || file.path);
   }
 
+  // Xử lý tiện ích
+  let amenitiesArr = room.amenities || [];
+  if (roomData.amenities) {
+    if (Array.isArray(roomData.amenities)) {
+      amenitiesArr = roomData.amenities;
+    } else if (typeof roomData.amenities === 'string') {
+      amenitiesArr = roomData.amenities.split(',').map(a => a.trim()).filter(Boolean);
+    }
+  }
+
   const updatedRoom = {
     ...room,
     title: roomData.title.trim(),
@@ -122,6 +143,7 @@ const updateRoom = async (roomId, roomData, files, sessionUser) => {
     parking: roomData.parking ? roomData.parking.trim() : '',
     electricityPrice: roomData.electricityPrice ? Number(roomData.electricityPrice) : null,
     waterPrice: roomData.waterPrice ? Number(roomData.waterPrice) : null,
+    amenities: amenitiesArr,
     images: imagesArr
   };
 
