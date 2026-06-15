@@ -114,6 +114,34 @@ const toggleRoomStatus = async (id) => {
   }
 };
 
+// Pagination State
+let currentRoomPage = 1;
+let currentUserPage = 1;
+const itemsPerPage = 6;
+
+// CLIENT-SIDE FILTER & PAGINATION FOR ROOMS
+function filterDashboardRooms(page = 1) {
+  currentRoomPage = page;
+  const filterVal = document.getElementById('statusFilter').value;
+  const rows = Array.from(document.querySelectorAll('tbody tr[id^="room-row-"]'));
+  
+  // Filter
+  const filteredRows = rows.filter(row => {
+    const status = row.getAttribute('data-status');
+    return filterVal === 'all' || status === filterVal;
+  });
+
+  // Hide all
+  rows.forEach(row => row.style.setProperty('display', 'none', 'important'));
+
+  // Show paginated
+  const start = (currentRoomPage - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  filteredRows.slice(start, end).forEach(row => {
+    row.style.setProperty('display', '', 'important');
+  });
+
+  renderPagination('roomsPagination', filteredRows.length, currentRoomPage, 'filterDashboardRooms');
 // CLIENT-SIDE FILTER BY STATUS
 function filterDashboardRooms(resetPage = true) {
   if (resetPage) currentRoomPage = 1;
@@ -259,6 +287,15 @@ function viewLandlordRooms(landlordId, landlordUsername) {
   modalInstance.show();
 }
 
+// CLIENT-SIDE FILTER & PAGINATION FOR USERS
+function filterUsers(page = 1) {
+  currentUserPage = page;
+  const query = document.getElementById('userSearchInput').value.toLowerCase().trim();
+  const roleFilter = document.getElementById('userRoleFilter').value;
+  const rows = Array.from(document.querySelectorAll('tbody tr[id^="user-row-"]'));
+  
+  // Filter
+  const filteredRows = rows.filter(row => {
 // CLIENT-SIDE FILTER USERS BY NAME AND ROLE
 function filterUsers(resetPage = true) {
   if (resetPage) currentUserPage = 1;
@@ -270,9 +307,22 @@ function filterUsers(resetPage = true) {
   rows.forEach(row => {
     const username = row.getAttribute('data-username') || '';
     const role = row.getAttribute('data-role') || '';
-    
     const matchesName = username.includes(query);
     const matchesRole = roleFilter === 'all' || role === roleFilter;
+    return matchesName && matchesRole;
+  });
+
+  // Hide all
+  rows.forEach(row => row.style.setProperty('display', 'none', 'important'));
+
+  // Show paginated
+  const start = (currentUserPage - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  filteredRows.slice(start, end).forEach(row => {
+    row.style.setProperty('display', '', 'important');
+  });
+
+  renderPagination('usersPagination', filteredRows.length, currentUserPage, 'filterUsers');
     
     if (matchesName && matchesRole) {
       visibleRows.push(row);
@@ -336,6 +386,51 @@ function changeUserPage(page) {
   currentUserPage = page;
   filterUsers(false);
 }
+
+// Render Pagination UI
+function renderPagination(containerId, totalItems, currentPage, funcName) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  let html = '';
+  
+  if (totalPages <= 1) {
+    container.innerHTML = '';
+    return;
+  }
+
+  // Prev Button
+  html += `
+    <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+      <a class="page-link" href="#" onclick="event.preventDefault(); if(${currentPage} > 1) ${funcName}(${currentPage - 1})">&laquo; Trang trước</a>
+    </li>
+  `;
+
+  // Page Numbers
+  for (let i = 1; i <= totalPages; i++) {
+    html += `
+      <li class="page-item ${i === currentPage ? 'active' : ''}">
+        <a class="page-link" href="#" onclick="event.preventDefault(); ${funcName}(${i})">${i}</a>
+      </li>
+    `;
+  }
+
+  // Next Button
+  html += `
+    <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+      <a class="page-link" href="#" onclick="event.preventDefault(); if(${currentPage} < ${totalPages}) ${funcName}(${currentPage + 1})">Trang sau &raquo;</a>
+    </li>
+  `;
+
+  container.innerHTML = html;
+}
+
+// Initialize on load
+document.addEventListener('DOMContentLoaded', () => {
+  filterDashboardRooms(1);
+  filterUsers(1);
+});
 
 
 
