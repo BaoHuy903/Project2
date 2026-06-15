@@ -10,32 +10,17 @@
 // SHARED UTILITIES
 // =============================================
 
-/**
- * Toggle hiển thị/ẩn mật khẩu
- * @param {string} inputId - ID của input password
- * @param {string} iconId  - ID của icon mắt
- */
-function togglePassword(inputId = 'password', iconId = 'eyeIcon') {
+const togglePassword = (inputId = 'password', iconId = 'eyeIcon') => {
   const input = document.getElementById(inputId);
   const icon = document.getElementById(iconId);
   if (!input || !icon) return;
 
-  if (input.type === 'password') {
-    input.type = 'text';
-    icon.classList.replace('bi-eye', 'bi-eye-slash');
-  } else {
-    input.type = 'password';
-    icon.classList.replace('bi-eye-slash', 'bi-eye');
-  }
-}
+  const isPassword = input.type === 'password';
+  input.type = isPassword ? 'text' : 'password';
+  icon.classList.replace(isPassword ? 'bi-eye' : 'bi-eye-slash', isPassword ? 'bi-eye-slash' : 'bi-eye');
+};
 
-/**
- * Gắn logic kiểm tra độ mạnh mật khẩu vào một input
- * @param {HTMLInputElement} passwordInput - Input mật khẩu
- * @param {HTMLElement} reqLength   - Phần tử hiển thị yêu cầu độ dài
- * @param {HTMLElement} reqAlphaNum - Phần tử hiển thị yêu cầu có chữ+số
- */
-function bindPasswordStrength(passwordInput, reqLength, reqAlphaNum) {
+const bindPasswordStrength = (passwordInput, reqLength, reqAlphaNum) => {
   if (!passwordInput || !reqLength || !reqAlphaNum) return;
 
   passwordInput.addEventListener('input', () => {
@@ -44,52 +29,29 @@ function bindPasswordStrength(passwordInput, reqLength, reqAlphaNum) {
     const hasNumber = /[0-9]/.test(val);
     const isLongEnough = val.length >= 6;
 
-    // Cập nhật icon & class cho yêu cầu độ dài
-    if (isLongEnough) {
-      reqLength.classList.replace('invalid', 'valid');
-      reqLength.querySelector('i').className = 'bi bi-check-circle-fill';
-    } else {
-      reqLength.classList.replace('valid', 'invalid');
-      reqLength.querySelector('i').className = 'bi bi-x-circle-fill';
-    }
+    const updateReq = (reqElement, isValid) => {
+      reqElement.classList.replace(isValid ? 'invalid' : 'valid', isValid ? 'valid' : 'invalid');
+      reqElement.querySelector('i').className = isValid ? 'bi bi-check-circle-fill' : 'bi bi-x-circle-fill';
+    };
 
-    // Cập nhật icon & class cho yêu cầu chữ + số
-    if (hasLetter && hasNumber) {
-      reqAlphaNum.classList.replace('invalid', 'valid');
-      reqAlphaNum.querySelector('i').className = 'bi bi-check-circle-fill';
-    } else {
-      reqAlphaNum.classList.replace('valid', 'invalid');
-      reqAlphaNum.querySelector('i').className = 'bi bi-x-circle-fill';
-    }
-
-    // Đặt custom validity
-    passwordInput.setCustomValidity(
-      isLongEnough && hasLetter && hasNumber ? '' : 'Weak password'
-    );
+    updateReq(reqLength, isLongEnough);
+    updateReq(reqAlphaNum, hasLetter && hasNumber);
+    passwordInput.setCustomValidity(isLongEnough && hasLetter && hasNumber ? '' : 'Weak password');
   });
-}
+};
 
-/**
- * Gắn logic kiểm tra xác nhận mật khẩu khớp nhau
- * @param {HTMLInputElement} passwordInput - Input mật khẩu mới
- * @param {HTMLInputElement} confirmInput  - Input xác nhận mật khẩu
- * @param {HTMLElement} confirmFeedback    - Phần tử hiển thị lỗi
- */
-function bindConfirmPassword(passwordInput, confirmInput, confirmFeedback) {
+const bindConfirmPassword = (passwordInput, confirmInput, confirmFeedback) => {
   if (!passwordInput || !confirmInput) return;
 
   const validate = () => {
-    if (confirmInput.value !== passwordInput.value) {
-      confirmInput.setCustomValidity('Mismatch');
-      if (confirmFeedback) confirmFeedback.textContent = 'Xác nhận mật khẩu mới không khớp.';
-    } else {
-      confirmInput.setCustomValidity('');
-    }
+    const isMismatch = confirmInput.value !== passwordInput.value;
+    confirmInput.setCustomValidity(isMismatch ? 'Mismatch' : '');
+    if (confirmFeedback) confirmFeedback.textContent = isMismatch ? 'Xác nhận mật khẩu mới không khớp.' : '';
   };
 
   confirmInput.addEventListener('input', validate);
   passwordInput.addEventListener('input', validate);
-}
+};
 
 // =============================================
 // DOM READY
@@ -241,26 +203,17 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-// =============================================
-// ROLE SELECTION (Trang đăng ký)
-// =============================================
-/**
- * Chọn vai trò khi đăng ký tài khoản
- * @param {string} role - 'TENANT' hoặc 'LANDLORD'
- */
-function selectRole(role) {
+const selectRole = (role) => {
   const selectedRoleInput = document.getElementById('selectedRole');
   if (!selectedRoleInput) return;
 
   selectedRoleInput.value = role;
 
-  // Toggle active class trên các role cards
   document.querySelectorAll('#roleCards .role-card').forEach(card => {
     card.classList.toggle('selected', card.getAttribute('data-role') === role);
   });
 
-  // Ẩn error feedback
   const roleFeedback = document.getElementById('roleFeedback');
   if (roleFeedback) roleFeedback.classList.add('d-none');
   selectedRoleInput.setCustomValidity('');
-}
+};

@@ -38,25 +38,14 @@ const deleteUserByAdmin = async (userIdToDelete, currentAdminId) => {
 const deleteRoomByAdmin = async (roomId) => {
   const room = await roomRepository.getRoomById(roomId);
 
-  // Xóa ảnh trên Cloudinary
-  if (room && room.images && room.images.length > 0) {
-    for (const imageUrl of room.images) {
-      if (imageUrl && typeof imageUrl === 'string' && imageUrl.includes('cloudinary.com')) {
-        const parts = imageUrl.split('/upload/');
+  if (room?.images?.length) {
+    for (const url of room.images) {
+      if (typeof url === 'string' && url.includes('cloudinary.com')) {
+        const parts = url.split('/upload/');
         if (parts.length >= 2) {
-          let publicIdWithExt = parts[1];
-          if (publicIdWithExt.startsWith('v')) {
-            const nextSlash = publicIdWithExt.indexOf('/');
-            if (nextSlash !== -1) {
-              publicIdWithExt = publicIdWithExt.substring(nextSlash + 1);
-            }
-          }
-          const lastDot = publicIdWithExt.lastIndexOf('.');
-          const publicId = lastDot !== -1 ? publicIdWithExt.substring(0, lastDot) : publicIdWithExt;
-
+          let publicId = parts[1].replace(/^v\d+\//, '').split('.')[0];
           try {
-            const destroyResult = await cloudinary.uploader.destroy(publicId);
-            console.log(`Admin Deleted Cloudinary image: ${publicId}`, destroyResult);
+            await cloudinary.uploader.destroy(publicId);
           } catch (err) {
             console.error(`Admin Failed to delete Cloudinary image: ${publicId}`, err);
           }
