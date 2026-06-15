@@ -105,7 +105,7 @@ const updateHeartIcons = () => {
   document.querySelectorAll('.btn-fav-toggle').forEach(btn => {
     const id = btn.getAttribute('data-fav-id');
     const icon = btn.querySelector('i');
-    icon.className = state.favorites.includes(id) ? 'bi bi-heart-fill fav-active' : 'bi bi-heart text-secondary';
+    icon.className = state.favorites.includes(id) ? 'bi bi-heart-fill text-danger fav-active' : 'bi bi-heart text-danger';
   });
   
   const navBtn = document.getElementById('favNavBtn');
@@ -490,7 +490,11 @@ function handleCardClick(event, element) {
       item.className = `carousel-item ${i === 0 ? 'active' : ''}`;
       
       const img = document.createElement('img');
-      img.src = imgUrl;
+      let highResUrl = imgUrl;
+      if (highResUrl.includes('unsplash.com')) {
+        highResUrl = highResUrl.replace(/w=\d+/, 'w=1200').replace(/h=\d+/, 'h=800');
+      }
+      img.src = highResUrl;
       img.className = 'd-block w-100';
       img.alt = `Room image ${i + 1}`;
       

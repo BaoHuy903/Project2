@@ -154,19 +154,19 @@
                         <td class="text-center text-nowrap">
                           <a href="/rooms/edit/<%= room.id %>" class="btn btn-sm btn-outline-primary me-2 rounded"
                              title="Chỉnh sửa tin đăng"
-                             style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; background: #fff;">
+                             style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center;">
                             <i class="bi bi-pencil-square"></i>
                           </a>
                           <button class="btn btn-sm btn-outline-secondary me-2 rounded btn-action-toggle" 
                                   onclick="toggleRoomStatus('<%= room.id %>')"
                                   title="Đổi trạng thái phòng"
-                                  style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; background: #fff;">
+                                  style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center;">
                             <i class="bi bi-arrow-repeat"></i>
                           </button>
                           <button class="btn btn-sm btn-outline-danger rounded" 
                                   onclick="deleteRoom('<%= room.id %>')"
                                   title="Xóa tin đăng"
-                                  style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; background: #fff;">
+                                  style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center;">
                             <i class="bi bi-trash"></i>
                           </button>
                         </td>
@@ -180,9 +180,6 @@
                 </tbody>
               </table>
             </div>
-            <div class="d-flex justify-content-center mt-4">
-              <ul class="pagination pagination-sm" id="roomsPagination"></ul>
-            
             <!-- Rooms Pagination Container -->
             <div class="d-flex justify-content-end align-items-center mt-3 mb-2 px-3 pb-3" id="roomsPaginationWrapper" style="display: none;">
               <nav aria-label="Page navigation">
@@ -252,7 +249,7 @@
                           <button class="btn btn-sm btn-outline-primary rounded me-2" 
                                   onclick="viewLandlordRooms('<%= u.id %>', '<%= u.username %>')"
                                   title="Xem danh sách bài đăng"
-                                  style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; background: #fff;">
+                                  style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center;">
                             <i class="bi bi-journal-text"></i>
                           </button>
                         <% } %>
@@ -260,7 +257,7 @@
                                 id="btn-delete-user-<%= u.id %>"
                                 onclick="deleteUser('<%= u.id %>', '<%= u.username %>')"
                                 title="Xóa người dùng"
-                                style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; background: #fff; <%= u.id === user.id ? ' opacity: 0.5; cursor: not-allowed;' : '' %>"
+                                style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; <%= u.id === user.id ? ' opacity: 0.5; cursor: not-allowed;' : '' %>"
                                 <%= u.id === user.id ? 'disabled' : '' %>>
                           <i class="bi bi-trash"></i>
                         </button>
@@ -271,9 +268,6 @@
                 </tbody>
               </table>
             </div>
-            <div class="d-flex justify-content-center mt-4">
-              <ul class="pagination pagination-sm" id="usersPagination"></ul>
-            
             <!-- Users Pagination Container -->
             <div class="d-flex justify-content-end align-items-center mt-3 mb-2 px-3 pb-3" id="usersPaginationWrapper" style="display: none;">
               <nav aria-label="Page navigation">

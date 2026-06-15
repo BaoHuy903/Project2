@@ -1,7 +1,4 @@
 let deleteCallback = null;
-let currentRoomPage = 1;
-let currentUserPage = 1;
-const itemsPerPage = 6;
 
 document.addEventListener('DOMContentLoaded', () => {
   const confirmBtn = document.getElementById('confirmDeleteBtn');
@@ -123,7 +120,7 @@ const itemsPerPage = 6;
 function filterDashboardRooms(page = 1) {
   currentRoomPage = page;
   const filterVal = document.getElementById('statusFilter').value;
-  const rows = Array.from(document.querySelectorAll('tbody tr[id^="room-row-"]'));
+  const rows = Array.from(document.querySelectorAll('#rooms-pane tbody tr[id^="room-row-"]'));
   
   // Filter
   const filteredRows = rows.filter(row => {
@@ -141,77 +138,80 @@ function filterDashboardRooms(page = 1) {
     row.style.setProperty('display', '', 'important');
   });
 
-  renderPagination('roomsPagination', filteredRows.length, currentRoomPage, 'filterDashboardRooms');
-// CLIENT-SIDE FILTER BY STATUS
-function filterDashboardRooms(resetPage = true) {
-  if (resetPage) currentRoomPage = 1;
-  const filterVal = document.getElementById('statusFilter').value;
-  const rows = document.querySelectorAll('#rooms-pane tbody tr[id^="room-row-"]');
-  const visibleRows = [];
-
-  rows.forEach(row => {
-    const status = row.getAttribute('data-status');
-    if (filterVal === 'all' || status === filterVal) {
-      visibleRows.push(row);
-    } else {
-      row.style.setProperty('display', 'none', 'important');
-    }
-  });
-
-  renderRoomsPagination(visibleRows);
+  renderPagination('roomsPaginationContainer', 'roomsPaginationWrapper', filteredRows.length, currentRoomPage, 'filterDashboardRooms');
 }
 
-function renderRoomsPagination(visibleRows) {
-  const totalItems = visibleRows.length;
+// CLIENT-SIDE FILTER & PAGINATION FOR USERS
+function filterUsers(page = 1) {
+  currentUserPage = page;
+  const query = document.getElementById('userSearchInput').value.toLowerCase().trim();
+  const roleFilter = document.getElementById('userRoleFilter').value;
+  const rows = Array.from(document.querySelectorAll('#users-pane tbody tr[id^="user-row-"]'));
+  
+  // Filter
+  const filteredRows = rows.filter(row => {
+    const username = row.getAttribute('data-username') || '';
+    const role = row.getAttribute('data-role') || '';
+    const matchesName = username.includes(query);
+    const matchesRole = roleFilter === 'all' || role === roleFilter;
+    return matchesName && matchesRole;
+  });
+
+  // Hide all
+  rows.forEach(row => row.style.setProperty('display', 'none', 'important'));
+
+  // Show paginated
+  const start = (currentUserPage - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  filteredRows.slice(start, end).forEach(row => {
+    row.style.setProperty('display', '', 'important');
+  });
+
+  renderPagination('usersPaginationContainer', 'usersPaginationWrapper', filteredRows.length, currentUserPage, 'filterUsers');
+}
+
+// Render Pagination UI
+function renderPagination(containerId, wrapperId, totalItems, currentPage, funcName) {
+  const container = document.getElementById(containerId);
+  const wrapper = document.getElementById(wrapperId);
+  if (!container || !wrapper) return;
+  
   const totalPages = Math.ceil(totalItems / itemsPerPage);
-  const wrapper = document.getElementById('roomsPaginationWrapper');
-  const container = document.getElementById('roomsPaginationContainer');
-
-  if (!wrapper || !container) return;
-
-  if (totalItems === 0) {
+  
+  if (totalItems === 0 || totalPages <= 1) {
     wrapper.style.setProperty('display', 'none', 'important');
+    container.innerHTML = '';
     return;
-  }
-
-  if (totalPages <= 1) {
-    wrapper.style.setProperty('display', 'none', 'important');
   } else {
     wrapper.style.setProperty('display', 'flex', 'important');
   }
 
-  const startIndex = (currentRoomPage - 1) * itemsPerPage;
-  const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
-
-  visibleRows.forEach((row, index) => {
-    if (index >= startIndex && index < endIndex) {
-      row.style.setProperty('display', '', 'important');
-    } else {
-      row.style.setProperty('display', 'none', 'important');
-    }
-  });
-
   let html = '';
-  html += `<li class="page-item ${currentRoomPage === 1 ? 'disabled' : ''}">
-             <a class="page-link" href="#" onclick="changeRoomPage(${currentRoomPage - 1}); return false;">&laquo; Trang trước</a>
-           </li>`;
 
+  // Prev Button
+  html += `
+    <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+      <a class="page-link" href="#" onclick="event.preventDefault(); if(${currentPage} > 1) ${funcName}(${currentPage - 1})">&laquo; Trang trước</a>
+    </li>
+  `;
+
+  // Page Numbers
   for (let i = 1; i <= totalPages; i++) {
-    html += `<li class="page-item ${currentRoomPage === i ? 'active' : ''}">
-               <a class="page-link" href="#" onclick="changeRoomPage(${i}); return false;">${i}</a>
-             </li>`;
+    html += `
+      <li class="page-item ${i === currentPage ? 'active' : ''}">
+        <a class="page-link" href="#" onclick="event.preventDefault(); ${funcName}(${i})">${i}</a>
+      </li>
+    `;
   }
 
-  html += `<li class="page-item ${currentRoomPage === totalPages ? 'disabled' : ''}">
-             <a class="page-link" href="#" onclick="changeRoomPage(${currentRoomPage + 1}); return false;">Trang sau &raquo;</a>
-           </li>`;
+  // Next Button
+  html += `
+    <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+      <a class="page-link" href="#" onclick="event.preventDefault(); if(${currentPage} < ${totalPages}) ${funcName}(${currentPage + 1})">Trang sau &raquo;</a>
+    </li>
+  `;
 
   container.innerHTML = html;
-}
-
-function changeRoomPage(page) {
-  currentRoomPage = page;
-  filterDashboardRooms(false);
 }
 
 // VIEW LANDLORD ROOMS IN MODAL
@@ -287,149 +287,13 @@ function viewLandlordRooms(landlordId, landlordUsername) {
   modalInstance.show();
 }
 
-// CLIENT-SIDE FILTER & PAGINATION FOR USERS
-function filterUsers(page = 1) {
-  currentUserPage = page;
-  const query = document.getElementById('userSearchInput').value.toLowerCase().trim();
-  const roleFilter = document.getElementById('userRoleFilter').value;
-  const rows = Array.from(document.querySelectorAll('tbody tr[id^="user-row-"]'));
-  
-  // Filter
-  const filteredRows = rows.filter(row => {
-// CLIENT-SIDE FILTER USERS BY NAME AND ROLE
-function filterUsers(resetPage = true) {
-  if (resetPage) currentUserPage = 1;
-  const query = document.getElementById('userSearchInput').value.toLowerCase().trim();
-  const roleFilter = document.getElementById('userRoleFilter').value;
-  const rows = document.querySelectorAll('#users-pane tbody tr[id^="user-row-"]');
-  const visibleRows = [];
-
-  rows.forEach(row => {
-    const username = row.getAttribute('data-username') || '';
-    const role = row.getAttribute('data-role') || '';
-    const matchesName = username.includes(query);
-    const matchesRole = roleFilter === 'all' || role === roleFilter;
-    return matchesName && matchesRole;
-  });
-
-  // Hide all
-  rows.forEach(row => row.style.setProperty('display', 'none', 'important'));
-
-  // Show paginated
-  const start = (currentUserPage - 1) * itemsPerPage;
-  const end = start + itemsPerPage;
-  filteredRows.slice(start, end).forEach(row => {
-    row.style.setProperty('display', '', 'important');
-  });
-
-  renderPagination('usersPagination', filteredRows.length, currentUserPage, 'filterUsers');
-    
-    if (matchesName && matchesRole) {
-      visibleRows.push(row);
-    } else {
-      row.style.setProperty('display', 'none', 'important');
-    }
-  });
-
-  renderUsersPagination(visibleRows);
-}
-
-function renderUsersPagination(visibleRows) {
-  const totalItems = visibleRows.length;
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
-  const wrapper = document.getElementById('usersPaginationWrapper');
-  const container = document.getElementById('usersPaginationContainer');
-
-  if (!wrapper || !container) return;
-
-  if (totalItems === 0) {
-    wrapper.style.setProperty('display', 'none', 'important');
-    return;
-  }
-
-  if (totalPages <= 1) {
-    wrapper.style.setProperty('display', 'none', 'important');
-  } else {
-    wrapper.style.setProperty('display', 'flex', 'important');
-  }
-
-  const startIndex = (currentUserPage - 1) * itemsPerPage;
-  const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
-
-  visibleRows.forEach((row, index) => {
-    if (index >= startIndex && index < endIndex) {
-      row.style.setProperty('display', '', 'important');
-    } else {
-      row.style.setProperty('display', 'none', 'important');
-    }
-  });
-
-  let html = '';
-  html += `<li class="page-item ${currentUserPage === 1 ? 'disabled' : ''}">
-             <a class="page-link" href="#" onclick="changeUserPage(${currentUserPage - 1}); return false;">&laquo; Trang trước</a>
-           </li>`;
-
-  for (let i = 1; i <= totalPages; i++) {
-    html += `<li class="page-item ${currentUserPage === i ? 'active' : ''}">
-               <a class="page-link" href="#" onclick="changeUserPage(${i}); return false;">${i}</a>
-             </li>`;
-  }
-
-  html += `<li class="page-item ${currentUserPage === totalPages ? 'disabled' : ''}">
-             <a class="page-link" href="#" onclick="changeUserPage(${currentUserPage + 1}); return false;">Trang sau &raquo;</a>
-           </li>`;
-
-  container.innerHTML = html;
-}
-
-function changeUserPage(page) {
-  currentUserPage = page;
-  filterUsers(false);
-}
-
-// Render Pagination UI
-function renderPagination(containerId, totalItems, currentPage, funcName) {
-  const container = document.getElementById(containerId);
-  if (!container) return;
-  
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
-  let html = '';
-  
-  if (totalPages <= 1) {
-    container.innerHTML = '';
-    return;
-  }
-
-  // Prev Button
-  html += `
-    <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
-      <a class="page-link" href="#" onclick="event.preventDefault(); if(${currentPage} > 1) ${funcName}(${currentPage - 1})">&laquo; Trang trước</a>
-    </li>
-  `;
-
-  // Page Numbers
-  for (let i = 1; i <= totalPages; i++) {
-    html += `
-      <li class="page-item ${i === currentPage ? 'active' : ''}">
-        <a class="page-link" href="#" onclick="event.preventDefault(); ${funcName}(${i})">${i}</a>
-      </li>
-    `;
-  }
-
-  // Next Button
-  html += `
-    <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
-      <a class="page-link" href="#" onclick="event.preventDefault(); if(${currentPage} < ${totalPages}) ${funcName}(${currentPage + 1})">Trang sau &raquo;</a>
-    </li>
-  `;
-
-  container.innerHTML = html;
-}
-
 // Initialize on load
 document.addEventListener('DOMContentLoaded', () => {
-  filterDashboardRooms(1);
-  filterUsers(1);
+  // Use timeout to ensure DOM is fully ready and filters apply correctly
+  setTimeout(() => {
+    filterDashboardRooms(1);
+    filterUsers(1);
+  }, 100);
 });
 
 
