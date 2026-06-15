@@ -165,7 +165,7 @@ function renderRoomsPagination(visibleRows) {
 
   let html = '';
   html += `<li class="page-item ${currentRoomPage === 1 ? 'disabled' : ''}">
-             <a class="page-link" href="#" onclick="changeRoomPage(${currentRoomPage - 1}); return false;"><i class="bi bi-chevron-left"></i></a>
+             <a class="page-link" href="#" onclick="changeRoomPage(${currentRoomPage - 1}); return false;">&laquo; Trang trước</a>
            </li>`;
 
   for (let i = 1; i <= totalPages; i++) {
@@ -175,7 +175,7 @@ function renderRoomsPagination(visibleRows) {
   }
 
   html += `<li class="page-item ${currentRoomPage === totalPages ? 'disabled' : ''}">
-             <a class="page-link" href="#" onclick="changeRoomPage(${currentRoomPage + 1}); return false;"><i class="bi bi-chevron-right"></i></a>
+             <a class="page-link" href="#" onclick="changeRoomPage(${currentRoomPage + 1}); return false;">Trang sau &raquo;</a>
            </li>`;
 
   container.innerHTML = html;
@@ -316,7 +316,7 @@ function renderUsersPagination(visibleRows) {
 
   let html = '';
   html += `<li class="page-item ${currentUserPage === 1 ? 'disabled' : ''}">
-             <a class="page-link" href="#" onclick="changeUserPage(${currentUserPage - 1}); return false;"><i class="bi bi-chevron-left"></i></a>
+             <a class="page-link" href="#" onclick="changeUserPage(${currentUserPage - 1}); return false;">&laquo; Trang trước</a>
            </li>`;
 
   for (let i = 1; i <= totalPages; i++) {
@@ -326,7 +326,7 @@ function renderUsersPagination(visibleRows) {
   }
 
   html += `<li class="page-item ${currentUserPage === totalPages ? 'disabled' : ''}">
-             <a class="page-link" href="#" onclick="changeUserPage(${currentUserPage + 1}); return false;"><i class="bi bi-chevron-right"></i></a>
+             <a class="page-link" href="#" onclick="changeUserPage(${currentUserPage + 1}); return false;">Trang sau &raquo;</a>
            </li>`;
 
   container.innerHTML = html;
