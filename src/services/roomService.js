@@ -2,12 +2,34 @@ const roomRepository = require('../repositories/roomRepository');
 const { ROLES, DEFAULT_HOTLINE } = require('../constants');
 const cloudinary = require('cloudinary').v2;
 
-// Cấu hình Cloudinary v2
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
+
+const parseAmenities = (amenities) => {
+  if (Array.isArray(amenities)) return amenities;
+  if (typeof amenities === 'string') return amenities.split(',').map(a => a.trim()).filter(Boolean);
+  return [];
+};
+
+const deleteCloudinaryImages = async (images) => {
+  if (!images?.length) return;
+  for (const url of images) {
+    if (typeof url === 'string' && url.includes('cloudinary.com')) {
+      const parts = url.split('/upload/');
+      if (parts.length >= 2) {
+        let publicId = parts[1].replace(/^v\d+\//, '').split('.')[0];
+        try {
+          await cloudinary.uploader.destroy(publicId);
+        } catch (err) {
+          console.error(`Failed to delete Cloudinary image: ${publicId}`, err);
+        }
+      }
+    }
+  }
+};
 
 /**
  * Lấy danh sách phòng cho trang chủ
@@ -32,24 +54,11 @@ const getLandlordRooms = async (landlordId) => {
  * Đăng tin phòng trọ mới
  */
 const createRoom = async (roomData, files, sessionUser) => {
-  // Xử lý hình ảnh
-  let imagesArr = [];
-  if (files && files.length > 0) {
-    imagesArr = files.map(file => file.secure_url || file.url || file.path);
-  } else {
-    // Ảnh mặc định
-    imagesArr = ['https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=600&h=400&q=80'];
-  }
+  const imagesArr = files?.length 
+    ? files.map(file => file.secure_url || file.url || file.path)
+    : ['https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=600&h=400&q=80'];
 
-  // Xử lý tiện ích
-  let amenitiesArr = [];
-  if (roomData.amenities) {
-    if (Array.isArray(roomData.amenities)) {
-      amenitiesArr = roomData.amenities;
-    } else if (typeof roomData.amenities === 'string') {
-      amenitiesArr = roomData.amenities.split(',').map(a => a.trim()).filter(Boolean);
-    }
-  }
+  const amenitiesArr = parseAmenities(roomData.amenities);
 
   const newRoom = {
     title: roomData.title.trim(),
@@ -112,31 +121,15 @@ const updateRoom = async (roomId, roomData, files, sessionUser) => {
     throw new Error('Bạn không có quyền chỉnh sửa phòng trọ này.');
   }
 
-  // Xử lý ảnh: Nếu có danh sách ảnh cũ được giữ lại thì dùng nó, nếu không dùng toàn bộ ảnh cũ
-  let imagesArr = [];
-  if (Object.prototype.hasOwnProperty.call(roomData, 'keepImages')) {
-    imagesArr = roomData.keepImages
-      ? roomData.keepImages.split(',').map(img => img.trim()).filter(Boolean)
-      : [];
-  } else {
-    imagesArr = room.images || [];
+  let imagesArr = Object.prototype.hasOwnProperty.call(roomData, 'keepImages')
+    ? (roomData.keepImages ? roomData.keepImages.split(',').map(img => img.trim()).filter(Boolean) : [])
+    : (room.images || []);
+
+  if (files?.length) {
+    imagesArr.push(...files.map(file => file.secure_url || file.url || file.path));
   }
 
-  // Nếu có tải thêm ảnh mới thì thêm vào danh sách
-  if (files && files.length > 0) {
-    const newImgs = files.map(file => file.secure_url || file.url || file.path);
-    imagesArr = [...imagesArr, ...newImgs];
-  }
-
-  // Xử lý tiện ích
-  let amenitiesArr = [];
-  if (roomData.amenities) {
-    if (Array.isArray(roomData.amenities)) {
-      amenitiesArr = roomData.amenities;
-    } else if (typeof roomData.amenities === 'string') {
-      amenitiesArr = roomData.amenities.split(',').map(a => a.trim()).filter(Boolean);
-    }
-  }
+  const amenitiesArr = parseAmenities(roomData.amenities);
 
   const updatedRoom = {
     ...room,
@@ -202,31 +195,7 @@ const deleteRoom = async (roomId, sessionUser) => {
     throw new Error('Bạn không có quyền xóa phòng trọ này!');
   }
 
-  // Xóa ảnh trên Cloudinary
-  if (room.images && room.images.length > 0) {
-    for (const imageUrl of room.images) {
-      if (imageUrl && typeof imageUrl === 'string' && imageUrl.includes('cloudinary.com')) {
-        const parts = imageUrl.split('/upload/');
-        if (parts.length >= 2) {
-          let publicIdWithExt = parts[1];
-          if (publicIdWithExt.startsWith('v')) {
-            const nextSlash = publicIdWithExt.indexOf('/');
-            if (nextSlash !== -1) {
-              publicIdWithExt = publicIdWithExt.substring(nextSlash + 1);
-            }
-          }
-          const lastDot = publicIdWithExt.lastIndexOf('.');
-          const publicId = lastDot !== -1 ? publicIdWithExt.substring(0, lastDot) : publicIdWithExt;
-
-          try {
-            await cloudinary.uploader.destroy(publicId);
-          } catch (err) {
-            console.error(`Failed to delete Cloudinary image: ${publicId}`, err);
-          }
-        }
-      }
-    }
-  }
+  await deleteCloudinaryImages(room.images);
 
   return roomRepository.deleteRoom(roomId);
 };

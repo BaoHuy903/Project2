@@ -250,7 +250,7 @@
 
                         <div class="col-md-6">
                             <div class="form-group floating-label" id="availableFromGroup">
-                                <input type="date" class="custom-input" name="availableFrom" placeholder=" " id="availableFromInput">
+                                <input type="date" class="custom-input" name="availableFrom" placeholder=" " id="availableFromInput" min="<%= new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Ho_Chi_Minh' }) %>">
                                 <label>Ngày có thể chuyển vào ở</label>
                             </div>
                         </div>

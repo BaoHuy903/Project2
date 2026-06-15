@@ -15,26 +15,18 @@ const state = {
   pageSize: 8
 };
 
-// Formatting posting time helper
-function formatTimeSince(dateString) {
+const formatTimeSince = (dateString) => {
   if (!dateString || dateString === 'undefined') return 'Vừa xong';
-  const date = new Date(dateString);
-  const now = new Date();
-  const seconds = Math.floor((now - date) / 1000);
-  
+  const seconds = Math.floor((new Date() - new Date(dateString)) / 1000);
   if (seconds < 60) return 'Vừa xong';
-  
   const minutes = Math.floor(seconds / 60);
   if (minutes < 60) return `${minutes} phút trước`;
-  
   const hours = Math.floor(minutes / 60);
   if (hours < 24) return `${hours} giờ trước`;
-  
   const days = Math.floor(hours / 24);
   if (days < 30) return `${days} ngày trước`;
-  
-  return 'Đăng ngày ' + date.toLocaleDateString('vi-VN');
-}
+  return `Đăng ngày ${new Date(dateString).toLocaleDateString('vi-VN')}`;
+};
 
 // Get user-specific key for favorites
 const getFavKey = () => {
@@ -109,27 +101,18 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// Handle heart icon states
-function updateHeartIcons() {
+const updateHeartIcons = () => {
   document.querySelectorAll('.btn-fav-toggle').forEach(btn => {
     const id = btn.getAttribute('data-fav-id');
     const icon = btn.querySelector('i');
-    if (state.favorites.includes(id)) {
-      icon.className = 'bi bi-heart-fill fav-active';
-    } else {
-      icon.className = 'bi bi-heart text-secondary';
-    }
+    icon.className = state.favorites.includes(id) ? 'bi bi-heart-fill fav-active' : 'bi bi-heart text-secondary';
   });
-  // Update navbar heart button state
+  
   const navBtn = document.getElementById('favNavBtn');
   if (navBtn) {
-    if (state.showFavoritesOnly) {
-      navBtn.classList.add('fav-nav-active');
-    } else {
-      navBtn.classList.remove('fav-nav-active');
-    }
+    navBtn.classList.toggle('fav-nav-active', state.showFavoritesOnly);
   }
-}
+};
 
 // Toggle favorites array
 function toggleFavorite(event, id) {

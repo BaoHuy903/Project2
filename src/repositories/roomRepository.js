@@ -1,27 +1,5 @@
 const axios = require('axios');
-const { ROOMS_API_URL } = require('../config/api');
-
-/**
- * Helper: Gọi axios với retry khi bị rate limit (429)
- */
-const withRetry = async (fn, retries = 2, delayMs = 1500) => {
-  for (let i = 0; i <= retries; i++) {
-    try {
-      return await fn();
-    } catch (err) {
-      const status = err.response?.status;
-      if (status === 429 && i < retries) {
-        await new Promise(r => setTimeout(r, delayMs * (i + 1)));
-        continue;
-      }
-      // Thông báo lỗi rõ ràng hơn
-      if (status === 429) {
-        throw new Error('Hệ thống đang bận, vui lòng thử lại sau vài giây.');
-      }
-      throw err;
-    }
-  }
-};
+const { ROOMS_API_URL, withRetry } = require('../config/api');
 
 /**
  * Lấy danh sách tất cả phòng trọ
