@@ -83,28 +83,6 @@
           </div>
         </div>
 
-        <!-- Simulated metrics for premium visual design -->
-        <div class="db-stat-card">
-          <div>
-            <div class="db-stat-label">Tổng lượt xem tin</div>
-            <div class="db-stat-value">1,482</div>
-            <div class="db-stat-trend text-muted"><i class="bi bi-arrow-up-right text-success"></i> +12% tuần này</div>
-          </div>
-          <div class="db-stat-icon purple">
-            <i class="bi bi-eye-fill"></i>
-          </div>
-        </div>
-
-        <div class="db-stat-card">
-          <div>
-            <div class="db-stat-label">Liên hệ Zalo/SĐT</div>
-            <div class="db-stat-value">54</div>
-            <div class="db-stat-trend text-muted"><i class="bi bi-arrow-up-right text-success"></i> +8% tuần này</div>
-          </div>
-          <div class="db-stat-icon orange">
-            <i class="bi bi-chat-dots-fill"></i>
-          </div>
-        </div>
       </div>
 
       <!-- Main Room Management Section -->
@@ -191,6 +169,15 @@
               <% } %>
             </tbody>
           </table>
+        </div>
+        
+        <!-- Pagination Container -->
+        <div class="d-flex justify-content-end align-items-center mt-3 mb-2 px-3 pb-3" id="paginationWrapper" style="display: none;">
+          <nav aria-label="Page navigation">
+            <ul class="pagination pagination-sm mb-0" id="paginationContainer">
+              <!-- Pagination items will be generated here -->
+            </ul>
+          </nav>
         </div>
       </div>
     </div>

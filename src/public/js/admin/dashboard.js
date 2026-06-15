@@ -1,174 +1,189 @@
 let deleteCallback = null;
+let currentRoomPage = 1;
+let currentUserPage = 1;
+const itemsPerPage = 6;
 
 document.addEventListener('DOMContentLoaded', () => {
   const confirmBtn = document.getElementById('confirmDeleteBtn');
   if (confirmBtn) {
     confirmBtn.addEventListener('click', () => {
-      if (deleteCallback) deleteCallback();
-      const modalEl = document.getElementById('confirmDeleteModal');
-      const modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
-      modalInstance.hide();
+      deleteCallback?.();
+      bootstrap.Modal.getOrCreateInstance(document.getElementById('confirmDeleteModal')).hide();
     });
   }
 
-  // Handle tab switching manually
   const tabButtons = document.querySelectorAll('.db-tab-btn');
   tabButtons.forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.preventDefault();
       tabButtons.forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.tab-pane').forEach(p => {
-        p.classList.remove('show', 'active');
-      });
+      document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('show', 'active'));
       
       btn.classList.add('active');
-      const targetId = btn.getAttribute('data-bs-target');
-      const targetPane = document.querySelector(targetId);
-      if (targetPane) {
-        targetPane.classList.add('show', 'active');
-      }
+      const targetPane = document.querySelector(btn.getAttribute('data-bs-target'));
+      if (targetPane) targetPane.classList.add('show', 'active');
     });
   });
+
+  filterDashboardRooms();
+  filterUsers();
 });
 
-function confirmAction(title, message, callback) {
+const confirmAction = (title, message, callback) => {
   document.getElementById('confirmDeleteTitle').textContent = title;
   document.getElementById('confirmDeleteMessage').textContent = message;
   deleteCallback = callback;
-  
-  const modalEl = document.getElementById('confirmDeleteModal');
-  const modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
-  modalInstance.show();
-}
+  bootstrap.Modal.getOrCreateInstance(document.getElementById('confirmDeleteModal')).show();
+};
 
-// DELETE USER API CALL
-function deleteUser(id, username) {
+const deleteUser = (id, username) => {
   confirmAction(
     'Xác nhận xóa tài khoản',
     `Bạn có chắc chắn muốn xóa tài khoản "${username}" không? Hành động này không thể hoàn tác và toàn bộ dữ liệu liên quan sẽ bị xóa bỏ.`,
     async () => {
       try {
-        const response = await fetch(`/admin/users/${id}`, {
-          method: 'DELETE',
-          headers: { 'Content-Type': 'application/json' }
-        });
-
+        const response = await fetch(`/admin/users/${id}`, { method: 'DELETE' });
         const result = await response.json();
-
-        if (result.success) {
-          showToast(result.message, true);
-          const row = document.getElementById(`user-row-${id}`);
-          if (row) row.remove();
-        } else {
-          showToast(result.message, false);
-        }
+        showToast(result.message, result.success);
+        if (result.success) document.getElementById(`user-row-${id}`)?.remove();
       } catch (err) {
         showToast('Có lỗi xảy ra kết nối máy chủ.', false);
       }
     }
   );
-}
+};
 
-// DELETE ROOM API CALL
-function deleteRoom(id) {
+const deleteRoom = (id) => {
   confirmAction(
     'Xác nhận xóa phòng trọ',
     'Bạn có chắc chắn muốn xóa tin đăng phòng trọ này không? Hành động này không thể hoàn tác.',
     async () => {
       try {
-        const response = await fetch(`/admin/rooms/${id}`, {
-          method: 'DELETE',
-          headers: { 'Content-Type': 'application/json' }
-        });
-
+        const response = await fetch(`/admin/rooms/${id}`, { method: 'DELETE' });
         const result = await response.json();
-
+        showToast(result.message, result.success);
         if (result.success) {
-          showToast(result.message, true);
-          const row = document.getElementById(`room-row-${id}`);
-          if (row) row.remove();
-          const modalRow = document.getElementById(`modal-room-row-${id}`);
-          if (modalRow) modalRow.remove();
+          document.getElementById(`room-row-${id}`)?.remove();
+          document.getElementById(`modal-room-row-${id}`)?.remove();
           if (typeof allRooms !== 'undefined') {
             const index = allRooms.findIndex(r => String(r.id) === String(id));
             if (index > -1) allRooms.splice(index, 1);
           }
-        } else {
-          showToast(result.message, false);
         }
       } catch (err) {
         showToast('Có lỗi xảy ra kết nối máy chủ.', false);
       }
     }
   );
-}
+};
 
-// TOGGLE ROOM STATUS API CALL
-async function toggleRoomStatus(id) {
+const toggleRoomStatus = async (id) => {
   const badge = document.getElementById(`room-badge-${id}`);
   const modalBadge = document.getElementById(`modal-room-badge-${id}`);
   const buttons = document.querySelectorAll(`#room-row-${id} .btn-action-toggle, #modal-room-row-${id} .btn-action-toggle`);
 
-  if (badge) {
-    badge.style.opacity = '0.6';
-    badge.innerHTML = `<span class="spinner-border spinner-border-sm me-1" style="width: 0.8rem; height: 0.8rem;" role="status" aria-hidden="true"></span> Đang lưu...`;
-  }
-  if (modalBadge) {
-    modalBadge.style.opacity = '0.6';
-    modalBadge.innerHTML = `<span class="spinner-border spinner-border-sm me-1" style="width: 0.8rem; height: 0.8rem;" role="status" aria-hidden="true"></span> Đang lưu...`;
-  }
+  const loadingHtml = `<span class="spinner-border spinner-border-sm me-1" role="status"></span> Đang lưu...`;
+  if (badge) { badge.style.opacity = '0.6'; badge.innerHTML = loadingHtml; }
+  if (modalBadge) { modalBadge.style.opacity = '0.6'; modalBadge.innerHTML = loadingHtml; }
   buttons.forEach(btn => btn.disabled = true);
 
   try {
-    const response = await fetch(`/admin/rooms/${id}/status`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' }
-    });
-
+    const response = await fetch(`/admin/rooms/${id}/status`, { method: 'PATCH' });
     const result = await response.json();
+    showToast(result.message, result.success);
 
     if (result.success) {
-      showToast(result.message, true);
-      if (badge) {
-        badge.textContent = result.isAvailable ? 'Còn trống' : 'Đã thuê';
-        badge.className = result.isAvailable ? 'badge-status-empty' : 'badge-status-rented';
-        badge.removeAttribute('style');
-      }
-      if (modalBadge) {
-        modalBadge.textContent = result.isAvailable ? 'Còn trống' : 'Đã thuê';
-        modalBadge.className = result.isAvailable ? 'badge-status-empty' : 'badge-status-rented';
-        modalBadge.removeAttribute('style');
-      }
+      const text = result.isAvailable ? 'Còn trống' : 'Đã thuê';
+      const className = result.isAvailable ? 'badge-status-empty' : 'badge-status-rented';
+      if (badge) { badge.textContent = text; badge.className = className; badge.removeAttribute('style'); }
+      if (modalBadge) { modalBadge.textContent = text; modalBadge.className = className; modalBadge.removeAttribute('style'); }
       if (typeof allRooms !== 'undefined') {
         const room = allRooms.find(r => String(r.id) === String(id));
         if (room) room.isAvailable = result.isAvailable;
       }
     } else {
-      showToast(result.message, false);
-      if (badge) badge.removeAttribute('style');
-      if (modalBadge) modalBadge.removeAttribute('style');
+      badge?.removeAttribute('style');
+      modalBadge?.removeAttribute('style');
     }
   } catch (err) {
     showToast('Có lỗi xảy ra kết nối máy chủ.', false);
-    if (badge) badge.removeAttribute('style');
-    if (modalBadge) modalBadge.removeAttribute('style');
+    badge?.removeAttribute('style');
+    modalBadge?.removeAttribute('style');
   } finally {
     buttons.forEach(btn => btn.disabled = false);
   }
-}
+};
 
 // CLIENT-SIDE FILTER BY STATUS
-function filterDashboardRooms() {
+function filterDashboardRooms(resetPage = true) {
+  if (resetPage) currentRoomPage = 1;
   const filterVal = document.getElementById('statusFilter').value;
-  const rows = document.querySelectorAll('tbody tr[id^="room-row-"]');
+  const rows = document.querySelectorAll('#rooms-pane tbody tr[id^="room-row-"]');
+  const visibleRows = [];
+
   rows.forEach(row => {
     const status = row.getAttribute('data-status');
     if (filterVal === 'all' || status === filterVal) {
+      visibleRows.push(row);
+    } else {
+      row.style.setProperty('display', 'none', 'important');
+    }
+  });
+
+  renderRoomsPagination(visibleRows);
+}
+
+function renderRoomsPagination(visibleRows) {
+  const totalItems = visibleRows.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const wrapper = document.getElementById('roomsPaginationWrapper');
+  const container = document.getElementById('roomsPaginationContainer');
+
+  if (!wrapper || !container) return;
+
+  if (totalItems === 0) {
+    wrapper.style.setProperty('display', 'none', 'important');
+    return;
+  }
+
+  if (totalPages <= 1) {
+    wrapper.style.setProperty('display', 'none', 'important');
+  } else {
+    wrapper.style.setProperty('display', 'flex', 'important');
+  }
+
+  const startIndex = (currentRoomPage - 1) * itemsPerPage;
+  const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
+
+  visibleRows.forEach((row, index) => {
+    if (index >= startIndex && index < endIndex) {
       row.style.setProperty('display', '', 'important');
     } else {
       row.style.setProperty('display', 'none', 'important');
     }
   });
+
+  let html = '';
+  html += `<li class="page-item ${currentRoomPage === 1 ? 'disabled' : ''}">
+             <a class="page-link" href="#" onclick="changeRoomPage(${currentRoomPage - 1}); return false;"><i class="bi bi-chevron-left"></i></a>
+           </li>`;
+
+  for (let i = 1; i <= totalPages; i++) {
+    html += `<li class="page-item ${currentRoomPage === i ? 'active' : ''}">
+               <a class="page-link" href="#" onclick="changeRoomPage(${i}); return false;">${i}</a>
+             </li>`;
+  }
+
+  html += `<li class="page-item ${currentRoomPage === totalPages ? 'disabled' : ''}">
+             <a class="page-link" href="#" onclick="changeRoomPage(${currentRoomPage + 1}); return false;"><i class="bi bi-chevron-right"></i></a>
+           </li>`;
+
+  container.innerHTML = html;
+}
+
+function changeRoomPage(page) {
+  currentRoomPage = page;
+  filterDashboardRooms(false);
 }
 
 // VIEW LANDLORD ROOMS IN MODAL
@@ -245,10 +260,13 @@ function viewLandlordRooms(landlordId, landlordUsername) {
 }
 
 // CLIENT-SIDE FILTER USERS BY NAME AND ROLE
-function filterUsers() {
+function filterUsers(resetPage = true) {
+  if (resetPage) currentUserPage = 1;
   const query = document.getElementById('userSearchInput').value.toLowerCase().trim();
   const roleFilter = document.getElementById('userRoleFilter').value;
-  const rows = document.querySelectorAll('tbody tr[id^="user-row-"]');
+  const rows = document.querySelectorAll('#users-pane tbody tr[id^="user-row-"]');
+  const visibleRows = [];
+
   rows.forEach(row => {
     const username = row.getAttribute('data-username') || '';
     const role = row.getAttribute('data-role') || '';
@@ -257,11 +275,66 @@ function filterUsers() {
     const matchesRole = roleFilter === 'all' || role === roleFilter;
     
     if (matchesName && matchesRole) {
+      visibleRows.push(row);
+    } else {
+      row.style.setProperty('display', 'none', 'important');
+    }
+  });
+
+  renderUsersPagination(visibleRows);
+}
+
+function renderUsersPagination(visibleRows) {
+  const totalItems = visibleRows.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const wrapper = document.getElementById('usersPaginationWrapper');
+  const container = document.getElementById('usersPaginationContainer');
+
+  if (!wrapper || !container) return;
+
+  if (totalItems === 0) {
+    wrapper.style.setProperty('display', 'none', 'important');
+    return;
+  }
+
+  if (totalPages <= 1) {
+    wrapper.style.setProperty('display', 'none', 'important');
+  } else {
+    wrapper.style.setProperty('display', 'flex', 'important');
+  }
+
+  const startIndex = (currentUserPage - 1) * itemsPerPage;
+  const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
+
+  visibleRows.forEach((row, index) => {
+    if (index >= startIndex && index < endIndex) {
       row.style.setProperty('display', '', 'important');
     } else {
       row.style.setProperty('display', 'none', 'important');
     }
   });
+
+  let html = '';
+  html += `<li class="page-item ${currentUserPage === 1 ? 'disabled' : ''}">
+             <a class="page-link" href="#" onclick="changeUserPage(${currentUserPage - 1}); return false;"><i class="bi bi-chevron-left"></i></a>
+           </li>`;
+
+  for (let i = 1; i <= totalPages; i++) {
+    html += `<li class="page-item ${currentUserPage === i ? 'active' : ''}">
+               <a class="page-link" href="#" onclick="changeUserPage(${i}); return false;">${i}</a>
+             </li>`;
+  }
+
+  html += `<li class="page-item ${currentUserPage === totalPages ? 'disabled' : ''}">
+             <a class="page-link" href="#" onclick="changeUserPage(${currentUserPage + 1}); return false;"><i class="bi bi-chevron-right"></i></a>
+           </li>`;
+
+  container.innerHTML = html;
+}
+
+function changeUserPage(page) {
+  currentUserPage = page;
+  filterUsers(false);
 }
 
 
