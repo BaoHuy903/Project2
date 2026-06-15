@@ -6,31 +6,30 @@
   <title><%= title %></title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/design-system.css">
   <link rel="stylesheet" href="/css/admin/dashboard.css">
 </head>
 <body>
 
-<div class="container-fluid">
-  <div class="row">
+<div class="container-fluid p-0">
+  <div class="dashboard-container">
     <!-- Sidebar -->
     <%- include('../../components/sidebarAdmin', { activeTab: 'dashboard' }) %>
 
     <!-- Main Content -->
-    <div class="col-md-10 p-4" style="min-height: 100vh;">
-      <!-- Top navbar/header -->
-      <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+    <div class="db-main">
+      <!-- Header -->
+      <div class="db-header">
         <div>
-          <h2 class="fw-bold text-dark mb-1">Bảng điều khiển</h2>
-          <p class="text-muted mb-0">Xin chào, <%= user.username %> | Quyền quản trị hệ thống</p>
+          <h1 class="db-title">Bảng điều khiển Admin</h1>
+          <p class="db-subtitle">Xin chào, <strong><%= user.username %></strong> | Quyền quản trị hệ thống</p>
         </div>
         <div class="dropdown">
           <button class="btn btn-white border dropdown-toggle rounded px-3" type="button" data-bs-toggle="dropdown">
-            <i class="bi bi-person me-2 text-secondary"></i> <%= user.username %>
+            <i class="bi bi-person me-2 text-secondary"></i> <%= user.username %> (Admin)
           </button>
           <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 mt-2">
             <li><a class="dropdown-item" href="/rooms"><i class="bi bi-house me-2 text-muted"></i>Trang chủ</a></li>
-            <li class="d-md-none"><a class="dropdown-item" href="/rooms/add"><i class="bi bi-house-add me-2 text-muted"></i>Đăng phòng trọ</a></li>
             <li><a class="dropdown-item" href="/users/change-password"><i class="bi bi-key me-2 text-muted"></i>Đổi mật khẩu</a></li>
             <li><hr class="dropdown-divider"></li>
             <li><a class="dropdown-item text-danger" href="/users/logout"><i class="bi bi-box-arrow-left me-2"></i>Đăng xuất</a></li>
@@ -45,74 +44,69 @@
         let availableRooms = rooms.filter(r => r.isAvailable !== false).length;
         let rentedRooms = totalRooms - availableRooms;
       %>
-      <div class="row g-4 mb-4">
-        <div class="col-md-3">
-          <div class="card-stat d-flex align-items-center justify-content-between">
-            <div>
-              <h6 class="text-muted mb-1 text-uppercase font-weight-bold" style="font-size:0.75rem; letter-spacing: 0.5px;">Tổng người dùng</h6>
-              <h3 class="fw-bold mb-0 text-dark"><%= totalUsers %></h3>
-            </div>
-            <div class="stat-icon stat-bg-blue">
-              <i class="bi bi-people-fill"></i>
-            </div>
+      <div class="db-stats-grid">
+        <div class="db-stat-card">
+          <div>
+            <div class="db-stat-label">Tổng người dùng</div>
+            <div class="db-stat-value"><%= totalUsers %></div>
+            <div class="db-stat-trend text-primary">Tài khoản hoạt động</div>
+          </div>
+          <div class="db-stat-icon blue">
+            <i class="bi bi-people-fill"></i>
           </div>
         </div>
-        <div class="col-md-3">
-          <div class="card-stat d-flex align-items-center justify-content-between">
-            <div>
-              <h6 class="text-muted mb-1 text-uppercase font-weight-bold" style="font-size:0.75rem; letter-spacing: 0.5px;">Tổng phòng đăng</h6>
-              <h3 class="fw-bold mb-0 text-dark"><%= totalRooms %></h3>
-            </div>
-            <div class="stat-icon stat-bg-green">
-              <i class="bi bi-house-door-fill"></i>
-            </div>
+
+        <div class="db-stat-card">
+          <div>
+            <div class="db-stat-label">Tổng phòng đăng</div>
+            <div class="db-stat-value"><%= totalRooms %></div>
+            <div class="db-stat-trend">Trên toàn hệ thống</div>
+          </div>
+          <div class="db-stat-icon green">
+            <i class="bi bi-house-door-fill"></i>
           </div>
         </div>
-        <div class="col-md-3">
-          <div class="card-stat d-flex align-items-center justify-content-between">
-            <div>
-              <h6 class="text-muted mb-1 text-uppercase font-weight-bold" style="font-size:0.75rem; letter-spacing: 0.5px;">Phòng đang trống</h6>
-              <h3 class="fw-bold mb-0 text-dark"><%= availableRooms %></h3>
-            </div>
-            <div class="stat-icon stat-bg-yellow">
-              <i class="bi bi-door-open-fill"></i>
-            </div>
+
+        <div class="db-stat-card">
+          <div>
+            <div class="db-stat-label">Phòng đang trống</div>
+            <div class="db-stat-value"><%= availableRooms %></div>
+            <div class="db-stat-trend text-warning">Chờ khách thuê</div>
+          </div>
+          <div class="db-stat-icon orange">
+            <i class="bi bi-door-open-fill"></i>
           </div>
         </div>
-        <div class="col-md-3">
-          <div class="card-stat d-flex align-items-center justify-content-between">
-            <div>
-              <h6 class="text-muted mb-1 text-uppercase font-weight-bold" style="font-size:0.75rem; letter-spacing: 0.5px;">Phòng đã thuê</h6>
-              <h3 class="fw-bold mb-0 text-dark"><%= rentedRooms %></h3>
-            </div>
-            <div class="stat-icon stat-bg-red">
-              <i class="bi bi-door-closed-fill"></i>
-            </div>
+
+        <div class="db-stat-card">
+          <div>
+            <div class="db-stat-label">Phòng đã thuê</div>
+            <div class="db-stat-value"><%= rentedRooms %></div>
+            <div class="db-stat-trend text-danger">Đã có hợp đồng</div>
+          </div>
+          <div class="db-stat-icon red">
+            <i class="bi bi-door-closed-fill"></i>
           </div>
         </div>
       </div>
 
       <!-- Navigation Tabs -->
-      <ul class="nav nav-tabs nav-tabs-custom" id="adminTabs" role="tablist">
-        <li class="nav-item" role="presentation">
-          <button class="nav-link active" id="rooms-tab" data-bs-toggle="tab" data-bs-target="#rooms-pane" type="button" role="tab"><i class="bi bi-house-fill me-2"></i>Quản lý phòng trọ</button>
-        </li>
-        <li class="nav-item" role="presentation">
-          <button class="nav-link" id="users-tab" data-bs-toggle="tab" data-bs-target="#users-pane" type="button" role="tab"><i class="bi bi-people-fill me-2"></i>Quản lý người dùng</button>
-        </li>
-      </ul>
+      <div class="db-tabs">
+        <button class="db-tab-btn active" id="rooms-tab" data-bs-toggle="tab" data-bs-target="#rooms-pane" type="button" role="tab"><i class="bi bi-house-fill me-1"></i> Quản lý phòng trọ</button>
+        <button class="db-tab-btn" id="users-tab" data-bs-toggle="tab" data-bs-target="#users-pane" type="button" role="tab"><i class="bi bi-people-fill me-1"></i> Quản lý người dùng</button>
+      </div>
 
       <!-- Tabs Contents -->
       <div class="tab-content" id="adminTabsContent">
         
         <!-- ROOMS PANE -->
         <div class="tab-pane fade show active" id="rooms-pane" role="tabpanel">
-          <div class="table-container">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-              <h5 class="fw-bold text-dark mb-0">Danh sách tin đăng phòng trọ</h5>
+          <div class="db-card">
+            <div class="db-card-header flex-wrap gap-2">
+              <h5 class="db-card-title">Danh sách tin đăng phòng trọ</h5>
               <div class="d-flex align-items-center gap-2">
-                <span class="text-secondary small fw-medium text-nowrap">Lọc trạng thái:</span>
-                <select class="form-select form-select-sm" id="statusFilter" style="width: 130px; font-size: 0.85rem;" onchange="filterDashboardRooms()">
+                <span class="text-secondary small fw-medium text-nowrap">Trạng thái:</span>
+                <select class="form-select form-select-sm border" id="statusFilter" style="width: 130px; font-size: 0.85rem;" onchange="filterDashboardRooms()">
                   <option value="all">Tất cả</option>
                   <option value="available">Còn trống</option>
                   <option value="rented">Đã thuê</option>
@@ -120,10 +114,10 @@
               </div>
             </div>
             <div class="table-responsive">
-              <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
+              <table class="table table-hover align-middle mb-0 table-tv">
+                <thead>
                   <tr>
-                    <th class="ps-3">Hình ảnh</th>
+                    <th class="ps-3" style="width: 100px;">Hình ảnh</th>
                     <th>Tiêu đề / Địa chỉ</th>
                     <th>Giá / Diện tích</th>
                     <th>Người đăng</th>
@@ -183,7 +177,7 @@
                     <% }) %>
                   <% } else { %>
                     <tr>
-                      <td colspan="6" class="text-center py-4 text-muted">Chưa có phòng trọ nào được đăng.</td>
+                      <td colspan="6" class="text-center py-5 text-muted">Chưa có phòng trọ nào được đăng.</td>
                     </tr>
                   <% } %>
                 </tbody>
@@ -194,17 +188,25 @@
 
         <!-- USERS PANE -->
         <div class="tab-pane fade" id="users-pane" role="tabpanel">
-          <div class="table-container">
-            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-              <h5 class="fw-bold text-dark mb-0">Danh sách tài khoản người dùng</h5>
-              <div class="d-flex align-items-center" style="max-width: 250px; position: relative;">
-                <i class="bi bi-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #64748b; font-size: 0.85rem;"></i>
-                <input type="text" id="userSearchInput" class="form-control form-control-sm border" placeholder="Tìm theo tên tài khoản..." oninput="filterUsersByName()" style="font-size: 0.85rem; padding-left: 32px !important;">
+          <div class="db-card">
+            <div class="db-card-header flex-wrap gap-2">
+              <h5 class="db-card-title">Danh sách tài khoản người dùng</h5>
+              <div class="d-flex align-items-center gap-2">
+                <div class="d-flex align-items-center" style="max-width: 200px; position: relative;">
+                  <i class="bi bi-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--color-text-muted); font-size: 0.85rem;"></i>
+                  <input type="text" id="userSearchInput" class="form-control form-control-sm border" placeholder="Tìm theo tên..." oninput="filterUsers()" style="font-size: 0.85rem; padding-left: 32px !important;">
+                </div>
+                <select class="form-select form-select-sm border" id="userRoleFilter" onchange="filterUsers()" style="width: 140px; font-size: 0.85rem;">
+                  <option value="all">Tất cả vai trò</option>
+                  <option value="<%= ROLES.ADMIN %>">Quản trị viên</option>
+                  <option value="<%= ROLES.LANDLORD %>">Chủ trọ</option>
+                  <option value="<%= ROLES.TENANT %>">Khách thuê</option>
+                </select>
               </div>
             </div>
             <div class="table-responsive">
-              <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
+              <table class="table table-hover align-middle mb-0 table-tv">
+                <thead>
                   <tr>
                     <th class="ps-4">Mã số (ID)</th>
                     <th>Tài khoản</th>
@@ -214,12 +216,12 @@
                 </thead>
                 <tbody>
                   <% users.forEach(u => { %>
-                    <tr id="user-row-<%= u.id %>" data-username="<%= u.username.toLowerCase() %>">
+                    <tr id="user-row-<%= u.id %>" data-username="<%= u.username.toLowerCase() %>" data-role="<%= u.role %>">
                       <td class="ps-4 text-muted small">#<%= u.id %></td>
                       <td>
                         <div class="d-flex align-items-center">
                           <div class="text-primary rounded p-2 me-3 d-flex align-items-center justify-content-center" 
-                               style="width: 34px; height: 34px; background: rgba(37,99,235,0.06)">
+                               style="width: 34px; height: 34px; background: var(--color-primary-bg)">
                             <i class="bi bi-person"></i>
                           </div>
                           <div>
@@ -229,13 +231,13 @@
                       </td>
                       <td>
                       <% if (u.role === ROLES.ADMIN) { %>
-                          <span class="badge badge-pill-custom" style="background-color: #f1f5f9; color: #1e3a8a; border: 1px solid #cbd5e1;">Quản trị viên</span>
+                          <span class="badge badge-pill-custom" style="background-color: var(--color-bg-subtle); color: var(--color-primary); border: 1px solid var(--color-border);">Quản trị viên</span>
                         <% } else if (u.role === ROLES.LANDLORD) { %>
-                          <span class="badge badge-pill-custom" style="background-color: #ecfdf5; color: #047857; border: 1px solid #d1fae5;">Chủ trọ</span>
+                          <span class="badge badge-pill-custom bg-success-subtle text-success border border-success-subtle" style="padding: 4px 10px; font-size: 0.72rem; font-weight: 600; border-radius: var(--radius-sm);">Chủ trọ</span>
                         <% } else if (u.role === ROLES.TENANT) { %>
-                          <span class="badge badge-pill-custom" style="background-color: #f0f9ff; color: #0369a1; border: 1px solid #e0f2fe;">Khách thuê</span>
+                          <span class="badge badge-pill-custom bg-info-subtle text-info border border-info-subtle" style="padding: 4px 10px; font-size: 0.72rem; font-weight: 600; border-radius: var(--radius-sm);">Khách thuê</span>
                         <% } else { %>
-                          <span class="badge badge-pill-custom" style="background-color: #f8fafc; color: #475569; border: 1px solid #e2e8f0;"><%= u.role || 'Người dùng' %></span>
+                          <span class="badge badge-pill-custom" style="background-color: var(--color-bg-white); color: var(--color-text-secondary); border: 1px solid var(--color-border);"><%= u.role || 'Người dùng' %></span>
                         <% } %>
                       </td>
                        <td class="text-center text-nowrap">
@@ -248,9 +250,11 @@
                           </button>
                         <% } %>
                         <button class="btn btn-sm btn-outline-danger rounded" 
+                                id="btn-delete-user-<%= u.id %>"
                                 onclick="deleteUser('<%= u.id %>', '<%= u.username %>')"
                                 title="Xóa người dùng"
-                                style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center;">
+                                style="width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center;<%= u.id === user.id ? ' opacity: 0.5; cursor: not-allowed;' : '' %>"
+                                <%= u.id === user.id ? 'disabled' : '' %>>
                           <i class="bi bi-trash"></i>
                         </button>
                       </td>
@@ -270,7 +274,7 @@
 <!-- Confirm Delete Modal -->
 <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
   <div class="modal-dialog modal-dialog-centered" style="max-width: 400px;">
-    <div class="modal-content border-0 shadow-lg">
+    <div class="modal-content border-0 shadow-lg rounded-3">
       <div class="modal-body p-4 text-center">
         <div class="text-danger mb-3" style="font-size: 3rem;">
           <i class="bi bi-exclamation-triangle-fill"></i>
@@ -278,40 +282,28 @@
         <h5 class="fw-bold text-dark mb-2" id="confirmDeleteTitle">Xác nhận xóa</h5>
         <p class="text-secondary small mb-4" id="confirmDeleteMessage">Bạn có chắc chắn muốn thực hiện hành động này không? Hành động này không thể hoàn tác.</p>
         <div class="d-flex justify-content-center gap-2">
-          <button type="button" class="btn btn-light px-4 border" data-bs-dismiss="modal">Hủy</button>
-          <button type="button" class="btn btn-danger px-4" id="confirmDeleteBtn">Xác nhận xóa</button>
+          <button type="button" class="btn-tv btn-tv-outline btn-tv-sm" data-bs-dismiss="modal">Hủy</button>
+          <button type="button" class="btn-tv btn-tv-danger btn-tv-sm" id="confirmDeleteBtn">Xác nhận xóa</button>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Alerts Toasts -->
-<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1050;">
-  <div id="toastMessage" class="toast align-items-center text-bg-success border-0 rounded-3" role="alert" aria-live="assertive" aria-atomic="true">
-    <div class="d-flex">
-      <div class="toast-body" id="toastBody">
-        Thao tác thành công!
-      </div>
-      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-    </div>
-  </div>
-</div>
-
 <!-- Landlord Rooms Modal -->
-<div class="modal fade" id="landlordRoomsModal" tabindex="-1" aria-labelledby="landlordRoomsModalLabel" aria-hidden="true">
+<div class="modal fade" id="landlordRoomsModal" tabindex="-1" aria-labelledby="landlordRoomsModalLabel" aria-hidden="true" style="z-index: 1060;">
   <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content border-0 shadow-lg">
+    <div class="modal-content border-0 shadow-lg rounded-3">
       <div class="modal-header bg-light">
         <h5 class="modal-title fw-bold" id="landlordRoomsModalLabel">Bài đăng của chủ trọ</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body p-0">
         <div class="table-responsive" style="max-height: 450px;">
-          <table class="table table-hover align-middle mb-0">
-            <thead class="table-light">
+          <table class="table table-hover align-middle mb-0 table-tv">
+            <thead>
               <tr>
-                <th class="ps-3">Hình ảnh</th>
+                <th class="ps-3" style="width: 100px;">Hình ảnh</th>
                 <th>Tiêu đề / Địa chỉ</th>
                 <th>Giá / Diện tích</th>
                 <th class="text-center">Trạng thái</th>
@@ -324,6 +316,18 @@
           </table>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Alerts Toasts -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1060;">
+  <div id="toastMessage" class="toast align-items-center text-bg-success border-0 rounded-3 toast-tv" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body" id="toastBody">
+        Thao tác thành công!
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
     </div>
   </div>
 </div>

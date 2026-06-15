@@ -2,11 +2,31 @@ const axios = require('axios');
 const { USERS_API_URL } = require('../config/api');
 
 /**
+ * Helper: Gọi axios với retry khi bị rate limit (429)
+ */
+const withRetry = async (fn, retries = 2, delayMs = 1500) => {
+  for (let i = 0; i <= retries; i++) {
+    try {
+      return await fn();
+    } catch (err) {
+      const status = err.response?.status;
+      if (status === 429 && i < retries) {
+        await new Promise(r => setTimeout(r, delayMs * (i + 1)));
+        continue;
+      }
+      if (status === 429) {
+        throw new Error('Hệ thống đang bận, vui lòng thử lại sau vài giây.');
+      }
+      throw err;
+    }
+  }
+};
+
+/**
  * Lấy danh sách tất cả người dùng
  */
 const getAllUsers = async () => {
-  const response = await axios.get(USERS_API_URL);
-  // Normalize roles to uppercase
+  const response = await withRetry(() => axios.get(USERS_API_URL));
   return response.data.map(user => ({
     ...user,
     role: user.role ? user.role.toUpperCase() : user.role
@@ -17,9 +37,8 @@ const getAllUsers = async () => {
  * Tìm người dùng theo ID
  */
 const getUserById = async (id) => {
-  const response = await axios.get(`${USERS_API_URL}/${id}`);
+  const response = await withRetry(() => axios.get(`${USERS_API_URL}/${id}`));
   const user = response.data;
-  // Normalize role to uppercase
   if (user && user.role) {
     user.role = user.role.toUpperCase();
   }
@@ -32,7 +51,6 @@ const getUserById = async (id) => {
 const getUserByUsername = async (username) => {
   const users = await getAllUsers();
   const user = users.find(u => u.username === username);
-  // Normalize role to uppercase
   if (user && user.role) {
     user.role = user.role.toUpperCase();
   }
@@ -43,7 +61,7 @@ const getUserByUsername = async (username) => {
  * Tạo người dùng mới
  */
 const createUser = async (userData) => {
-  const response = await axios.post(USERS_API_URL, userData);
+  const response = await withRetry(() => axios.post(USERS_API_URL, userData));
   return response.data;
 };
 
@@ -51,7 +69,7 @@ const createUser = async (userData) => {
  * Cập nhật thông tin người dùng
  */
 const updateUser = async (id, userData) => {
-  const response = await axios.put(`${USERS_API_URL}/${id}`, userData);
+  const response = await withRetry(() => axios.put(`${USERS_API_URL}/${id}`, userData));
   return response.data;
 };
 
@@ -59,7 +77,7 @@ const updateUser = async (id, userData) => {
  * Xóa người dùng
  */
 const deleteUser = async (id) => {
-  const response = await axios.delete(`${USERS_API_URL}/${id}`);
+  const response = await withRetry(() => axios.delete(`${USERS_API_URL}/${id}`));
   return response.data;
 };
 

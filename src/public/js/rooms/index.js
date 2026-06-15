@@ -5,7 +5,8 @@ const state = {
     price: 'Tất cả',
     area: 'Tất cả',
     category: 'Tất cả',
-    search: ''
+    search: '',
+    amenities: []
   },
   sortBy: 'newest',
   showFavoritesOnly: false,
@@ -49,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
   } else {
     const stored = localStorage.getItem(getFavKey());
     if (stored) {
-      state.favorites = JSON.parse(stored);
+      try { state.favorites = JSON.parse(stored); } catch(e) { state.favorites = []; }
     }
   }
   updateHeartIcons();
@@ -60,7 +61,32 @@ document.addEventListener('DOMContentLoaded', () => {
     el.textContent = formatTimeSince(created);
   });
 
+  // Apply pre-filters from URL (e.g. landing page quick filter chips)
+  if (typeof PRE_FILTER !== 'undefined') {
+    if (PRE_FILTER.district && PRE_FILTER.district.trim() !== '') {
+      setFilter('location', PRE_FILTER.district.trim());
+    }
+    if (PRE_FILTER.q && PRE_FILTER.q.trim() !== '') {
+      state.filters.search = PRE_FILTER.q.toLowerCase().trim();
+      if (searchInput) searchInput.value = PRE_FILTER.q;
+      if (mobileSearchInput) mobileSearchInput.value = PRE_FILTER.q;
+    }
+  }
+
   filterRooms();
+
+  // Open modal if room query parameter is present (supports clicking from Landing Page)
+  const params = new URLSearchParams(window.location.search);
+  const roomId = params.get('room') || params.get('id');
+  if (roomId) {
+    // If the room might be on another page, let's find the card
+    const card = document.querySelector(`.room-card[data-id="${roomId}"]`);
+    if (card) {
+      setTimeout(() => {
+        card.click();
+      }, 150);
+    }
+  }
 
   // Synchronize thumbnail active state with carousel sliding
   const carouselEl = document.getElementById('detailCarousel');
@@ -203,14 +229,13 @@ function setFilter(type, value) {
   );
   
   if (btn) {
-    let prefix = '';
-    if (type === 'location') prefix = 'Địa điểm';
-    if (type === 'status') prefix = 'Loại phòng';
-    if (type === 'price') prefix = 'Giá thuê';
-    if (type === 'area') prefix = 'Diện tích';
-    if (type === 'category') prefix = 'Nội thất';
-
-    btn.textContent = `${prefix}: ${value}`;
+    let icon = '';
+    if (type === 'location') icon = '<i class="bi bi-geo-alt"></i> ';
+    if (type === 'status') icon = '<i class="bi bi-door-open"></i> ';
+    if (type === 'price') icon = '<i class="bi bi-cash"></i> ';
+    if (type === 'area') icon = '<i class="bi bi-rulers"></i> ';
+    if (type === 'category') icon = '<i class="bi bi-lamp"></i> ';
+    btn.innerHTML = `${icon}${value !== 'Tất cả' ? value : (['location'].includes(type) ? 'Khu vực' : type === 'status' ? 'Loại phòng' : type === 'price' ? 'Giá thuê' : type === 'area' ? 'Diện tích' : 'Nội thất')}`;
     if (value !== 'Tất cả') {
       btn.classList.add('active');
     } else {
@@ -233,6 +258,20 @@ function setFilter(type, value) {
   filterRooms();
 }
 
+// Toggle amenity filter
+function toggleAmenityFilter(btn, key) {
+  const index = state.filters.amenities.indexOf(key);
+  if (index === -1) {
+    state.filters.amenities.push(key);
+    btn.classList.add('active');
+  } else {
+    state.filters.amenities.splice(index, 1);
+    btn.classList.remove('active');
+  }
+  state.currentPage = 1;
+  filterRooms();
+}
+
 // Reset filters
 function resetAllFilters() {
   state.filters = {
@@ -241,7 +280,8 @@ function resetAllFilters() {
     price: 'Tất cả',
     area: 'Tất cả',
     category: 'Tất cả',
-    search: ''
+    search: '',
+    amenities: []
   };
   state.showFavoritesOnly = false;
   
@@ -254,13 +294,14 @@ function resetAllFilters() {
   const areaBtn = document.getElementById('btnFilterArea');
   const catBtn = document.getElementById('btnFilterCategory');
 
-  if (locBtn) locBtn.textContent = 'Địa điểm: Tất cả';
-  if (statBtn) statBtn.textContent = 'Loại phòng: Tất cả';
-  if (priceBtn) priceBtn.textContent = 'Giá thuê: Tất cả';
-  if (areaBtn) areaBtn.textContent = 'Diện tích: Tất cả';
-  if (catBtn) catBtn.textContent = 'Nội thất: Tất cả';
+  if (locBtn) locBtn.innerHTML = '<i class="bi bi-geo-alt"></i> Khu vực';
+  if (statBtn) statBtn.innerHTML = '<i class="bi bi-door-open"></i> Loại phòng';
+  if (priceBtn) priceBtn.innerHTML = '<i class="bi bi-cash"></i> Giá thuê';
+  if (areaBtn) areaBtn.innerHTML = '<i class="bi bi-rulers"></i> Diện tích';
+  if (catBtn) catBtn.innerHTML = '<i class="bi bi-lamp"></i> Nội thất';
 
-  document.querySelectorAll('.filter-bar button').forEach(btn => btn.classList.remove('active'));
+  document.querySelectorAll('.filter-pill').forEach(btn => btn.classList.remove('active'));
+  document.querySelectorAll('.tv-amenity-filters .amenity-chip').forEach(btn => btn.classList.remove('active'));
   const resetBtn = document.getElementById('filterResetBtn');
   if (resetBtn) resetBtn.classList.add('active');
 
@@ -283,7 +324,18 @@ function filterRooms() {
     const category = card.getAttribute('data-category');
     const status = card.getAttribute('data-status');
 
+    const cardAmenitiesStr = card.getAttribute('data-amenities') || '';
+    const cardAmenities = cardAmenitiesStr ? cardAmenitiesStr.split(',') : [];
+
     let isMatch = true;
+
+    // Amenities Filter
+    if (state.filters.amenities.length > 0) {
+      const matchesAllAmenities = state.filters.amenities.every(amenity => cardAmenities.includes(amenity));
+      if (!matchesAllAmenities) {
+        isMatch = false;
+      }
+    }
 
     // Search Filter
     if (state.filters.search && !title.includes(state.filters.search) && !address.includes(state.filters.search)) {
@@ -306,8 +358,12 @@ function filterRooms() {
     }
 
     // Category Filter (Nội thất)
-    if (state.filters.category !== 'Tất cả' && category !== state.filters.category) {
-      isMatch = false;
+    if (state.filters.category !== 'Tất cả') {
+      const filterVal = state.filters.category === 'Nhà trống' ? 'Không nội thất' : state.filters.category;
+      const cardVal = category === 'Nhà trống' ? 'Không nội thất' : category;
+      if (cardVal !== filterVal) {
+        isMatch = false;
+      }
     }
 
     // Price Filter
@@ -378,7 +434,7 @@ function handleCardClick(event, element) {
   
   const timeEl = document.getElementById('detailPostingTime');
   if (timeEl) {
-    timeEl.innerHTML = `<i class="bi bi-clock me-1"></i>${getRelativeTime(room.createdAt)}`;
+    timeEl.innerHTML = `<i class="bi bi-clock me-1"></i>${formatTimeSince(room.createdAt)}`;
   }
 
   const detailFavBtn = document.getElementById('detailFavBtn');
@@ -402,7 +458,15 @@ function handleCardClick(event, element) {
   // Populate new rules and utility costs
   document.getElementById('detailDepositMonth').textContent = room.depositMonth !== undefined && room.depositMonth !== null ? `${room.depositMonth} tháng` : 'Chưa cập nhật';
   document.getElementById('detailPaymentCycle').textContent = room.paymentCycle || 'Chưa cập nhật';
-  document.getElementById('detailParking').textContent = room.parking || 'Chưa cập nhật';
+  const availableFromEl = document.getElementById('detailAvailableFrom');
+  if (availableFromEl) {
+    if (room.availableFrom) {
+      const d = new Date(room.availableFrom);
+      availableFromEl.textContent = d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    } else {
+      availableFromEl.textContent = 'Chưa cập nhật';
+    }
+  }
   document.getElementById('detailElectricity').textContent = room.electricityPrice !== undefined && room.electricityPrice !== null ? `${room.electricityPrice.toLocaleString('vi-VN')} đ/kWh` : 'Chưa cập nhật';
   document.getElementById('detailWater').textContent = room.waterPrice !== undefined && room.waterPrice !== null ? `${room.waterPrice.toLocaleString('vi-VN')} đ/m³` : 'Chưa cập nhật';
 
@@ -472,17 +536,33 @@ function handleCardClick(event, element) {
   const hostRole = room.host && room.host.role ? room.host.role : 'Cá nhân';
   const contactPhone = room.phone || '0905123456';
 
-  const detailPostingTime = document.getElementById('detailPostingTime');
-  if (detailPostingTime) {
-    detailPostingTime.innerHTML = `<i class="bi bi-clock me-1"></i>${formatTimeSince(room.createdAt)}`;
-  }
-
   document.getElementById('detailHostName').textContent = hostName;
   document.getElementById('detailHostRole').textContent = hostRole;
   document.getElementById('detailPhone').textContent = contactPhone;
 
   document.getElementById('btnCallHost').href = `tel:${contactPhone}`;
   document.getElementById('btnZaloHost').href = `https://zalo.me/${contactPhone}`;
+
+  // Populate Amenities
+  const detailAmenitiesContainer = document.getElementById('detailAmenities');
+  const detailAmenitiesList = document.getElementById('detailAmenitiesList');
+  if (detailAmenitiesContainer && detailAmenitiesList) {
+    detailAmenitiesList.innerHTML = '';
+    if (room.amenities && room.amenities.length > 0 && typeof AMENITIES_DATA !== 'undefined') {
+      detailAmenitiesContainer.style.display = 'block';
+      room.amenities.forEach(ak => {
+        const found = AMENITIES_DATA.find(a => a.key === ak);
+        if (found) {
+          const item = document.createElement('div');
+          item.className = 'tv-amenity-detail-item';
+          item.innerHTML = `<i class="bi ${found.icon}"></i> <span>${found.label}</span>`;
+          detailAmenitiesList.appendChild(item);
+        }
+      });
+    } else {
+      detailAmenitiesContainer.style.display = 'none';
+    }
+  }
 
   // Open Modal
   const modal = new bootstrap.Modal(document.getElementById('roomDetailModal'));
@@ -498,9 +578,9 @@ function setSort(type) {
   const btn = document.getElementById('sortByBtn');
   if (btn) {
     let text = 'Tin mới nhất';
-    if (type === 'price-asc') text = 'Giá thấp trước';
-    if (type === 'price-desc') text = 'Giá cao trước';
-    btn.textContent = text;
+    if (type === 'price-asc') text = 'Giá Thấp - Cao';
+    if (type === 'price-desc') text = 'Giá Cao - Thấp';
+    btn.innerHTML = `<i class="bi bi-arrow-down-up"></i> ${text}`;
   }
 
   // Update checkmarks in dropdown menu
@@ -676,35 +756,5 @@ function updatePagination(totalItems) {
     };
   }
   container.appendChild(nextBtn);
-}
-
-// Helper to format relative time for room postings
-function getRelativeTime(dateString) {
-  if (!dateString) return 'Vừa xong';
-  const now = new Date();
-  const past = new Date(dateString);
-  const diffMs = now - past;
-  
-  if (isNaN(diffMs) || diffMs < 0) return 'Vừa xong';
-  
-  const diffSec = Math.floor(diffMs / 1000);
-  const diffMin = Math.floor(diffSec / 60);
-  const diffHr = Math.floor(diffMin / 60);
-  const diffDay = Math.floor(diffHr / 24);
-  
-  if (diffSec < 60) {
-    return 'Vừa xong';
-  } else if (diffMin < 60) {
-    return `${diffMin} phút trước`;
-  } else if (diffHr < 24) {
-    return `${diffHr} giờ trước`;
-  } else if (diffDay < 30) {
-    return `${diffDay} ngày trước`;
-  } else {
-    const d = past.getDate().toString().padStart(2, '0');
-    const m = (past.getMonth() + 1).toString().padStart(2, '0');
-    const y = past.getFullYear();
-    return `${d}/${m}/${y}`;
-  }
 }
 

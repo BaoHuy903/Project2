@@ -7,7 +7,7 @@
     <title>Chỉnh sửa tin đăng - TrọVíp</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/design-system.css">
     <link rel="stylesheet" href="/css/admin/newrooms.css">
 </head>
 
@@ -18,281 +18,374 @@
             let backUrl = '/rooms/dashboard';
             if (user && user.role === ROLES.ADMIN) backUrl = '/admin';
         %>
-        <div class="mb-4 d-flex align-items-center">
-            <a href="<%= backUrl %>" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+        <div class="mb-4 d-flex align-items-center justify-content-between">
+            <a href="<%= backUrl %>" class="btn-tv btn-tv-outline btn-tv-sm rounded-pill">
                 <i class="bi bi-arrow-left"></i> Quay lại Dashboard
             </a>
+            <span class="text-muted small fw-medium" id="stepIndicatorText">Bước 1 trên 6</span>
+        </div>
+
+        <!-- Stepper Indicator Header -->
+        <div class="stepper-header" id="stepperHeader">
+            <div class="stepper-step active" data-step="1">
+                <div class="step-number">1</div>
+                <div class="step-label">Thông tin</div>
+            </div>
+            <div class="stepper-step" data-step="2">
+                <div class="step-number">2</div>
+                <div class="step-label">Địa chỉ</div>
+            </div>
+            <div class="stepper-step" data-step="3">
+                <div class="step-number">3</div>
+                <div class="step-label">Giá & DT</div>
+            </div>
+            <div class="stepper-step" data-step="4">
+                <div class="step-number">4</div>
+                <div class="step-label">Nội thất & Tiện ích</div>
+            </div>
+            <div class="stepper-step" data-step="5">
+                <div class="step-number">5</div>
+                <div class="step-label">Hình ảnh</div>
+            </div>
+            <div class="stepper-step" data-step="6">
+                <div class="step-number">6</div>
+                <div class="step-label">Xác nhận</div>
+            </div>
         </div>
 
         <form action="/rooms/edit/<%= room.id %>" method="POST" enctype="multipart/form-data" id="roomForm" novalidate>
             <!-- Error Alert -->
             <% if (typeof error !== 'undefined' && error) { %>
-              <div class="alert alert-danger alert-dismissible fade show rounded-3 mb-4" role="alert">
-                <i class="bi bi-exclamation-triangle-fill me-2"></i> <%= error %>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-              </div>
+                <div class="alert alert-danger alert-dismissible fade show rounded-3 mb-4" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i> <%= error %>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
             <% } %>
 
-            <!-- Vị trí phòng trọ -->
-            <div class="custom-card">
-                <h2 class="card-title">Vị trí phòng trọ</h2>
-
-                <% 
-                const danangWards = {
-                  'Hải Châu': [
-                    'Phường Hòa Cường Bắc, Quận Hải Châu',
-                    'Phường Hòa Cường Nam, Quận Hải Châu',
-                    'Phường Hòa Thuận Đông, Quận Hải Châu',
-                    'Phường Hòa Thuận Tây, Quận Hải Châu',
-                    'Phường Hải Châu I, Quận Hải Châu',
-                    'Phường Hải Châu II, Quận Hải Châu',
-                    'Phường Phước Ninh, Quận Hải Châu',
-                    'Phường Nam Dương, Quận Hải Châu',
-                    'Phường Thạch Thang, Quận Hải Châu',
-                    'Phường Thanh Bình, Quận Hải Châu',
-                    'Phường Thuận Phước, Quận Hải Châu',
-                    'Phường Bình Thuận, Quận Hải Châu',
-                    'Phường Bình Hiên, Quận Hải Châu'
-                  ],
-                  'Thanh Khê': [
-                    'Phường Thạc Gián, Quận Thanh Khê',
-                    'Phường Vĩnh Trung, Quận Thanh Khê',
-                    'Phường Tân Lập, Quận Thanh Khê',
-                    'Phường Chính Gián, Quận Thanh Khê',
-                    'Phường Tam Thuận, Quận Thanh Khê',
-                    'Phường Xuân Hà, Quận Thanh Khê',
-                    'Phường An Khê, Quận Thanh Khê',
-                    'Phường Hòa Khê, Quận Thanh Khê',
-                    'Phường Thanh Khê Đông, Quận Thanh Khê',
-                    'Phường Thanh Khê Tây, Quận Thanh Khê'
-                  ],
-                  'Sơn Trà': [
-                    'Phường An Hải Bắc, Quận Sơn Trà',
-                    'Phường An Hải Tây, Quận Sơn Trà',
-                    'Phường An Hải Đông, Quận Sơn Trà',
-                    'Phường Phước Mỹ, Quận Sơn Trà',
-                    'Phường Mân Thái, Quận Sơn Trà',
-                    'Phường Nại Hiên Đông, Quận Sơn Trà',
-                    'Phường Thọ Quang, Quận Sơn Trà'
-                  ],
-                  'Ngũ Hành Sơn': [
-                    'Phường Mỹ An, Quận Ngũ Hành Sơn',
-                    'Phường Khuê Mỹ, Quận Ngũ Hành Sơn',
-                    'Phường Hòa Hải, Quận Ngũ Hành Sơn',
-                    'Phường Hòa Quý, Quận Ngũ Hành Sơn'
-                  ],
-                  'Liên Chiểu': [
-                    'Phường Hòa Minh, Quận Liên Chiểu',
-                    'Phường Hòa Khánh Nam, Quận Liên Chiểu',
-                    'Phường Hòa Khánh Bắc, Quận Liên Chiểu',
-                    'Phường Hòa Hiệp Nam, Quận Liên Chiểu',
-                    'Phường Hòa Hiệp Bắc, Quận Liên Chiểu'
-                  ],
-                  'Cẩm Lệ': [
-                    'Phường Khuê Trung, Quận Cẩm Lệ',
-                    'Phường Hòa An, Quận Cẩm Lệ',
-                    'Phường Hòa Phát, Quận Cẩm Lệ',
-                    'Phường Hòa Thọ Đông, Quận Cẩm Lệ',
-                    'Phường Hòa Thọ Tây, Quận Cẩm Lệ',
-                    'Phường Hòa Xuân, Quận Cẩm Lệ'
-                  ]
-                };
-                %>
-
-                <div class="form-group floating-label" id="addressGroup">
-                    <select class="custom-input has-value" name="address" required id="addressInput">
-                        <option value="" disabled></option>
-                        <% for (const [district, wards] of Object.entries(danangWards)) { %>
-                            <optgroup label="Quận <%= district %>">
-                                <% wards.forEach(ward => { %>
-                                    <option value="<%= ward %>" <%= (room.address && room.address.includes(ward)) ? 'selected' : '' %>><%= ward %></option>
-                                <% }) %>
-                            </optgroup>
-                        <% } %>
-                    </select>
-                    <label>Địa chỉ <span>*</span></label>
-                    <div class="error-msg">Vui lòng chọn địa chỉ phòng trọ</div>
-                </div>
-            </div>
-
-            <!-- Đặc điểm phòng trọ -->
-            <div class="custom-card">
-                <h2 class="card-title">Đặc điểm phòng trọ</h2>
-
-                <div class="row g-3">
-                    <div class="col-md-4">
-                        <div class="form-group floating-label" id="areaGroup">
-                            <input type="number" class="custom-input has-value" name="area" placeholder=" " required id="areaInput" min="1" value="<%= room.area %>">
-                            <label>Diện tích (m²) <span>*</span></label>
-                            <div class="error-msg">Diện tích phải lớn hơn 0</div>
-                        </div>
+            <!-- STEP 1: THÔNG TIN CƠ BẢN -->
+            <div class="step-pane active" id="stepPane-1">
+                <div class="custom-card">
+                    <h2 class="card-title"><i class="bi bi-info-circle-fill"></i> Thông tin cơ bản</h2>
+                    
+                    <!-- Title -->
+                    <div class="form-group floating-label" id="titleGroup">
+                        <input type="text" class="custom-input <%= room.title ? 'has-value' : '' %>" name="title" required minlength="10" maxlength="70"
+                            placeholder=" " id="titleInput" value="<%= room.title || '' %>">
+                        <label>Tiêu đề tin đăng <span>*</span></label>
+                        <div class="char-count" id="titleCharCount">0/70 kí tự</div>
+                        <div class="error-msg">Tiêu đề phải từ 10 đến 70 ký tự</div>
                     </div>
-                    <div class="col-md-4">
-                        <div class="form-group floating-label">
-                            <select class="custom-input has-value" name="category" id="categoryInput">
-                                <option value="" disabled></option>
-                                <option value="Nội thất cơ bản" <%= room.category === 'Nội thất cơ bản' ? 'selected' : '' %>>Nội thất cơ bản</option>
-                                <option value="Nội thất đầy đủ" <%= room.category === 'Nội thất đầy đủ' ? 'selected' : '' %>>Nội thất đầy đủ</option>
-                                <option value="Nhà trống" <%= room.category === 'Nhà trống' ? 'selected' : '' %>>Nhà trống</option>
-                            </select>
-                            <label>Tình trạng nội thất</label>
-                        </div>
+
+                    <!-- Room Category/Type -->
+                    <div class="form-group floating-label" id="statusGroup">
+                        <select class="custom-input <%= room.status ? 'has-value' : '' %>" name="status" required id="statusInput">
+                            <option value="" disabled></option>
+                            <option value="Ở đơn" <%= room.status === 'Ở đơn' ? 'selected' : '' %>>Ở đơn (1 người)</option>
+                            <option value="Ở ghép" <%= room.status === 'Ở ghép' ? 'selected' : '' %>>Ở ghép (Từ 2 người trở lên)</option>
+                        </select>
+                        <label>Số lượng người ở 1 phòng <span>*</span></label>
+                        <div class="error-msg">Vui lòng chọn số lượng người ở</div>
                     </div>
-                    <div class="col-md-4">
-                        <div class="form-group floating-label" id="statusGroup">
-                            <select class="custom-input has-value" name="status" required id="statusInput">
-                                <option value="" disabled></option>
-                                <option value="Ở đơn" <%= room.status === 'Ở đơn' ? 'selected' : '' %>>Ở đơn</option>
-                                <option value="Ở ghép" <%= room.status === 'Ở ghép' ? 'selected' : '' %>>Ở ghép</option>
-                            </select>
-                            <label>Loại phòng <span>*</span></label>
-                            <div class="error-msg">Vui lòng chọn loại phòng</div>
-                        </div>
+
+                    <!-- Phone -->
+                    <div class="form-group floating-label" id="phoneGroup">
+                        <input type="tel" class="custom-input <%= room.phone ? 'has-value' : '' %>" name="phone" required placeholder=" " id="phoneInput" value="<%= room.phone || '' %>">
+                        <label>Số điện thoại liên hệ <span>*</span></label>
+
+                    </div>
+
+                    <!-- Description -->
+                    <div class="form-group floating-label" id="descriptionGroup">
+                        <textarea class="custom-input <%= room.description ? 'has-value' : '' %>" name="description" rows="5" required minlength="30"
+                            maxlength="1500" placeholder=" " id="descriptionInput"><%= room.description || '' %></textarea>
+                        <label>Mô tả chi tiết phòng trọ (<span id="descCharCount">0</span>/1500 kí tự) <span>*</span></label>
+                        <div class="error-msg">Mô tả phòng phải dài ít nhất 30 ký tự</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Quy định & Chi phí khác -->
-            <div class="custom-card">
-                <h2 class="card-title">Quy định & Chi phí</h2>
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <div class="form-group floating-label" id="depositMonthGroup">
-                            <input type="number" class="custom-input" name="depositMonth" placeholder=" " min="0" step="0.1" id="depositMonthInput" value="<%= room.depositMonth %>">
-                            <label>Số tháng cọc trước (tháng)</label>
-                            <div class="error-msg">Số tháng cọc trước không được là số âm</div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group floating-label" id="paymentCycleGroup">
-                            <input type="text" class="custom-input" name="paymentCycle" placeholder=" " id="paymentCycleInput" value="<%= room.paymentCycle || '' %>">
-                            <label>Chu kỳ trả tiền (VD: 1 tháng/lần)</label>
-                        </div>
-                    </div>
-                    <div class="col-md-12">
-                        <div class="form-group floating-label" id="parkingGroup">
-                            <select class="custom-input has-value" name="parking" id="parkingInput">
-                                <option value="" disabled></option>
-                                <option value="Có" <%= room.parking === 'Có' ? 'selected' : '' %>>Có</option>
-                                <option value="Không" <%= room.parking === 'Không' ? 'selected' : '' %>>Không</option>
-                            </select>
-                            <label>Chỗ để xe</label>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group floating-label" id="electricityPriceGroup">
-                            <div class="input-with-suffix">
-                                <input type="number" class="custom-input" name="electricityPrice" placeholder=" " min="0" id="electricityPriceInput" value="<%= room.electricityPrice %>">
-                                <label>Tiền điện (đ/kWh)</label>
-                                <span class="suffix">đ/kWh</span>
+            <!-- STEP 2: ĐỊA CHỈ -->
+            <div class="step-pane" id="stepPane-2">
+                <div class="custom-card">
+                    <h2 class="card-title"><i class="bi bi-geo-alt-fill"></i> Vị trí phòng trọ</h2>
+                    <% const danangWards = {
+                      'Hải Châu': [
+                        'Phường Hòa Cường Bắc, Quận Hải Châu',
+                        'Phường Hòa Cường Nam, Quận Hải Châu',
+                        'Phường Hòa Thuận Đông, Quận Hải Châu',
+                        'Phường Hòa Thuận Tây, Quận Hải Châu',
+                        'Phường Hải Châu I, Quận Hải Châu',
+                        'Phường Hải Châu II, Quận Hải Châu',
+                        'Phường Phước Ninh, Quận Hải Châu',
+                        'Phường Nam Dương, Quận Hải Châu',
+                        'Phường Thạch Thang, Quận Hải Châu',
+                        'Phường Thanh Bình, Quận Hải Châu',
+                        'Phường Thuận Phước, Quận Hải Châu',
+                        'Phường Bình Thuận, Quận Hải Châu',
+                        'Phường Bình Hiên, Quận Hải Châu'
+                      ],
+                      'Thanh Khê': [
+                        'Phường Thạc Gián, Quận Thanh Khê',
+                        'Phường Vĩnh Trung, Quận Thanh Khê',
+                        'Phường Tân Lập, Quận Thanh Khê',
+                        'Phường Chính Gián, Quận Thanh Khê',
+                        'Phường Tam Thuận, Quận Thanh Khê',
+                        'Phường Xuân Hà, Quận Thanh Khê',
+                        'Phường An Khê, Quận Thanh Khê',
+                        'Phường Hòa Khê, Quận Thanh Khê',
+                        'Phường Thanh Khê Đông, Quận Thanh Khê',
+                        'Phường Thanh Khê Tây, Quận Thanh Khê'
+                      ],
+                      'Sơn Trà': [
+                        'Phường An Hải Bắc, Quận Sơn Trà',
+                        'Phường An Hải Tây, Quận Sơn Trà',
+                        'Phường An Hải Đông, Quận Sơn Trà',
+                        'Phường Phước Mỹ, Quận Sơn Trà',
+                        'Phường Mân Thái, Quận Sơn Trà',
+                        'Phường Nại Hiên Đông, Quận Sơn Trà',
+                        'Phường Thọ Quang, Quận Sơn Trà'
+                      ],
+                      'Ngũ Hành Sơn': [
+                        'Phường Mỹ An, Quận Ngũ Hành Sơn',
+                        'Phường Khuê Mỹ, Quận Ngũ Hành Sơn',
+                        'Phường Hòa Hải, Quận Ngũ Hành Sơn',
+                        'Phường Hòa Quý, Quận Ngũ Hành Sơn'
+                      ],
+                      'Liên Chiểu': [
+                        'Phường Hòa Minh, Quận Liên Chiểu',
+                        'Phường Hòa Khánh Nam, Quận Liên Chiểu',
+                        'Phường Hòa Khánh Bắc, Quận Liên Chiểu',
+                        'Phường Hòa Hiệp Nam, Quận Liên Chiểu',
+                        'Phường Hòa Hiệp Bắc, Quận Liên Chiểu'
+                      ],
+                      'Cẩm Lệ': [
+                        'Phường Khuê Trung, Quận Cẩm Lệ',
+                        'Phường Hòa An, Quận Cẩm Lệ',
+                        'Phường Hòa Phát, Quận Cẩm Lệ',
+                        'Phường Hòa Thọ Đông, Quận Cẩm Lệ',
+                        'Phường Hòa Thọ Tây, Quận Cẩm Lệ',
+                        'Phường Hòa Xuân, Quận Cẩm Lệ'
+                      ]
+                    }; %>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="form-group floating-label" id="districtGroup">
+                                <select class="custom-input" id="districtInput" required>
+                                    <option value="" disabled></option>
+                                    <% for (const district of Object.keys(danangWards)) { %>
+                                        <option value="<%= district %>">Quận <%= district %></option>
+                                    <% } %>
+                                </select>
+                                <label>Quận/Huyện <span>*</span></label>
+                                <div class="error-msg">Vui lòng chọn quận/huyện</div>
                             </div>
-                            <div class="error-msg">Tiền điện không được là số âm</div>
                         </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group floating-label" id="waterPriceGroup">
-                            <div class="input-with-suffix">
-                                <input type="number" class="custom-input" name="waterPrice" placeholder=" " min="0" id="waterPriceInput" value="<%= room.waterPrice %>">
-                                <label>Tiền nước (đ/m³)</label>
-                                <span class="suffix">đ/m³</span>
+                        <div class="col-md-6">
+                            <div class="form-group floating-label" id="addressGroup">
+                                <select class="custom-input <%= room.address ? 'has-value' : '' %>" name="address" id="addressInput" required>
+                                    <option value="" disabled></option>
+                                </select>
+                                <label>Phường/Xã <span>*</span></label>
+                                <div class="error-msg">Vui lòng chọn phường/xã</div>
                             </div>
-                            <div class="error-msg">Tiền nước không được là số âm</div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Nội dung tin đăng -->
-            <div class="custom-card">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h2 class="card-title mb-0">Nội dung tin đăng</h2>
+            <!-- STEP 3: GIÁ VÀ DIỆN TÍCH -->
+            <div class="step-pane" id="stepPane-3">
+                <div class="custom-card">
+                    <h2 class="card-title"><i class="bi bi-cash-stack"></i> Giá và Diện tích</h2>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="form-group floating-label" id="priceGroup">
+                                <div class="input-with-suffix">
+                                    <input type="text" class="custom-input <%= room.price ? 'has-value' : '' %>" name="price" required placeholder=" " id="priceInput" min="1" value="<%= room.price || '' %>">
+                                    <label>Giá thuê/tháng (đ) <span>*</span></label>
+                                    <span class="suffix">đ</span>
+                                </div>
+                                <div class="error-msg">Giá thuê phải lớn hơn 0</div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group floating-label" id="areaGroup">
+                                <input type="number" class="custom-input <%= room.area ? 'has-value' : '' %>" name="area" placeholder=" " required id="areaInput" min="1" value="<%= room.area || '' %>">
+                                <label>Diện tích (m²) <span>*</span></label>
+                                <div class="error-msg">Diện tích phải lớn hơn 0</div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group floating-label" id="depositGroup">
+                                <div class="input-with-suffix">
+                                    <input type="text" class="custom-input <%= room.deposit ? 'has-value' : '' %>" name="deposit" placeholder=" " id="depositInput" min="0" value="<%= room.deposit || '0' %>">
+                                    <label>Số tiền đặt cọc (đ)</label>
+                                    <span class="suffix">đ</span>
+                                </div>
+                                <div class="error-msg">Tiền đặt cọc không được là số âm</div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group floating-label" id="depositMonthGroup">
+                                <input type="number" class="custom-input <%= (room.depositMonth !== undefined && room.depositMonth !== null) ? 'has-value' : '' %>" name="depositMonth" placeholder=" " min="0" step="0.1" id="depositMonthInput" value="<%= room.depositMonth !== undefined ? room.depositMonth : '' %>">
+                                <label>Số tháng cọc trước (tháng)</label>
+                                <div class="error-msg">Số tháng cọc trước không được là số âm</div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <div class="form-group floating-label" id="paymentCycleGroup">
+                                <input type="text" class="custom-input <%= room.paymentCycle ? 'has-value' : '' %>" name="paymentCycle" placeholder=" " id="paymentCycleInput" value="<%= room.paymentCycle || '' %>">
+                                <label>Chu kỳ thanh toán tiền nhà (VD: 1 tháng/lần, 3 tháng/lần)</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 4: NỘI THẤT & TIỆN ÍCH -->
+            <div class="step-pane" id="stepPane-4">
+                <div class="custom-card">
+                    <h2 class="card-title"><i class="bi bi-lamp-fill"></i> Nội thất & Chi phí phụ</h2>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="form-group floating-label">
+                                <select class="custom-input <%= room.category ? 'has-value' : '' %>" name="category" id="categoryInput">
+                                    <option value="" disabled></option>
+                                    <option value="Nội thất đầy đủ" <%= room.category === 'Nội thất đầy đủ' ? 'selected' : '' %>>Nội thất đầy đủ</option>
+                                    <option value="Nội thất cơ bản" <%= room.category === 'Nội thất cơ bản' ? 'selected' : '' %>>Nội thất cơ bản</option>
+                                    <option value="Nhà trống" <%= room.category === 'Nhà trống' || room.category === 'Không nội thất' ? 'selected' : '' %>>Nhà trống</option>
+                                </select>
+                                <label>Tình trạng nội thất</label>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group floating-label" id="electricityPriceGroup">
+                                <div class="input-with-suffix">
+                                    <input type="text" class="custom-input <%= (room.electricityPrice !== undefined && room.electricityPrice !== null) ? 'has-value' : '' %>" name="electricityPrice" placeholder=" " min="0" id="electricityPriceInput" value="<%= room.electricityPrice !== undefined ? room.electricityPrice : '' %>">
+                                    <label>Tiền điện (đ/kWh)</label>
+                                    <span class="suffix">đ/kWh</span>
+                                </div>
+                                <div class="error-msg">Tiền điện không được là số âm</div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group floating-label" id="waterPriceGroup">
+                                <div class="input-with-suffix">
+                                    <input type="text" class="custom-input <%= (room.waterPrice !== undefined && room.waterPrice !== null) ? 'has-value' : '' %>" name="waterPrice" placeholder=" " min="0" id="waterPriceInput" value="<%= room.waterPrice !== undefined ? room.waterPrice : '' %>">
+                                    <label>Tiền nước (đ/m³ hoặc đ/người)</label>
+                                    <span class="suffix">đ/m³</span>
+                                </div>
+                                <div class="error-msg">Tiền nước không được là số âm</div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group floating-label" id="availableFromGroup">
+                                <input type="date" class="custom-input <%= room.availableFrom ? 'has-value' : '' %>" name="availableFrom" placeholder=" " id="availableFromInput" value="<%= room.availableFrom ? room.availableFrom.split('T')[0] : '' %>">
+                                <label>Ngày có thể chuyển vào ở</label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Preview current images -->
-                <% if (room.images && room.images.length > 0) { %>
-                    <div class="mb-3 p-3 bg-light rounded border" id="currentImagesPreview">
-                        <span class="d-block mb-2 text-secondary fw-semibold" style="font-size: 14px;">Ảnh hiện tại của tin đăng:</span>
-                        <div class="d-flex flex-wrap gap-2">
-                            <% room.images.forEach(img => { %>
-                                <img src="<%= img %>" class="rounded border" style="width: 70px; height: 50px; object-fit: cover;">
+                <div class="custom-card">
+                    <h2 class="card-title"><i class="bi bi-check2-circle"></i> Tiện ích phòng trọ</h2>
+                    <p class="text-secondary small mb-4">Chọn các tiện ích thực tế có sẵn tại phòng trọ của bạn. Thông tin này giúp khách thuê tìm phòng nhanh hơn.</p>
+
+                    <div class="amenities-grid-form">
+                        <% if (typeof AMENITIES !== 'undefined') { %>
+                            <% AMENITIES.forEach(a => { %>
+                                <% const isChecked = room.amenities && room.amenities.includes(a.key); %>
+                                <div class="amenity-form-card <%= isChecked ? 'selected' : '' %>" onclick="toggleFormAmenity(this)">
+                                    <input type="checkbox" name="amenities" value="<%= a.key %>" <%= isChecked ? 'checked' : '' %>>
+                                    <i class="bi <%= a.icon %>"></i>
+                                    <span><%= a.label %></span>
+                                </div>
                             <% }) %>
-                        </div>
-                        <small class="text-muted d-block mt-2" style="font-size: 12px;"><i class="bi bi-info-circle"></i> Nếu bạn tải lên ảnh mới bên dưới, toàn bộ ảnh hiện tại sẽ được thay thế.</small>
+                        <% } %>
                     </div>
-                <% } %>
-
-                <div class="form-group mb-4" id="uploadGroup">
-                    <div class="d-flex justify-content-between mb-2">
-                        <span class="fw-medium text-dark" style="font-size: 15px;">Thay đổi hình ảnh/video <span>(Tùy chọn)</span></span>
-                    </div>
-
-                    <!-- Beautiful Upload Area -->
-                    <div class="upload-area" id="uploadArea">
-                        <input type="file" id="fileInput" multiple accept="image/*" style="display: none;">
-                        <div class="upload-content" id="uploadContent">
-                            <i class="bi bi-images upload-icon"></i>
-                            <div class="upload-text">Thêm ảnh mới thay thế ảnh cũ</div>
-                        </div>
-                    </div>
-
-                    <!-- Container to show selected image previews -->
-                    <div id="imagePreviewsContainer" class="d-flex flex-wrap gap-2 mt-3"></div>
-
-                    <!-- The "+ Thêm ảnh khác" button to add more images -->
-                    <button type="button" class="btn btn-primary btn-sm mt-2 fw-semibold" id="addMoreImagesBtn">
-                        <i class="bi bi-plus-lg"></i> Thêm ảnh khác
-                    </button>
-                    
-                    <!-- Hidden input that actually submits ALL collected files -->
-                    <input type="file" name="images" id="finalImagesInput" multiple accept="image/*" style="display: none;">
-                    
-                    <div class="error-msg mt-2">Vui lòng tải lên ảnh hợp lệ</div>
-                </div>
-
-                <div class="form-group floating-label" id="titleGroup">
-                    <input type="text" class="custom-input has-value" name="title" required minlength="10" maxlength="70" placeholder=" " id="titleInput" value="<%= room.title %>">
-                    <label>Tiêu đề tin đăng <span>*</span></label>
-                    <div class="char-count" id="titleCharCount">0/70 kí tự</div>
-                    <div class="error-msg">Tiêu đề phải từ 10 đến 70 ký tự</div>
-                </div>
-
-                <div class="form-group floating-label" id="priceGroup">
-                    <div class="input-with-suffix">
-                        <input type="number" class="custom-input has-value" name="price" required placeholder=" " id="priceInput" min="1" value="<%= room.price %>">
-                        <label>Giá thuê <span>*</span></label>
-                        <span class="suffix">đ</span>
-                    </div>
-                    <div class="error-msg">Giá thuê phải lớn hơn 0</div>
-                </div>
-
-                <div class="form-group floating-label" id="depositGroup">
-                    <div class="input-with-suffix">
-                        <input type="number" class="custom-input has-value" name="deposit" placeholder=" " id="depositInput" min="0" value="<%= room.deposit %>">
-                        <label>Số tiền cọc</label>
-                        <span class="suffix">đ</span>
-                    </div>
-                    <div class="error-msg">Tiền đặt cọc không được là số âm</div>
-                </div>
-
-                <div class="form-group floating-label" id="phoneGroup">
-                    <input type="tel" class="custom-input has-value" name="phone" required placeholder=" " id="phoneInput" value="<%= room.phone || '' %>">
-                    <label>Số điện thoại liên hệ <span>*</span></label>
-                    <div class="error-msg">Số điện thoại không hợp lệ</div>
-                </div>
-
-                <div class="form-group floating-label" id="descriptionGroup">
-                    <textarea class="custom-input has-value" name="description" rows="5" required minlength="30" maxlength="1500"
-                        placeholder=" " id="descriptionInput"><%= room.description %></textarea>
-                    <label>Mô tả chi tiết phòng trọ (<span id="descCharCount">0</span>/1500 kí tự) <span>*</span></label>
-                    <div class="error-msg">Mô tả phòng phải dài ít nhất 30 ký tự</div>
                 </div>
             </div>
 
-            <!-- Sticky Bottom Bar -->
+            <!-- STEP 5: HÌNH ẢNH -->
+            <div class="step-pane" id="stepPane-5">
+                <div class="custom-card">
+                    <h2 class="card-title"><i class="bi bi-images"></i> Hình ảnh phòng trọ</h2>
+                    
+                    <!-- Previews existing images -->
+                    <% if (room.images && room.images.length > 0) { %>
+                        <div class="mb-4 p-3 bg-light rounded border" id="currentImagesPreview">
+                            <div class="d-flex flex-wrap gap-3" id="currentImagesContainer">
+                                <% room.images.forEach((img, idx) => { %>
+                                    <div class="position-relative current-img-wrapper" data-url="<%= img %>" style="width: 80px; height: 60px;">
+                                        <img src="<%= img %>" class="rounded border w-100 h-100" style="object-fit: cover;" alt="Room image">
+                                        <button type="button" class="btn btn-danger p-0 d-flex align-items-center justify-content-center position-absolute rounded-circle shadow-sm" 
+                                                style="width: 20px; height: 20px; top: -6px; right: -6px; font-size: 10px; line-height: 1;" 
+                                                onclick="deleteExistingImage(this)">
+                                            <i class="bi bi-x"></i>
+                                        </button>
+                                    </div>
+                                <% }) %>
+                            </div>
+                            <input type="hidden" name="keepImages" id="keepImagesInput" value="<%= room.images.join(',') %>">
+                        </div>
+                    <% } %>
+
+                    <div class="form-group" id="uploadGroup">
+                        <!-- Beautiful Upload Area -->
+                        <div class="upload-area" id="uploadArea">
+                            <input type="file" id="fileInput" multiple accept="image/*" style="display: none;">
+                            <div class="upload-content" id="uploadContent">
+                                <i class="bi bi-cloud-arrow-up upload-icon text-primary"></i>
+                                <div class="upload-text">Tải lên thêm ảnh mới</div>
+                                <small class="text-muted" style="font-size: 0.8rem;">Hỗ trợ: JPG, PNG, WEBP. Chọn nhiều ảnh cùng lúc.</small>
+                            </div>
+                        </div>
+
+                        <!-- Container to show selected image previews -->
+                        <div id="imagePreviewsContainer" class="d-flex flex-wrap gap-2 mt-3"></div>
+
+                        <!-- The "+ Thêm ảnh khác" button to add more images -->
+                        <button type="button" class="btn-tv btn-tv-outline btn-tv-sm mt-3" id="addMoreImagesBtn">
+                            <i class="bi bi-plus-lg"></i> Thêm ảnh khác
+                        </button>
+
+                        <!-- Hidden input that submits files -->
+                        <input type="file" name="images" id="finalImagesInput" multiple accept="image/*" style="display: none;">
+                        
+                        <div class="error-msg mt-2">Vui lòng tải lên ảnh phòng trọ hợp lệ.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 6: XÁC NHẬN -->
+            <div class="step-pane" id="stepPane-6">
+                <div class="custom-card">
+                    <h2 class="card-title"><i class="bi bi-clipboard-check-fill"></i> Xác nhận thông tin</h2>
+                    <p class="text-secondary small mb-4">Vui lòng kiểm tra lại các thông tin của tin đăng trước khi lưu thay đổi.</p>
+                    
+                    <div class="summary-group" id="formSummary">
+                        <!-- Dinamically populated in JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sticky Bottom Action Bar -->
             <div class="action-bar">
-                <div class="wrapper d-flex gap-3 py-3" style="margin: 0 auto;">
-                    <a href="<%= backUrl %>" class="btn-cancel flex-fill text-center d-flex align-items-center justify-content-center">Hủy bỏ</a>
-                    <button type="submit" class="btn-submit flex-fill">Cập nhật tin đăng</button>
+                <div class="wrapper d-flex align-items-center justify-content-between py-3">
+                    <a href="<%= backUrl %>" class="btn-cancel-link"><i class="bi bi-x-circle"></i> Hủy chỉnh sửa</a>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn-prev" id="btnPrev" style="display: none;"><i class="bi bi-chevron-left"></i> Quay lại</button>
+                        <button type="button" class="btn-next" id="btnNext">Tiếp tục <i class="bi bi-chevron-right"></i></button>
+                        <button type="submit" class="btn-submit" id="btnSubmitReal" style="display: none;"><i class="bi bi-check-circle"></i> Lưu thay đổi</button>
+                    </div>
                 </div>
             </div>
 
@@ -301,16 +394,44 @@
 
     <!-- Toast container for client validations -->
     <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1060;">
-        <div id="errorToast" class="toast align-items-center text-bg-danger border-0 rounded-3" role="alert" aria-live="assertive" aria-atomic="true">
+        <div id="errorToast" class="toast align-items-center text-bg-danger border-0 rounded-3 toast-tv" role="alert"
+            aria-live="assertive" aria-atomic="true">
             <div class="d-flex">
-                <div class="toast-body">
-                    ⚠️ Vui lòng sửa các lỗi nhập liệu trước khi lưu tin đăng!
+                <div class="toast-body" id="errorToastBody">
+                    ⚠️ Vui lòng hoàn thành các trường bắt buộc ở bước này!
                 </div>
                 <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
             </div>
         </div>
     </div>
 
+    <script>
+      // Global standard amenities array definition passed from controller
+      const AMENITIES_LIST = <%- JSON.stringify(typeof AMENITIES !== 'undefined' ? AMENITIES : []) %>;
+      const DANANG_WARDS = <%- JSON.stringify(danangWards) %>;
+      const EXISTING_ADDRESS_VAL = '<%= room.address || "" %>';
+
+      function deleteExistingImage(btn) {
+        const wrapper = btn.closest('.current-img-wrapper');
+        if (wrapper) {
+          wrapper.remove();
+          updateKeepImages();
+        }
+      }
+
+      function updateKeepImages() {
+        const wrappers = document.querySelectorAll('.current-img-wrapper');
+        const urls = [];
+        wrappers.forEach(w => {
+          const url = w.getAttribute('data-url');
+          if (url) urls.push(url);
+        });
+        const keepInput = document.getElementById('keepImagesInput');
+        if (keepInput) {
+          keepInput.value = urls.join(',');
+        }
+      }
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/js/rooms/roomFormValidation.js"></script>
 </body>

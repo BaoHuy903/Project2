@@ -10,6 +10,25 @@ document.addEventListener('DOMContentLoaded', () => {
       modalInstance.hide();
     });
   }
+
+  // Handle tab switching manually
+  const tabButtons = document.querySelectorAll('.db-tab-btn');
+  tabButtons.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      tabButtons.forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(p => {
+        p.classList.remove('show', 'active');
+      });
+      
+      btn.classList.add('active');
+      const targetId = btn.getAttribute('data-bs-target');
+      const targetPane = document.querySelector(targetId);
+      if (targetPane) {
+        targetPane.classList.add('show', 'active');
+      }
+    });
+  });
 });
 
 function confirmAction(title, message, callback) {
@@ -225,13 +244,19 @@ function viewLandlordRooms(landlordId, landlordUsername) {
   modalInstance.show();
 }
 
-// CLIENT-SIDE FILTER USERS BY NAME
-function filterUsersByName() {
+// CLIENT-SIDE FILTER USERS BY NAME AND ROLE
+function filterUsers() {
   const query = document.getElementById('userSearchInput').value.toLowerCase().trim();
+  const roleFilter = document.getElementById('userRoleFilter').value;
   const rows = document.querySelectorAll('tbody tr[id^="user-row-"]');
   rows.forEach(row => {
     const username = row.getAttribute('data-username') || '';
-    if (username.includes(query)) {
+    const role = row.getAttribute('data-role') || '';
+    
+    const matchesName = username.includes(query);
+    const matchesRole = roleFilter === 'all' || role === roleFilter;
+    
+    if (matchesName && matchesRole) {
       row.style.setProperty('display', '', 'important');
     } else {
       row.style.setProperty('display', 'none', 'important');

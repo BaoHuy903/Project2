@@ -1,691 +1,481 @@
 <!DOCTYPE html>
 <html lang="vi">
-
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>
-    <%= title || 'Trang chủ - TrọVíp' %>
-  </title>
+  <title><%= title %></title>
+  <meta name="description" content="Tìm kiếm phòng trọ tại Đà Nẵng - TrọVíp. Lọc theo quận, giá, diện tích, tiện ích. Cập nhật liên tục.">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/design-system.css">
   <link rel="stylesheet" href="/css/rooms/index.css">
-  <style>
-    /* Horizontal scrolling for mobile */
-    .filter-bar {
-      scrollbar-width: none;
-    }
-
-    .filter-bar::-webkit-scrollbar {
-      display: none;
-    }
-
-    .fav-nav-active {
-      background-color: #fee2e2 !important;
-      border-color: #fca5a5 !important;
-      color: #ef4444 !important;
-    }
-  </style>
 </head>
-
 <body>
 
-  <!-- Top Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom sticky-top" style="z-index: 1030;">
-    <div class="container-fluid px-4">
-      <a class="navbar-brand d-flex align-items-center" href="/rooms">
-        <i class="bi bi-house-door fs-4 me-2"></i> TrọVíp
+  <!-- ========== NAVBAR ========== -->
+  <nav class="tv-navbar">
+    <div class="container d-flex align-items-center justify-content-between">
+      <a href="/" class="tv-navbar-brand">
+        <i class="bi bi-house-door"></i> TrọVíp
       </a>
 
-      <!-- Search input -->
-      <div class="search-bar d-none d-md-block flex-grow-1 mx-4" style="max-width: 400px; position: relative;">
-        <i class="bi bi-search"
-          style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #64748b;"></i>
-        <input type="text" id="searchInput" class="form-control ps-5 border"
-          placeholder="Tìm kiếm theo tiêu đề, địa chỉ...">
+      <!-- Desktop Search -->
+      <div class="tv-nav-search d-none d-lg-flex">
+        <i class="bi bi-search"></i>
+        <input type="text" id="searchInput" placeholder="Tìm theo tiêu đề, địa chỉ...">
       </div>
 
-      <div class="ms-auto d-flex align-items-center">
-        <!-- Nút Yêu thích -->
-        <button id="favNavBtn"
-          class="btn btn-light rounded me-3 d-flex justify-content-center align-items-center border"
-          style="width: 38px; height: 38px;" title="Tin đã lưu" onclick="toggleFavoritesOnly()">
-          <i class="bi bi-heart-fill fs-6"></i>
-        </button>
-
-        <% if (user && user.role===ROLES.ADMIN) { %>
-          <a href="/admin" class="btn btn-outline-secondary btn-sm rounded px-3 fw-semibold me-3">
-            <i class="bi bi-shield-lock me-1"></i> Admin Panel
-          </a>
-          <a href="/rooms/add" class="btn btn-primary btn-sm rounded px-3 fw-bold me-3"
-            style="background-color: #1e3a8a; border-color: #1e3a8a;">
-            <i class="bi bi-pencil-square me-1"></i> Đăng tin
-          </a>
-          <% } else if (user && user.role===ROLES.LANDLORD) { %>
-            <a href="/rooms/dashboard" class="btn btn-outline-secondary btn-sm rounded px-3 fw-semibold me-3">
-              <i class="bi bi-speedometer2 me-1"></i> Dashboard
+      <div class="tv-nav-actions">
+        <% if (user) { %>
+          <button class="btn-tv btn-tv-ghost btn-tv-sm" id="favNavBtn" onclick="toggleFavoritesOnly()" title="Tin đã lưu">
+            <i class="bi bi-heart"></i> <span class="d-none d-md-inline">Đã lưu</span>
+          </button>
+          <% if (user.role === ROLES.LANDLORD || user.role === ROLES.ADMIN) { %>
+            <a href="/rooms/add" class="btn-tv btn-tv-accent btn-tv-sm">
+              <i class="bi bi-plus-lg"></i> <span class="d-none d-sm-inline">Đăng tin</span>
             </a>
-            <a href="/rooms/add" class="btn btn-primary btn-sm rounded px-3 fw-bold me-3"
-              style="background-color: #1e3a8a; border-color: #1e3a8a;">
-              <i class="bi bi-pencil-square me-1"></i> Đăng tin
-            </a>
-            <% } %>
-
-              <div class="dropdown">
-                <button class="btn btn-light rounded dropdown-toggle border" type="button" data-bs-toggle="dropdown">
-                  <i class="bi bi-person fs-5 me-1 text-secondary align-middle"></i>
-                  <span class="fw-medium">
-                    <%= user ? user.username : 'Khách' %>
-                  </span>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-2">
-                  <% if (user) { %>
-                    <% if (user.role===ROLES.ADMIN) { %>
-                      <li><a class="dropdown-item" href="/admin"><i class="bi bi-shield-lock me-2 text-muted"></i> Admin
-                          Panel</a></li>
-                      <% } else if (user.role===ROLES.LANDLORD) { %>
-                        <li><a class="dropdown-item" href="/rooms/dashboard"><i
-                              class="bi bi-speedometer2 me-2 text-muted"></i> Dashboard</a></li>
-                        <% } %>
-                          <li><a class="dropdown-item" href="/users/change-password"><i
-                                class="bi bi-key me-2 text-muted"></i> Đổi mật khẩu</a></li>
-                          <li>
-                            <hr class="dropdown-divider">
-                          </li>
-                          <% } %>
-                            <li><a class="dropdown-item text-danger" href="/users/logout"><i
-                                  class="bi bi-box-arrow-right me-2"></i> Đăng xuất</a></li>
-                </ul>
-              </div>
+          <% } %>
+          <div class="dropdown">
+            <button class="tv-avatar-btn" data-bs-toggle="dropdown">
+              <i class="bi bi-person-circle"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end tv-dropdown">
+              <li class="dropdown-header">
+                <strong><%= user.username %></strong>
+                <small class="text-muted"><%= user.role %></small>
+              </li>
+              <li><hr class="dropdown-divider"></li>
+              <% if (user.role === ROLES.ADMIN) { %>
+                <li><a class="dropdown-item" href="/admin"><i class="bi bi-speedometer2 me-2"></i>Admin Dashboard</a></li>
+              <% } else if (user.role === ROLES.LANDLORD) { %>
+                <li><a class="dropdown-item" href="/rooms/dashboard"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a></li>
+              <% } %>
+              <li><a class="dropdown-item" href="/users/change-password"><i class="bi bi-key me-2"></i>Đổi mật khẩu</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item text-danger" href="/users/logout"><i class="bi bi-box-arrow-left me-2"></i>Đăng xuất</a></li>
+            </ul>
+          </div>
+        <% } else { %>
+          <a href="/users/login" class="btn-tv btn-tv-outline btn-tv-sm">Đăng nhập</a>
+          <a href="/users/register" class="btn-tv btn-tv-primary btn-tv-sm">Đăng ký</a>
+        <% } %>
       </div>
     </div>
   </nav>
 
-  <!-- Horizontal Filter Bar -->
-  <div class="filter-bar bg-white border-bottom py-2" style="position: sticky; top: 56px; z-index: 1020;">
-    <div class="container-fluid px-4 d-flex flex-wrap py-1 gap-2">
-      <button class="filter-btn active" id="filterResetBtn" onclick="resetAllFilters()">
-        <i class="bi bi-filter"></i> Tất cả
-      </button>
-
-      <!-- Dropdown Địa điểm -->
-      <div class="dropdown">
-        <button class="filter-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" id="btnFilterLocation">
-          Địa điểm: Tất cả
-        </button>
-        <ul class="dropdown-menu border-0 shadow">
-          <li><a class="dropdown-item" href="javascript:void(0)" onclick="setFilter('location', 'Tất cả')">Tất cả</a>
-          </li>
-          <li><a class="dropdown-item" href="javascript:void(0)" onclick="setFilter('location', 'Hải Châu')">Hải
-              Châu</a></li>
-          <li><a class="dropdown-item" href="javascript:void(0)" onclick="setFilter('location', 'Thanh Khê')">Thanh
-              Khê</a></li>
-          <li><a class="dropdown-item" href="javascript:void(0)" onclick="setFilter('location', 'Sơn Trà')">Sơn Trà</a>
-          </li>
-          <li><a class="dropdown-item" href="javascript:void(0)" onclick="setFilter('location', 'Ngũ Hành Sơn')">Ngũ
-              Hành Sơn</a></li>
-          <li><a class="dropdown-item" href="javascript:void(0)" onclick="setFilter('location', 'Liên Chiểu')">Liên
-              Chiểu</a></li>
-          <li><a class="dropdown-item" href="javascript:void(0)" onclick="setFilter('location', 'Cẩm Lệ')">Cẩm Lệ</a>
-          </li>
-        </ul>
-      </div>
-
-      <!-- Dropdown Loại phòng -->
-      <div class="dropdown">
-        <button class="filter-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" id="btnFilterStatus">
-          Loại phòng: Tất cả
-        </button>
-        <ul class="dropdown-menu border-0 shadow">
-          <li><a class="dropdown-item" href="javascript:void(0)" onclick="setFilter('status', 'Tất cả')">Tất cả</a></li>
-          <li><a class="dropdown-item" href="javascript:void(0)" onclick="setFilter('status', 'Ở đơn')">Ở đơn</a></li>
-          <li><a class="dropdown-item" href="javascript:void(0)" onclick="setFilter('status', 'Ở ghép')">Ở ghép</a></li>
-        </ul>
-      </div>
-
-      <!-- Dropdown Khoảng giá -->
-      <div class="dropdown">
-        <button class="filter-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" id="btnFilterPrice">
-          Giá thuê: Tất cả
-        </button>
-        <ul class="dropdown-menu border-0 shadow">
-          <li><a class="dropdown-item" href="javascript:void(0)" onclick="setFilter('price', 'Tất cả')">Tất cả</a></li>
-          <li><a class="dropdown-item" href="javascript:void(0)" onclick="setFilter('price', '<2M')">Dưới 2 triệu</a>
-          </li>
-          <li><a class="dropdown-item" href="javascript:void(0)" onclick="setFilter('price', '2M-3M')">Từ 2 - 3
-              triệu</a></li>
-          <li><a class="dropdown-item" href="javascript:void(0)" onclick="setFilter('price', '3M-5M')">Từ 3 - 5
-              triệu</a></li>
-          <li><a class="dropdown-item" href="javascript:void(0)" onclick="setFilter('price', '>5M')">Trên 5 triệu</a>
-          </li>
-        </ul>
-      </div>
-
-      <!-- Dropdown Diện tích -->
-      <div class="dropdown">
-        <button class="filter-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" id="btnFilterArea">
-          Diện tích: Tất cả
-        </button>
-        <ul class="dropdown-menu border-0 shadow">
-          <li><a class="dropdown-item" href="javascript:void(0)" onclick="setFilter('area', 'Tất cả')">Tất cả</a></li>
-          <li><a class="dropdown-item" href="javascript:void(0)" onclick="setFilter('area', '<20')">Dưới 20 m²</a></li>
-          <li><a class="dropdown-item" href="javascript:void(0)" onclick="setFilter('area', '20-30')">20 m² - 30 m²</a>
-          </li>
-          <li><a class="dropdown-item" href="javascript:void(0)" onclick="setFilter('area', '>30')">Trên 30 m²</a></li>
-        </ul>
-      </div>
-
-      <!-- Dropdown Nội thất -->
-      <div class="dropdown">
-        <button class="filter-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" id="btnFilterCategory">
-          Nội thất: Tất cả
-        </button>
-        <ul class="dropdown-menu border-0 shadow">
-          <li><a class="dropdown-item" href="javascript:void(0)" onclick="setFilter('category', 'Tất cả')">Tất cả</a>
-          </li>
-          <li><a class="dropdown-item" href="javascript:void(0)" onclick="setFilter('category', 'Nội thất cơ bản')">Nội
-              thất cơ bản</a></li>
-          <li><a class="dropdown-item" href="javascript:void(0)" onclick="setFilter('category', 'Nội thất đầy đủ')">Nội
-              thất đầy đủ</a></li>
-          <li><a class="dropdown-item" href="javascript:void(0)" onclick="setFilter('category', 'Nhà trống')">Nhà
-              trống</a></li>
-        </ul>
+  <!-- Mobile Search -->
+  <div class="tv-mobile-search d-lg-none">
+    <div class="container">
+      <div class="tv-search-bar-mobile">
+        <i class="bi bi-search"></i>
+        <input type="text" id="mobileSearchInput" placeholder="Tìm theo tiêu đề, địa chỉ...">
       </div>
     </div>
   </div>
 
-  <div class="container-fluid px-4 py-4">
-    <!-- Breadcrumb -->
-    <nav aria-label="breadcrumb" class="mb-3">
-      <ol class="breadcrumb mb-0" style="font-size: 0.85rem;">
-        <li class="breadcrumb-item"><a href="/rooms" class="text-decoration-none text-muted">TrọVíp</a></li>
-        <li class="breadcrumb-item active" aria-current="page">Đà Nẵng</li>
-      </ol>
-    </nav>
+  <!-- ========== FILTER BAR ========== -->
+  <div class="tv-filter-bar">
+    <div class="container">
+      <div class="tv-filters-scroll">
+        <!-- Reset -->
+        <button class="filter-pill active" id="filterResetBtn" onclick="resetAllFilters()">
+          <i class="bi bi-grid-3x3-gap"></i> Tất cả
+        </button>
 
-    <!-- Premium Hero Statistics Banner -->
-    <div class="hero-banner mb-4 p-4 rounded-3 text-white position-relative overflow-hidden border shadow-sm"
-      style="background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); border-color: rgba(255, 255, 255, 0.15) !important;">
-      <div class="row align-items-center position-relative" style="z-index: 1;">
-        <div class="col-md-8">
-          <span class="badge mb-2"
-            style="font-size: 0.75rem; font-weight: 700; letter-spacing: 0.5px; background-color: rgba(255, 255, 255, 0.2); color: #ffffff; padding: 6px 12px; backdrop-filter: blur(4px);">ĐÀ
-            NẴNG</span>
-          <h1 class="fw-bold mb-2 fs-3">Tìm kiếm phòng trọ dễ dàng</h1>
-          <p class="mb-0 text-white-50" style="font-size: 0.95rem; max-width: 650px; line-height: 1.5;">
-            Hệ thống kết nối trực tiếp chủ trọ và người thuê. Thông tin phòng trọ được cập nhật liên tục, hỗ trợ liên hệ
-            trực tiếp chủ trọ an toàn, miễn phí.
-          </p>
+        <!-- Location -->
+        <div class="dropdown">
+          <button class="filter-pill" data-bs-toggle="dropdown" data-bs-boundary="viewport" id="btnFilterLocation">
+            <i class="bi bi-geo-alt"></i> Khu vực
+          </button>
+          <ul class="dropdown-menu tv-dropdown">
+            <li><a class="dropdown-item" onclick="setFilter('location','Tất cả')">Tất cả</a></li>
+            <li><a class="dropdown-item" onclick="setFilter('location','Hải Châu')">Hải Châu</a></li>
+            <li><a class="dropdown-item" onclick="setFilter('location','Thanh Khê')">Thanh Khê</a></li>
+            <li><a class="dropdown-item" onclick="setFilter('location','Sơn Trà')">Sơn Trà</a></li>
+            <li><a class="dropdown-item" onclick="setFilter('location','Liên Chiểu')">Liên Chiểu</a></li>
+            <li><a class="dropdown-item" onclick="setFilter('location','Ngũ Hành Sơn')">Ngũ Hành Sơn</a></li>
+            <li><a class="dropdown-item" onclick="setFilter('location','Cẩm Lệ')">Cẩm Lệ</a></li>
+          </ul>
         </div>
-        <div class="col-md-4 mt-3 mt-md-0 d-flex justify-content-md-end align-items-center">
-          <div class="d-flex align-items-center text-white"
-            style="opacity: 1; font-size: 3rem; font-weight: 800; letter-spacing: -1.5px; user-select: none; pointer-events: none;">
-            <i class="bi bi-house-door me-2.5" style="font-size: 3.5rem;"></i> TrọVíp
-          </div>
+
+        <!-- Price -->
+        <div class="dropdown">
+          <button class="filter-pill" data-bs-toggle="dropdown" data-bs-boundary="viewport" id="btnFilterPrice">
+            <i class="bi bi-cash"></i> Giá thuê
+          </button>
+          <ul class="dropdown-menu tv-dropdown">
+            <li><a class="dropdown-item" onclick="setFilter('price','Tất cả')">Tất cả</a></li>
+            <li><a class="dropdown-item" onclick="setFilter('price','<2M')">Dưới 2 triệu</a></li>
+            <li><a class="dropdown-item" onclick="setFilter('price','2M-3M')">2 - 3 triệu</a></li>
+            <li><a class="dropdown-item" onclick="setFilter('price','3M-5M')">3 - 5 triệu</a></li>
+            <li><a class="dropdown-item" onclick="setFilter('price','>5M')">Trên 5 triệu</a></li>
+          </ul>
+        </div>
+
+        <!-- Area -->
+        <div class="dropdown">
+          <button class="filter-pill" data-bs-toggle="dropdown" data-bs-boundary="viewport" id="btnFilterArea">
+            <i class="bi bi-rulers"></i> Diện tích
+          </button>
+          <ul class="dropdown-menu tv-dropdown">
+            <li><a class="dropdown-item" onclick="setFilter('area','Tất cả')">Tất cả</a></li>
+            <li><a class="dropdown-item" onclick="setFilter('area','<20')">Dưới 20m²</a></li>
+            <li><a class="dropdown-item" onclick="setFilter('area','20-30')">20 - 30m²</a></li>
+            <li><a class="dropdown-item" onclick="setFilter('area','>30')">Trên 30m²</a></li>
+          </ul>
+        </div>
+
+        <!-- Room Type -->
+        <div class="dropdown">
+          <button class="filter-pill" data-bs-toggle="dropdown" data-bs-boundary="viewport" id="btnFilterStatus">
+            <i class="bi bi-door-open"></i> Loại phòng
+          </button>
+          <ul class="dropdown-menu tv-dropdown">
+            <li><a class="dropdown-item" onclick="setFilter('status','Tất cả')">Tất cả</a></li>
+            <li><a class="dropdown-item" onclick="setFilter('status','Ở đơn')">Ở đơn</a></li>
+            <li><a class="dropdown-item" onclick="setFilter('status','Ở ghép')">Ở ghép</a></li>
+          </ul>
+        </div>
+
+        <!-- Category -->
+        <div class="dropdown">
+          <button class="filter-pill" data-bs-toggle="dropdown" data-bs-boundary="viewport" id="btnFilterCategory">
+            <i class="bi bi-lamp"></i> Nội thất
+          </button>
+          <ul class="dropdown-menu tv-dropdown">
+            <li><a class="dropdown-item" onclick="setFilter('category','Tất cả')">Tất cả</a></li>
+            <li><a class="dropdown-item" onclick="setFilter('category','Nội thất đầy đủ')">Nội thất đầy đủ</a></li>
+            <li><a class="dropdown-item" onclick="setFilter('category','Nội thất cơ bản')">Nội thất cơ bản</a></li>
+            <li><a class="dropdown-item" onclick="setFilter('category','Nhà trống')">Nhà trống</a></li>
+          </ul>
+        </div>
+
+        <!-- Sort -->
+        <div class="dropdown ms-auto">
+          <button class="filter-pill" data-bs-toggle="dropdown" id="sortByBtn">
+            <i class="bi bi-arrow-down-up"></i> Tin mới nhất
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end tv-dropdown">
+            <li><a class="dropdown-item" id="sort-newest" onclick="setSort('newest')">Tin mới nhất <i class="bi bi-check2 ms-auto"></i></a></li>
+            <li><a class="dropdown-item" id="sort-price-asc" onclick="setSort('price-asc')">Giá Thấp - Cao <i class="bi bi-check2 ms-auto d-none"></i></a></li>
+            <li><a class="dropdown-item" id="sort-price-desc" onclick="setSort('price-desc')">Giá Cao - Thấp <i class="bi bi-check2 ms-auto d-none"></i></a></li>
+          </ul>
         </div>
       </div>
-    </div>
 
-    <!-- Mobile Search input -->
-    <div class="d-md-none mb-3">
-      <div style="position: relative;">
-        <i class="bi bi-search"
-          style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #64748b;"></i>
-        <input type="text" id="mobileSearchInput" class="form-control ps-5 border"
-          placeholder="Tìm kiếm tin đăng phòng trọ...">
-      </div>
-    </div>
-
-    <div class="row">
-      <!-- Left Column: Main List -->
-      <div class="col-lg-9">
-        <div class="mb-4 pb-2 border-bottom d-flex justify-content-between align-items-center">
-          <h4 class="fw-bold text-dark mb-0 fs-5">Tất cả tin đăng</h4>
-          <!-- Sorting Dropdown -->
-          <div class="dropdown">
-            <button
-              class="btn btn-white border dropdown-toggle rounded px-3 py-1.5 fw-medium d-flex align-items-center gap-1"
-              type="button" data-bs-toggle="dropdown" id="sortByBtn" style="font-size: 0.9rem;">
-              Tin mới nhất
+      <!-- Amenities Filter -->
+      <div class="tv-amenity-filters">
+        <% if (typeof AMENITIES !== 'undefined') { %>
+          <% AMENITIES.forEach(a => { %>
+            <button class="amenity-chip" data-amenity="<%= a.key %>" onclick="toggleAmenityFilter(this, '<%= a.key %>')">
+              <i class="bi <%= a.icon %>"></i> <%= a.label %>
             </button>
-            <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3 mt-2" id="sortByMenu"
-              style="font-size: 0.9rem; min-width: 180px;">
-              <li class="dropdown-header text-uppercase fw-bold text-dark mb-1"
-                style="font-size: 0.75rem; letter-spacing: 0.5px;">Sắp xếp theo</li>
-              <li>
-                <a class="dropdown-item d-flex justify-content-between align-items-center active"
-                  href="javascript:void(0)" onclick="setSort('newest')" id="sort-newest">
-                  Tin mới nhất
-                  <i class="bi bi-check-circle-fill text-warning ms-2" style="color: #f97316 !important;"></i>
-                </a>
-              </li>
-              <li>
-                <a class="dropdown-item d-flex justify-content-between align-items-center" href="javascript:void(0)"
-                  onclick="setSort('price-asc')" id="sort-price-asc">
-                  Giá thấp trước
-                  <i class="bi bi-check-circle-fill text-warning ms-2 d-none" style="color: #f97316 !important;"></i>
-                </a>
-              </li>
-              <li>
-                <a class="dropdown-item d-flex justify-content-between align-items-center" href="javascript:void(0)"
-                  onclick="setSort('price-desc')" id="sort-price-desc">
-                  Giá cao trước
-                  <i class="bi bi-check-circle-fill text-warning ms-2 d-none" style="color: #f97316 !important;"></i>
-                </a>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <!-- Room cards container -->
-        <div id="roomsContainer">
-          <% if (typeof rooms !== 'undefined' && rooms.length > 0) { %>
-            <% rooms.forEach(room => { %>
-              <% 
-                /* Determine host display role */
-                const isPartner = room.host && room.host.role === 'Đối Tác';
-                const isAvail = room.isAvailable !== false; 
-              %>
-                <div class="room-card shadow-sm mb-3 rounded-3 p-3 bg-white d-flex flex-column flex-md-row gap-3"
-                  data-id="<%= room.id %>" data-title="<%= room.title %>" data-address="<%= room.address %>"
-                  data-price="<%= room.price %>" data-area="<%= room.area %>" data-category="<%= room.category %>"
-                  data-status="<%= room.status %>" data-host-role="<%= (room.host && room.host.role) || 'Cá nhân' %>"
-                  data-available="<%= isAvail %>" data-created-at="<%= room.createdAt %>"
-                  data-room="<%= encodeURIComponent(JSON.stringify(room)) %>" onclick="handleCardClick(event, this)">
-
-                  <div style="position: relative; width: 100%; max-width: 220px;" class="mx-auto mx-md-0">
-                    <img
-                      src="<%= room.images && room.images.length > 0 ? room.images[0] : 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=300&h=200&q=80' %>"
-                      alt="Room image" class="rounded-3 w-100 h-100"
-                      style="object-fit: cover; min-height: 150px; max-height: 170px; <%= !isAvail ? 'filter: brightness(0.6) blur(1.5px);' : '' %>">
-
-                    <% if (!isAvail) { %>
-                      <span
-                        class="position-absolute top-50 start-50 translate-middle badge bg-danger fs-6 py-2 px-3 opacity-90">ĐÃ
-                        THUÊ</span>
-                      <% } %>
-                  </div>
-
-                  <div class="d-flex flex-column justify-content-between flex-grow-1">
-                    <div>
-                      <h5 class="fw-bold text-dark mb-1 text-hover-orange d-flex align-items-center flex-wrap gap-2">
-                        <% if (isPartner) { %>
-                          <span class="badge bg-warning text-dark small"><i class="bi bi-shield-check"></i> Đối
-                            Tác</span>
-                          <% } %>
-                            <% if (isAvail) { %>
-                              <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1"
-                                style="font-size: 0.72rem; font-weight: 600; letter-spacing: 0.3px;">Còn trống</span>
-                              <% } else { %>
-                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1"
-                                  style="font-size: 0.72rem; font-weight: 600; letter-spacing: 0.3px;">Đã thuê</span>
-                                <% } %>
-                                  <span>
-                                    <%= room.title %>
-                                  </span>
-                      </h5>
-                      <div class="text-muted small mb-2">
-                        <%= room.category || 'Nội thất cơ bản' %> • <%= room.status || 'Ở đơn' %> • <i
-                              class="bi bi-clock me-1"></i><span class="posting-time-el"
-                              data-created="<%= room.createdAt %>">Vừa xong</span>
-                      </div>
-
-                      <div class="d-flex align-items-baseline gap-2 mb-2">
-                        <span class="text-danger fw-bold fs-5">
-                          <%= room.price ? (room.price / 1000000).toLocaleString('vi-VN') : 0 %> triệu/tháng
-                        </span>
-                        <span class="text-secondary">•</span>
-                        <span class="fw-semibold text-dark">
-                          <%= room.area || 0 %> m²
-                        </span>
-                      </div>
-
-                      <div class="text-muted small mb-2">
-                        <i class="bi bi-geo-alt-fill text-danger me-1"></i>
-                        <%= room.address %>
-                      </div>
-                    </div>
-
-                    <div class="d-flex align-items-center justify-content-between pt-3 border-top mt-2">
-                      <div class="d-flex align-items-center gap-2 flex-wrap">
-                        <div
-                          class="rounded bg-light text-secondary border d-flex align-items-center justify-content-center fw-semibold"
-                          style="width: 28px; height: 28px; font-size: 0.8rem;">
-                          <%= room.host && room.host.username ? room.host.username.charAt(0).toUpperCase() : 'Ẩ' %>
-                        </div>
-                        <span class="text-dark fw-medium small">
-                          <%= room.host ? room.host.username : 'Ẩn danh' %>
-                        </span>
-                        <span class="text-muted small">(<%= (room.host && room.host.role) || 'Cá nhân' %>)</span>
-                        <span class="text-secondary small">•</span>
-                        <span class="text-success fw-semibold small"><i class="bi bi-telephone-fill me-1"></i>
-                          <%= room.phone || '0905123456' %>
-                        </span>
-                      </div>
-
-                      <button class="btn btn-link p-0 text-secondary border-0 btn-fav-toggle"
-                        data-fav-id="<%= room.id %>" onclick="toggleFavorite(event, '<%= room.id %>')"
-                        style="outline: none; box-shadow: none;">
-                        <i class="bi bi-heart fs-5"></i>
-                      </button>
-                    </div>
-                  </div>
-
-                </div>
-                <% }) %>
-                  <% } %>
-
-                    <!-- Place holder when empty -->
-                    <div id="emptyPlaceholder" class="bg-white rounded border p-5 text-center mt-3"
-                      style="display: none;">
-                      <i class="bi bi-search fs-1 text-muted d-block mb-3"></i>
-                      <h5 class="fw-bold text-dark">Không tìm thấy phòng trọ phù hợp</h5>
-                      <p class="text-secondary mb-0">Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm của bạn.</p>
-                    </div>
-        </div>
-
-        <!-- Pagination Container -->
-        <div id="paginationContainer" class="d-flex justify-content-center align-items-center gap-2 flex-wrap mt-4 mb-4"></div>
-      </div>
-
-      <!-- Right Column: Sidebar Filters -->
-      <div class="col-lg-3">
-        <div class="card border-0 shadow-sm rounded-3 p-3 bg-white mb-3">
-          <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">Bộ lọc nhanh</h5>
-          <div class="mb-3">
-            <label class="form-label text-muted small fw-semibold">Khoảng giá thuê</label>
-            <ul class="list-unstyled">
-              <li class="mb-2"><a href="javascript:void(0)"
-                  class="text-decoration-none text-secondary small hover-orange"
-                  onclick="setFilter('price', '<2M')">Dưới 2 triệu</a></li>
-              <li class="mb-2"><a href="javascript:void(0)"
-                  class="text-decoration-none text-secondary small hover-orange"
-                  onclick="setFilter('price', '2M-3M')">Từ 2 - 3 triệu</a></li>
-              <li class="mb-2"><a href="javascript:void(0)"
-                  class="text-decoration-none text-secondary small hover-orange"
-                  onclick="setFilter('price', '3M-5M')">Từ 3 - 5 triệu</a></li>
-              <li><a href="javascript:void(0)" class="text-decoration-none text-secondary small hover-orange"
-                  onclick="setFilter('price', '>5M')">Trên 5 triệu</a></li>
-            </ul>
-          </div>
-          <div class="mb-2">
-            <label class="form-label text-muted small fw-semibold">Tình trạng nội thất</label>
-            <ul class="list-unstyled mb-0">
-              <li class="mb-2"><a href="javascript:void(0)"
-                  class="text-decoration-none text-secondary small hover-orange"
-                  onclick="setFilter('category', 'Nội thất cơ bản')">Nội thất cơ bản</a></li>
-              <li class="mb-2"><a href="javascript:void(0)"
-                  class="text-decoration-none text-secondary small hover-orange"
-                  onclick="setFilter('category', 'Nội thất đầy đủ')">Nội thất đầy đủ</a></li>
-              <li><a href="javascript:void(0)" class="text-decoration-none text-secondary small hover-orange"
-                  onclick="setFilter('category', 'Nhà trống')">Nhà trống</a></li>
-            </ul>
-          </div>
-        </div>
+          <% }) %>
+        <% } %>
       </div>
     </div>
   </div>
 
-  <!-- Premium Footer -->
-  <footer class="bg-dark text-light py-5 mt-5 border-top border-secondary">
-    <div class="container-fluid px-5">
-      <div class="row g-4">
-        <!-- Logo & Description -->
-        <div class="col-lg-4 col-md-6">
-          <h5 class="fw-bold text-white mb-3 d-flex align-items-center">
-            <i class="bi bi-house-door fs-4 me-2 text-warning"></i> TrọVíp
-          </h5>
-          <p class="text-secondary small" style="line-height: 1.6;">
-            Hệ thống đăng tin và tìm kiếm phòng trọ hàng đầu Đà Nẵng. Mang đến giải pháp nhanh chóng, uy tín và tiện lợi
-            cho chủ trọ và khách thuê.
-          </p>
-          <div class="d-flex gap-3 mt-3">
-            <a href="https://facebook.com" target="_blank" class="text-secondary hover-orange fs-5"><i
-                class="bi bi-facebook"></i></a>
-            <a href="https://zalo.me" target="_blank" class="text-secondary hover-orange fs-5"><i
-                class="bi bi-chat-text-fill"></i></a>
-            <a href="https://youtube.com" target="_blank" class="text-secondary hover-orange fs-5"><i
-                class="bi bi-youtube"></i></a>
+  <!-- ========== MAIN CONTENT ========== -->
+  <main class="tv-main">
+    <div class="container">
+      <!-- Results Header -->
+      <div class="tv-results-header">
+        <p class="tv-results-count">
+          <strong id="statRoomCount"><%= rooms.length %></strong> phòng trọ tại Đà Nẵng
+        </p>
+      </div>
+
+      <!-- Room Cards Grid -->
+      <div class="tv-rooms-grid" id="roomsContainer">
+        <% rooms.forEach(room => { %>
+        <div class="tv-room-card room-card"
+             data-id="<%= room.id %>"
+             data-title="<%= room.title %>"
+             data-address="<%= room.address %>"
+             data-price="<%= room.price %>"
+             data-area="<%= room.area %>"
+             data-category="<%= room.category %>"
+             data-status="<%= room.status %>"
+             data-created-at="<%= room.createdAt || '' %>"
+             data-amenities="<%= room.amenities ? room.amenities.join(',') : '' %>"
+             data-room="<%= encodeURIComponent(JSON.stringify(room)) %>"
+             onclick="handleCardClick(event, this)">
+
+          <div class="tv-card-img<%= room.isAvailable === false ? ' img-rented' : '' %>">
+            <img src="<%= room.images && room.images.length > 0 ? room.images[0] : 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=400&h=280&q=80' %>" alt="<%= room.title %>" loading="lazy">
+            <% if (room.isAvailable !== false) { %>
+              <span class="tv-badge-available">Còn trống</span>
+            <% } else { %>
+              <span class="tv-badge-rented">Đã thuê</span>
+            <% } %>
+            <button class="tv-fav-btn btn-fav-toggle" data-fav-id="<%= room.id %>" onclick="toggleFavorite(event, '<%= room.id %>')">
+              <i class="bi bi-heart text-secondary"></i>
+            </button>
+          </div>
+
+          <div class="tv-card-body">
+            <div class="tv-card-price">
+              <%= room.price ? (room.price / 1000000).toLocaleString('vi-VN') : 0 %> triệu/tháng
+            </div>
+            <h3 class="tv-card-title truncate-2"><%= room.title %></h3>
+            <div class="tv-card-location">
+              <i class="bi bi-geo-alt-fill"></i>
+              <span class="truncate-2"><%= room.address %></span>
+            </div>
+            <div class="tv-card-tags">
+              <span class="tv-tag"><i class="bi bi-rulers"></i> <%= room.area || 0 %> m²</span>
+              <span class="tv-tag"><i class="bi bi-grid"></i> <%= room.category || 'Cơ bản' %></span>
+              <span class="tv-tag"><i class="bi bi-door-open"></i> <%= room.status || 'Ở đơn' %></span>
+            </div>
+            <% if (room.amenities && room.amenities.length > 0) { %>
+            <div class="tv-card-amenities">
+              <% const displayAmenities = room.amenities.slice(0, 3); %>
+              <% displayAmenities.forEach(ak => { %>
+                <% const found = typeof AMENITIES !== 'undefined' ? AMENITIES.find(a => a.key === ak) : null; %>
+                <% if (found) { %>
+                  <span class="tv-amenity-mini"><i class="bi <%= found.icon %>"></i> <%= found.label %></span>
+                <% } %>
+              <% }) %>
+              <% if (room.amenities.length > 3) { %>
+                <span class="tv-amenity-mini tv-amenity-more">+<%= room.amenities.length - 3 %></span>
+              <% } %>
+            </div>
+            <% } %>
+            <div class="tv-card-footer">
+              <span class="tv-card-time posting-time-el" data-created="<%= room.createdAt %>">Vừa xong</span>
+              <span class="tv-card-host"><i class="bi bi-person"></i> <%= room.host && room.host.username ? room.host.username : 'Ẩn danh' %></span>
+            </div>
           </div>
         </div>
+        <% }) %>
 
-        <!-- Areas/Districts -->
-        <div class="col-lg-3 col-md-6">
-          <h6 class="text-white fw-bold text-uppercase mb-3" style="font-size: 0.8rem; letter-spacing: 1px;">Khu vực nổi
-            bật</h6>
-          <ul class="list-unstyled small">
-            <li class="mb-2"><a href="javascript:void(0)" class="text-secondary text-decoration-none hover-orange"
-                onclick="setFilter('location', 'Hải Châu')">Phòng trọ Quận Hải Châu</a></li>
-            <li class="mb-2"><a href="javascript:void(0)" class="text-secondary text-decoration-none hover-orange"
-                onclick="setFilter('location', 'Thanh Khê')">Phòng trọ Quận Thanh Khê</a></li>
-            <li class="mb-2"><a href="javascript:void(0)" class="text-secondary text-decoration-none hover-orange"
-                onclick="setFilter('location', 'Sơn Trà')">Phòng trọ Quận Sơn Trà</a></li>
-            <li class="mb-2"><a href="javascript:void(0)" class="text-secondary text-decoration-none hover-orange"
-                onclick="setFilter('location', 'Ngũ Hành Sơn')">Phòng trọ Quận Ngũ Hành Sơn</a></li>
-          </ul>
-        </div>
-
-        <!-- Quick Links -->
-        <div class="col-lg-2 col-md-6">
-          <h6 class="text-white fw-bold text-uppercase mb-3" style="font-size: 0.8rem; letter-spacing: 1px;">Liên kết
-            nhanh</h6>
-          <ul class="list-unstyled small">
-            <li class="mb-2"><a href="/rooms" class="text-secondary text-decoration-none hover-orange">Trang chủ</a>
-            </li>
-            <li class="mb-2"><a href="/rooms/dashboard" class="text-secondary text-decoration-none hover-orange">Bảng
-                điều khiển</a></li>
-            <li class="mb-2"><a href="/rooms/add" class="text-secondary text-decoration-none hover-orange">Đăng tin
-                phòng trọ</a></li>
-            <li class="mb-2"><a href="/users/change-password"
-                class="text-secondary text-decoration-none hover-orange">Đổi mật khẩu</a></li>
-          </ul>
-        </div>
-
-        <!-- Contact Info -->
-        <div class="col-lg-3 col-md-6">
-          <h6 class="text-white fw-bold text-uppercase mb-3" style="font-size: 0.8rem; letter-spacing: 1px;">Thông tin
-            liên hệ</h6>
-          <ul class="list-unstyled small text-secondary">
-            <li class="mb-2 d-flex align-items-center gap-2">
-              <i class="bi bi-telephone text-warning"></i> Hotline: 0704699523
-            </li>
-            <li class="mb-2 d-flex align-items-center gap-2">
-              <i class="bi bi-envelope text-warning"></i> Email: huyho.09032005@gmail.com
-            </li>
-            <li class="mb-2 d-flex align-items-start gap-2">
-              <i class="bi bi-geo-alt text-warning mt-1"></i> 87 Bùi Bình Uyên, Ngũ Hành Sơn, Đà Nẵng
-            </li>
-          </ul>
+        <!-- Empty Placeholder -->
+        <div id="emptyPlaceholder" class="tv-empty-state" style="display: none;">
+          <i class="bi bi-search"></i>
+          <h4>Không tìm thấy phòng trọ</h4>
+          <p>Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm</p>
+          <button class="btn-tv btn-tv-outline" onclick="resetAllFilters()">Xóa bộ lọc</button>
         </div>
       </div>
 
-      <!-- Copyright section -->
-      <div class="border-top border-secondary pt-4 mt-4 text-center text-secondary small">
-        <p class="mb-0">© 2026 TrọVíp. Bảo lưu mọi quyền.</p>
+      <!-- Pagination -->
+      <div class="tv-pagination" id="paginationContainer"></div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="landing-footer">
+    <div class="container">
+      <div class="row g-4">
+        <div class="col-lg-4 col-md-6">
+          <h5 class="footer-brand"><i class="bi bi-house-door me-2"></i>TrọVíp</h5>
+          <p class="footer-desc">Hệ thống đăng tin và tìm kiếm phòng trọ hàng đầu Đà Nẵng. Mang đến giải pháp nhanh chóng, uy tín và tiện lợi cho chủ trọ và khách thuê.</p>
+          <div class="footer-socials">
+            <a href="#"><i class="bi bi-facebook"></i></a>
+            <a href="#"><i class="bi bi-chat-text-fill"></i></a>
+            <a href="#"><i class="bi bi-youtube"></i></a>
+          </div>
+        </div>
+        <div class="col-lg-2 col-md-6">
+          <h6 class="footer-heading">Khu vực</h6>
+          <ul class="footer-links">
+            <li><a href="/rooms?district=Hải+Châu">Hải Châu</a></li>
+            <li><a href="/rooms?district=Thanh+Khê">Thanh Khê</a></li>
+            <li><a href="/rooms?district=Sơn+Trà">Sơn Trà</a></li>
+            <li><a href="/rooms?district=Liên+Chiểu">Liên Chiểu</a></li>
+          </ul>
+        </div>
+        <div class="col-lg-2 col-md-6">
+          <h6 class="footer-heading">Liên kết</h6>
+          <ul class="footer-links">
+            <li><a href="/rooms">Tìm phòng</a></li>
+            <li><a href="/users/register">Đăng ký</a></li>
+            <li><a href="/users/login">Đăng nhập</a></li>
+          </ul>
+        </div>
+        <div class="col-lg-4 col-md-6">
+          <h6 class="footer-heading">Liên hệ</h6>
+          <ul class="footer-contact">
+            <li><i class="bi bi-telephone"></i> Hotline: 0704699523</li>
+            <li><i class="bi bi-envelope"></i> huyho.09032005@gmail.com</li>
+            <li><i class="bi bi-geo-alt"></i> 87 Bùi Bình Uyên, Ngũ Hành Sơn, Đà Nẵng</li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2026 TrọVíp. Bảo lưu mọi quyền.</p>
       </div>
     </div>
   </footer>
 
-  <!-- Room Details Modal -->
+  <!-- ========== ROOM DETAIL MODAL ========== -->
   <div class="modal fade" id="roomDetailModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
-      <div class="modal-content border-0 shadow-lg rounded overflow-hidden position-relative">
+      <div class="modal-content tv-modal-content position-relative">
+        <!-- Close Button -->
+        <button type="button" class="btn-close tv-modal-close-btn" data-bs-dismiss="modal" aria-label="Close"></button>
 
-        <!-- Floating Close Button -->
-        <button type="button" class="btn-close position-absolute" data-bs-dismiss="modal" aria-label="Close"
-          style="top: 15px; right: 15px; z-index: 1050; background-color: rgba(255, 255, 255, 0.9) !important; opacity: 1 !important; border-radius: 50%; width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border: 1px solid rgba(0, 0, 0, 0.1); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); backdrop-filter: blur(4px); transition: all 0.2s;"></button>
-
-        <!-- Floating Favorite Button -->
-        <button class="btn btn-link p-0 text-secondary border-0 btn-fav-toggle position-absolute" id="detailFavBtn"
-          style="top: 15px; right: 54px; z-index: 1050; background-color: rgba(255, 255, 255, 0.9) !important; opacity: 1 !important; border-radius: 50%; width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border: 1px solid rgba(0, 0, 0, 0.1); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); backdrop-filter: blur(4px); transition: all 0.2s;">
-          <i class="bi bi-heart fs-5"></i>
-        </button>
-
-        <!-- Modal Carousel -->
-        <div id="detailCarousel" class="carousel slide bg-dark" data-bs-ride="carousel">
-          <div class="carousel-inner" id="carouselInner">
-            <!-- Populated via Javascript -->
-          </div>
+        <!-- Carousel -->
+        <div class="tv-modal-carousel carousel slide" id="detailCarousel">
+          <div id="carouselInner" class="carousel-inner"></div>
           <button class="carousel-control-prev" type="button" data-bs-target="#detailCarousel" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="carousel-control-prev-icon"></span>
           </button>
           <button class="carousel-control-next" type="button" data-bs-target="#detailCarousel" data-bs-slide="next">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="carousel-control-next-icon"></span>
           </button>
         </div>
+        <div class="carousel-thumbnails" id="carouselThumbnails" style="display: none;"></div>
 
-        <!-- Thumbnail indicators container -->
-        <div class="carousel-thumbnails" id="carouselThumbnails">
-          <!-- Populated via Javascript -->
-        </div>
+        <div class="modal-body tv-modal-body">
+          <!-- Status & Save -->
+          <div class="d-flex align-items-center justify-content-between mb-3">
+            <span id="detailBadgeStatus" class="badge-tv badge-tv-success">Còn trống</span>
+            <button class="btn-tv btn-tv-ghost btn-tv-sm btn-fav-toggle" id="detailFavBtn">
+              <i class="bi bi-heart text-secondary"></i> Lưu tin
+            </button>
+          </div>
 
-        <!-- Modal Body -->
-        <div class="modal-body p-4 bg-white">
-          <div class="d-flex justify-content-between align-items-start mb-3">
-            <div>
-              <span id="detailBadgeStatus"
-                class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 small mb-2 d-inline-block"
-                style="font-weight: 600; font-size: 0.75rem;">Còn trống</span>
-              <h4 class="fw-bold text-dark mb-1" id="detailTitle">Tiêu đề phòng trọ</h4>
-              <p class="text-muted small mb-0"><i class="bi bi-geo-alt-fill text-danger me-1"></i> <span
-                  id="detailAddress">Đà Nẵng</span> <span class="text-secondary ms-2">•</span> <span
-                  id="detailPostingTime" class="text-secondary ms-2 small"><i class="bi bi-clock me-1"></i>Vừa
-                  xong</span></p>
+          <!-- Price -->
+          <div class="tv-detail-price" id="detailPrice">0 triệu/tháng</div>
+          <span class="badge-tv badge-tv-neutral mb-3" id="detailDepositBadge" style="display:none">
+            <i class="bi bi-shield-check"></i> Cọc: <span id="detailDeposit">0</span>đ
+          </span>
+
+          <!-- Title -->
+          <h2 class="tv-detail-title" id="detailTitle">Tiêu đề</h2>
+
+          <!-- Location -->
+          <div class="tv-detail-location mb-4">
+            <i class="bi bi-geo-alt-fill text-danger"></i>
+            <span id="detailAddress">Địa chỉ</span>
+          </div>
+
+          <!-- Info Grid -->
+          <div class="tv-detail-info-grid mb-4">
+            <div class="tv-info-item">
+              <i class="bi bi-rulers"></i>
+              <div>
+                <span class="tv-info-label">Diện tích</span>
+                <span class="tv-info-value"><span id="detailArea">0</span> m²</span>
+              </div>
+            </div>
+            <div class="tv-info-item">
+              <i class="bi bi-grid"></i>
+              <div>
+                <span class="tv-info-label">Nội thất</span>
+                <span class="tv-info-value" id="detailCategory">Cơ bản</span>
+              </div>
+            </div>
+            <div class="tv-info-item">
+              <i class="bi bi-door-open"></i>
+              <div>
+                <span class="tv-info-label">Loại phòng</span>
+                <span class="tv-info-value" id="detailStatus">Ở đơn</span>
+              </div>
+            </div>
+            <div class="tv-info-item">
+              <i class="bi bi-calendar3"></i>
+              <div>
+                <span class="tv-info-label">Cọc trước</span>
+                <span class="tv-info-value" id="detailDepositMonth">Chưa cập nhật</span>
+              </div>
+            </div>
+            <div class="tv-info-item">
+              <i class="bi bi-repeat"></i>
+              <div>
+                <span class="tv-info-label">Chu kỳ trả</span>
+                <span class="tv-info-value" id="detailPaymentCycle">Chưa cập nhật</span>
+              </div>
+            </div>
+            <div class="tv-info-item">
+              <i class="bi bi-calendar-check"></i>
+              <div>
+                <span class="tv-info-label">Có thể vào ở từ</span>
+                <span class="tv-info-value" id="detailAvailableFrom">Chưa cập nhật</span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Utility Costs -->
+          <div class="tv-detail-costs mb-4">
+            <div class="tv-cost-item">
+              <i class="bi bi-lightning-charge text-warning"></i>
+              <span>Điện: <strong id="detailElectricity">Chưa cập nhật</strong></span>
+            </div>
+            <div class="tv-cost-item">
+              <i class="bi bi-droplet text-primary"></i>
+              <span>Nước: <strong id="detailWater">Chưa cập nhật</strong></span>
             </div>
           </div>
 
-          <div class="d-flex flex-wrap gap-2 mb-4">
-            <div class="detail-badge"><i class="bi bi-grid-fill"></i> <span id="detailCategory">Nội thất cơ bản</span>
-            </div>
-            <div class="detail-badge"><i class="bi bi-people-fill"></i> <span id="detailStatus">Ở đơn</span></div>
-            <div class="detail-badge"><i class="bi bi-rulers"></i> <span id="detailArea">0</span> m²</div>
-            <div class="detail-badge" id="detailDepositBadge"><i class="bi bi-shield-fill-check"></i> Đặt cọc: <span
-                id="detailDeposit">0</span> đ</div>
+          <!-- Amenities -->
+          <div class="tv-detail-amenities mb-4" id="detailAmenities" style="display:none">
+            <h6 class="tv-detail-section-title">Tiện ích</h6>
+            <div class="tv-amenities-grid" id="detailAmenitiesList"></div>
           </div>
 
-          <div class="row g-3 border-top pt-4 mb-4">
-            <div class="col-md-6">
-              <div class="text-muted small">Giá thuê hàng tháng</div>
-              <div class="price-large mb-2" id="detailPrice">0 đ/tháng</div>
-              <div class="text-dark fw-medium small" id="detailHostInfo">
-                <i class="bi bi-person-circle text-secondary me-1"></i> Người đăng: <span id="detailHostName">Ẩn
-                  danh</span> (<span id="detailHostRole">Cá nhân</span>)
+          <!-- Description -->
+          <div class="tv-detail-description mb-4">
+            <h6 class="tv-detail-section-title">Mô tả</h6>
+            <p id="detailDescription">Mô tả phòng trọ</p>
+          </div>
+
+          <!-- Host Info -->
+          <div class="tv-detail-host">
+            <div class="tv-host-info">
+              <div class="tv-host-avatar">
+                <i class="bi bi-person-circle"></i>
               </div>
-              <div class="text-success fw-bold small mt-1" id="detailPhoneContainer">
-                <i class="bi bi-telephone-fill me-1"></i> Hotline: <span id="detailPhone">0905xxxxxx</span>
+              <div>
+                <strong id="detailHostName">Chủ trọ</strong>
+                <span id="detailHostRole">Cá nhân</span>
               </div>
             </div>
-            <div class="col-md-6 d-flex flex-column align-items-md-end justify-content-center gap-2 mt-md-0 mt-3">
-              <a href="tel:0905123456" id="btnCallHost"
-                class="btn btn-success rounded px-4 py-2 fw-semibold d-inline-flex align-items-center gap-2 w-100 justify-content-center"
-                style="max-width: 220px;">
-                <i class="bi bi-telephone-fill"></i> Gọi điện thoại
+            <div class="d-flex flex-column flex-sm-row gap-2">
+              <a href="tel:" class="btn-tv btn-tv-success btn-tv-sm" id="btnCallHost">
+                <i class="bi bi-telephone"></i> <span id="detailPhone">SĐT</span>
               </a>
-              <a href="https://zalo.me" id="btnZaloHost" target="_blank"
-                class="btn btn-primary rounded px-4 py-2 fw-semibold d-inline-flex align-items-center gap-2 w-100 justify-content-center"
-                style="max-width: 220px;">
-                <i class="bi bi-chat-text-fill"></i> Liên hệ Zalo
+              <a href="#" target="_blank" class="btn-tv btn-tv-primary btn-tv-sm" id="btnZaloHost">
+                <i class="bi bi-chat-dots"></i> Nhắn Zalo
               </a>
             </div>
           </div>
 
-          <!-- Chi phí & Quy định -->
-          <div class="border-top pt-4 mb-4">
-            <h6 class="fw-bold text-dark mb-3">Thông tin chi phí & Quy định</h6>
-            <div class="row g-3">
-              <div class="col-6 col-md-4">
-                <div class="d-flex align-items-center gap-2">
-                  <i class="bi bi-shield-check text-primary fs-5"></i>
-                  <div>
-                    <div class="text-muted" style="font-size: 0.75rem;">Số tháng cọc trước</div>
-                    <div class="fw-semibold text-dark small" id="detailDepositMonth">Chưa cập nhật</div>
-                  </div>
-                </div>
-              </div>
-              <div class="col-6 col-md-4">
-                <div class="d-flex align-items-center gap-2">
-                  <i class="bi bi-calendar-check text-primary fs-5"></i>
-                  <div>
-                    <div class="text-muted" style="font-size: 0.75rem;">Chu kỳ đóng tiền</div>
-                    <div class="fw-semibold text-dark small" id="detailPaymentCycle">Chưa cập nhật</div>
-                  </div>
-                </div>
-              </div>
-              <div class="col-6 col-md-4">
-                <div class="d-flex align-items-center gap-2">
-                  <i class="bi bi-p-circle text-primary fs-5"></i>
-                  <div>
-                    <div class="text-muted" style="font-size: 0.75rem;">Chỗ để xe</div>
-                    <div class="fw-semibold text-dark small" id="detailParking">Chưa cập nhật</div>
-                  </div>
-                </div>
-              </div>
-              <div class="col-6 col-md-4">
-                <div class="d-flex align-items-center gap-2">
-                  <i class="bi bi-lightning-charge text-primary fs-5"></i>
-                  <div>
-                    <div class="text-muted" style="font-size: 0.75rem;">Tiền điện</div>
-                    <div class="fw-semibold text-dark small" id="detailElectricity">Chưa cập nhật</div>
-                  </div>
-                </div>
-              </div>
-              <div class="col-6 col-md-4">
-                <div class="d-flex align-items-center gap-2">
-                  <i class="bi bi-droplet text-primary fs-5"></i>
-                  <div>
-                    <div class="text-muted" style="font-size: 0.75rem;">Tiền nước</div>
-                    <div class="fw-semibold text-dark small" id="detailWater">Chưa cập nhật</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="border-top pt-4">
-            <h6 class="fw-bold text-dark mb-3">Mô tả chi tiết phòng trọ</h6>
-            <p class="text-secondary" id="detailDescription" style="white-space: pre-line; line-height: 1.6;">
-              Mô tả chi tiết phòng trọ.
-            </p>
-          </div>
-
-          <!-- Note/Warning alert box -->
-          <div class="mt-4 p-3 rounded-3" style="background-color: #fffbeb; border: 1px solid #fde68a; color: #b45309;">
-            <div class="fw-bold mb-1 small d-flex align-items-center gap-1"><i
-                class="bi bi-exclamation-triangle-fill"></i> Lưu ý quan trọng:</div>
-            <p class="small mb-2" style="line-height: 1.5; font-size: 0.8rem; opacity: 0.95;">
-              Chỉ đặt tiền cọc khi xác định được danh tính chủ nhà và có thỏa thuận biên nhận rõ ràng. Kiểm tra kỹ mọi
-              điều khoản hợp đồng và yêu cầu liệt kê tất cả các khoản chi phí phát sinh hàng tháng.
-            </p>
-            <p class="small mb-0" style="line-height: 1.5; font-size: 0.8rem; opacity: 0.95;">
-              Mọi thông tin trên tin đăng này chỉ mang tính chất tham khảo. Nếu phát hiện tin đăng không chính xác hoặc
-              có dấu hiệu giả mạo, hãy báo cáo ngay cho ban quản trị.
-            </p>
+          <!-- Posting Time -->
+          <div class="tv-detail-time mt-3" id="detailPostingTime">
+            <i class="bi bi-clock me-1"></i>Vừa xong
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Favorites Toast -->
+  <!-- Toast -->
   <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1060;">
-    <div id="favToast" class="toast align-items-center text-bg-success border-0 rounded-3" role="alert"
-      aria-live="assertive" aria-atomic="true" data-bs-delay="2000">
+    <div id="favToast" class="toast align-items-center border-0 rounded-3 toast-tv" role="alert" style="background: var(--color-text); color: #fff;">
       <div class="d-flex">
-        <div class="toast-body" id="favToastBody">
-          Đã thêm phòng trọ vào danh mục yêu thích!
-        </div>
+        <div class="toast-body" id="favToastBody">Đã lưu!</div>
         <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
       </div>
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Pass data to JS -->
   <script>
-    const LOGGED_IN_USER_ID = '<%= user ? user.id : "" %>';
-    const INITIAL_FAVORITES = <%- user && user.favorites ? JSON.stringify(user.favorites) : '[]' %>;
+    <% if (user) { %>
+      const LOGGED_IN_USER_ID = '<%= user.id %>';
+      const INITIAL_FAVORITES = <%- JSON.stringify(user.favorites || []) %>;
+    <% } else { %>
+      const LOGGED_IN_USER_ID = '';
+      const INITIAL_FAVORITES = [];
+    <% } %>
+    const AMENITIES_DATA = <%- JSON.stringify(typeof AMENITIES !== 'undefined' ? AMENITIES : []) %>;
+    const PRE_FILTER = <%- JSON.stringify(typeof preFilter !== 'undefined' ? preFilter : {}) %>;
   </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="/js/rooms/index.js"></script>
 </body>
-
 </html>

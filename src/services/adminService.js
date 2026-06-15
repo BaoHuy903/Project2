@@ -1,8 +1,8 @@
 const userRepository = require('../repositories/userRepository');
 const roomRepository = require('../repositories/roomRepository');
-const cloudinary = require('cloudinary');
+const cloudinary = require('cloudinary').v2;
 
-// Cấu hình Cloudinary
+// Cấu hình Cloudinary v2
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
@@ -55,7 +55,7 @@ const deleteRoomByAdmin = async (roomId) => {
           const publicId = lastDot !== -1 ? publicIdWithExt.substring(0, lastDot) : publicIdWithExt;
 
           try {
-            const destroyResult = await cloudinary.v2.uploader.destroy(publicId);
+            const destroyResult = await cloudinary.uploader.destroy(publicId);
             console.log(`Admin Deleted Cloudinary image: ${publicId}`, destroyResult);
           } catch (err) {
             console.error(`Admin Failed to delete Cloudinary image: ${publicId}`, err);

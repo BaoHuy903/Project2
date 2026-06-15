@@ -1,31 +1,35 @@
 const { ROLES } = require('../constants');
 
 exports.requireLogin = (req, res, next) => {
-  // Kiểm tra session: nếu KHÔNG có thông tin user → chưa đăng nhập
   if (!req.session.user) {
+    // Lưu URL hiện tại để redirect sau khi login
+    req.session.returnTo = req.originalUrl;
     return res.redirect('/users/login');
   }
   next();
 };
 
 exports.isAdmin = (req, res, next) => {
-  // Kiểm tra nếu đã đăng nhập và có role là ADMIN
   if (req.session.user && req.session.user.role === ROLES.ADMIN) {
     return next();
   }
-  // Nếu không phải admin, chặn và thông báo lỗi
-  res.status(403).send('Truy cập bị từ chối: Bạn không có quyền quản trị.');
+  res.status(403).render('users/login', {
+    title: 'Không có quyền truy cập',
+    error: 'Bạn không có quyền truy cập trang này. Vui lòng đăng nhập bằng tài khoản Admin.'
+  });
 };
 
 exports.isLandlordOrAdmin = (req, res, next) => {
-  // Kiểm tra nếu đã đăng nhập và có role là LANDLORD hoặc ADMIN
   if (
     req.session.user &&
     (req.session.user.role === ROLES.LANDLORD || req.session.user.role === ROLES.ADMIN)
   ) {
     return next();
   }
-  res.status(403).send('Truy cập bị từ chối: Bạn không có quyền thực hiện chức năng này.');
+  res.status(403).render('users/login', {
+    title: 'Không có quyền truy cập',
+    error: 'Chức năng này chỉ dành cho Chủ trọ. Vui lòng đăng nhập bằng tài khoản Chủ trọ.'
+  });
 };
 
 exports.preventCSRF = (req, res, next) => {

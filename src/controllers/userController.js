@@ -38,6 +38,14 @@ exports.login = async (req, res) => {
     const sessionUser = await userService.loginUser(username, password);
     req.session.user = sessionUser;
 
+    // Redirect về trang đã truy cập trước khi login (nếu có)
+    const returnTo = req.session.returnTo;
+    delete req.session.returnTo;
+
+    if (returnTo && returnTo !== '/users/login' && returnTo !== '/users/logout') {
+      return res.redirect(returnTo);
+    }
+
     if (sessionUser.role === ROLES.ADMIN) {
       res.redirect('/admin');
     } else if (sessionUser.role === ROLES.LANDLORD) {
@@ -57,7 +65,11 @@ exports.login = async (req, res) => {
  * Xử lý Đăng xuất
  */
 exports.logout = (req, res) => {
-  req.session.destroy(() => res.redirect('/users/login'));
+  req.session.destroy((err) => {
+    if (err) console.error('Session destroy error:', err);
+    res.clearCookie('connect.sid');
+    res.redirect('/users/login');
+  });
 };
 
 /**

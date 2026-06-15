@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= title %></title>
+  <meta name="description" content="TrọVíp - Nền tảng tìm kiếm và đăng tin phòng trọ hàng đầu Đà Nẵng. Kết nối trực tiếp chủ trọ và người thuê. Miễn phí, nhanh chóng, uy tín.">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/design-system.css">
+  <link rel="stylesheet" href="/css/landing.css">
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="landing-nav">
+    <div class="container d-flex align-items-center justify-content-between">
+      <a href="/" class="nav-logo">
+        <i class="bi bi-house-door"></i> TrọVíp
+      </a>
+      <div class="d-flex align-items-center gap-3">
+        <a href="/rooms" class="btn-tv btn-tv-ghost btn-tv-sm d-none d-sm-inline-flex">
+          <i class="bi bi-search"></i> Tìm phòng
+        </a>
+        <% if (user) { %>
+          <% if (user.role === ROLES.LANDLORD || user.role === ROLES.ADMIN) { %>
+            <a href="/rooms/add" class="btn-tv btn-tv-accent btn-tv-sm">
+              <i class="bi bi-plus-lg"></i> <span class="d-none d-sm-inline">Đăng tin</span>
+            </a>
+          <% } %>
+          <div class="dropdown">
+            <button class="tv-avatar-btn btn btn-link text-decoration-none p-0 border-0" data-bs-toggle="dropdown" style="font-size: 1.5rem; color: var(--color-primary); line-height: 1; display: block;">
+              <i class="bi bi-person-circle"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2" style="border-radius: var(--radius-md); min-width: 200px;">
+              <li class="dropdown-header py-2.5 px-3">
+                <strong class="d-block text-dark"><%= user.username %></strong>
+                <small class="text-muted"><%= user.role %></small>
+              </li>
+              <li><hr class="dropdown-divider my-1"></li>
+              <% if (user.role === ROLES.ADMIN) { %>
+                <li><a class="dropdown-item py-2" href="/admin"><i class="bi bi-speedometer2 me-2"></i>Admin Dashboard</a></li>
+              <% } else if (user.role === ROLES.LANDLORD) { %>
+                <li><a class="dropdown-item py-2" href="/rooms/dashboard"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a></li>
+              <% } %>
+              <li><a class="dropdown-item py-2" href="/users/change-password"><i class="bi bi-key me-2"></i>Đổi mật khẩu</a></li>
+              <li><hr class="dropdown-divider my-1"></li>
+              <li><a class="dropdown-item py-2 text-danger" href="/users/logout"><i class="bi bi-box-arrow-left me-2"></i>Đăng xuất</a></li>
+            </ul>
+          </div>
+        <% } else { %>
+          <a href="/users/login" class="btn-tv btn-tv-outline btn-tv-sm">Đăng nhập</a>
+          <a href="/users/register" class="btn-tv btn-tv-primary btn-tv-sm">Đăng ký</a>
+        <% } %>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-bg"></div>
+    <div class="container position-relative" style="z-index: 2;">
+      <div class="hero-content text-center">
+        <div class="hero-badge animate-fade-in-up">
+          <i class="bi bi-geo-alt-fill"></i> Đà Nẵng
+        </div>
+        <h1 class="hero-title animate-fade-in-up">
+          Tìm phòng trọ<br>
+          <span class="hero-highlight">chưa bao giờ dễ hơn</span>
+        </h1>
+        <p class="hero-subtitle animate-fade-in-up">
+          Hệ thống kết nối trực tiếp chủ trọ và người thuê. Thông tin cập nhật liên tục, miễn phí 100%.
+        </p>
+
+        <!-- Search Bar -->
+        <div class="hero-search animate-fade-in-up">
+          <form class="search-form" action="/rooms" method="GET">
+            <div class="search-input-wrapper">
+              <i class="bi bi-search search-icon"></i>
+              <input type="text" name="q" class="search-input" placeholder="Tìm theo quận, phường, đường...">
+            </div>
+            <button type="submit" class="btn-tv btn-tv-accent btn-tv-lg search-btn">
+              <i class="bi bi-search d-sm-none"></i>
+              <span class="d-none d-sm-inline">Tìm phòng ngay</span>
+            </button>
+          </form>
+        </div>
+
+        <!-- Quick Filters -->
+        <div class="quick-filters animate-fade-in-up">
+          <a href="/rooms?district=Hải+Châu" class="quick-filter-chip">
+            <i class="bi bi-buildings"></i> Hải Châu
+          </a>
+          <a href="/rooms?district=Thanh+Khê" class="quick-filter-chip">
+            <i class="bi bi-buildings"></i> Thanh Khê
+          </a>
+          <a href="/rooms?district=Sơn+Trà" class="quick-filter-chip">
+            <i class="bi bi-buildings"></i> Sơn Trà
+          </a>
+          <a href="/rooms?district=Liên+Chiểu" class="quick-filter-chip">
+            <i class="bi bi-buildings"></i> Liên Chiểu
+          </a>
+          <a href="/rooms?district=Ngũ+Hành+Sơn" class="quick-filter-chip d-none d-md-inline-flex">
+            <i class="bi bi-buildings"></i> Ngũ Hành Sơn
+          </a>
+          <a href="/rooms?district=Cẩm+Lệ" class="quick-filter-chip d-none d-md-inline-flex">
+            <i class="bi bi-buildings"></i> Cẩm Lệ
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats Section -->
+  <section class="stats-section">
+    <div class="container">
+      <div class="stats-grid">
+        <div class="stat-item animate-fade-in-up">
+          <div class="stat-number">10+</div>
+          <div class="stat-label">Tin đăng</div>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item animate-fade-in-up">
+          <div class="stat-number">100%</div>
+          <div class="stat-label">Miễn phí</div>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item animate-fade-in-up">
+          <div class="stat-number">24/7</div>
+          <div class="stat-label">Hỗ trợ</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Rooms -->
+  <% if (typeof rooms !== 'undefined' && rooms.length > 0) { %>
+  <section class="featured-section">
+    <div class="container">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">Phòng trọ mới nhất</h2>
+          <p class="section-subtitle">Tin đăng mới nhất được cập nhật liên tục</p>
+        </div>
+        <a href="/rooms" class="btn-tv btn-tv-outline">
+          Xem tất cả <i class="bi bi-arrow-right ms-1"></i>
+        </a>
+      </div>
+
+      <div class="rooms-grid">
+        <% rooms.forEach((room, idx) => { %>
+        <div class="room-card-landing room-card animate-fade-in-up"
+             data-id="<%= room.id %>"
+             data-room="<%= encodeURIComponent(JSON.stringify(room)) %>"
+             style="animation-delay: <%= idx * 0.08 %>s"
+             onclick="handleCardClick(event, this)">
+          <div class="room-card-img<%= room.isAvailable === false ? ' img-rented' : '' %>">
+            <img src="<%= room.images && room.images.length > 0 ? room.images[0] : 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=400&h=280&q=80' %>" alt="<%= room.title %>" loading="lazy">
+            <% if (room.isAvailable !== false) { %>
+              <span class="room-status-badge available">Còn trống</span>
+            <% } else { %>
+              <span class="room-status-badge rented">Đã thuê</span>
+            <% } %>
+            <div class="room-price-badge">
+              <%= room.price ? (room.price / 1000000).toLocaleString('vi-VN') : 0 %> tr/th
+            </div>
+          </div>
+          <div class="room-card-body">
+            <h3 class="room-card-title truncate-2"><%= room.title %></h3>
+            <div class="room-card-location">
+              <i class="bi bi-geo-alt"></i>
+              <span class="truncate-2"><%= room.address %></span>
+            </div>
+            <div class="room-card-meta">
+              <span><i class="bi bi-rulers"></i> <%= room.area || 0 %> m²</span>
+              <span><i class="bi bi-grid"></i> <%= room.category || 'Cơ bản' %></span>
+            </div>
+          </div>
+        </div>
+        <% }) %>
+      </div>
+    </div>
+  </section>
+  <% } %>
+
+  <!-- How It Works -->
+  <section class="how-section">
+    <div class="container">
+      <div class="text-center mb-5">
+        <h2 class="section-title">Cách hoạt động</h2>
+        <p class="section-subtitle">Tìm phòng trọ hoặc đăng tin chỉ trong vài bước đơn giản</p>
+      </div>
+      <div class="how-grid">
+        <div class="how-card animate-fade-in-up">
+          <div class="how-icon how-icon-blue">
+            <i class="bi bi-search"></i>
+          </div>
+          <h4>Tìm kiếm</h4>
+          <p>Lọc phòng theo khu vực, giá, diện tích và tiện ích phù hợp nhu cầu.</p>
+        </div>
+        <div class="how-card animate-fade-in-up" style="animation-delay: 0.1s">
+          <div class="how-icon how-icon-green">
+            <i class="bi bi-telephone"></i>
+          </div>
+          <h4>Liên hệ</h4>
+          <p>Gọi điện hoặc nhắn tin trực tiếp cho chủ trọ, không qua trung gian.</p>
+        </div>
+        <div class="how-card animate-fade-in-up" style="animation-delay: 0.2s">
+          <div class="how-icon how-icon-orange">
+            <i class="bi bi-key"></i>
+          </div>
+          <h4>Dọn vào ở</h4>
+          <p>Thỏa thuận, ký hợp đồng và chuyển đến ngôi nhà mới của bạn.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- CTA Section -->
+  <section class="cta-section">
+    <div class="container">
+      <div class="cta-card">
+        <div class="cta-content">
+          <h2>Bạn là chủ trọ?</h2>
+          <p>Đăng tin miễn phí, tiếp cận hàng nghìn người tìm phòng. Quản lý bài đăng dễ dàng với dashboard chuyên nghiệp.</p>
+          <div class="d-flex flex-wrap gap-3">
+            <a href="/users/register" class="btn-tv btn-tv-accent btn-tv-lg">
+              <i class="bi bi-pencil-square"></i> Đăng tin ngay
+            </a>
+            <a href="/rooms" class="btn-tv btn-tv-outline-white btn-tv-lg">
+              <i class="bi bi-arrow-right"></i> Tìm phòng
+            </a>
+          </div>
+        </div>
+        <div class="cta-visual">
+          <div class="cta-float-card">
+            <i class="bi bi-house-check-fill"></i>
+            <div>
+              <strong>Đăng tin dễ dàng</strong>
+              <span>Chỉ 3 phút để hoàn thành</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== ROOM DETAIL MODAL (LANDING) ========== -->
+  <div class="modal fade" id="roomDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content tv-modal-content position-relative animate-fade-in">
+        <!-- Close Button -->
+        <button type="button" class="btn-close tv-modal-close-btn" data-bs-dismiss="modal" aria-label="Close"></button>
+
+        <!-- Carousel -->
+        <div class="tv-modal-carousel carousel slide" id="detailCarousel">
+          <div id="carouselInner" class="carousel-inner"></div>
+          <button class="carousel-control-prev" type="button" data-bs-target="#detailCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon"></span>
+          </button>
+          <button class="carousel-control-next" type="button" data-bs-target="#detailCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon"></span>
+          </button>
+        </div>
+        <div class="carousel-thumbnails" id="carouselThumbnails" style="display: none;"></div>
+
+        <div class="modal-body tv-modal-body">
+          <!-- Status & Save -->
+          <div class="d-flex align-items-center justify-content-between mb-3">
+            <span id="detailBadgeStatus" class="badge-tv badge-tv-success">Còn trống</span>
+            <button class="btn-tv btn-tv-ghost btn-tv-sm btn-fav-toggle" id="detailFavBtn" style="display: none !important;">
+              <i class="bi bi-heart text-secondary"></i> Lưu tin
+            </button>
+          </div>
+
+          <!-- Price -->
+          <div class="tv-detail-price" id="detailPrice">0 triệu/tháng</div>
+          <span class="badge-tv badge-tv-neutral mb-3" id="detailDepositBadge" style="display:none">
+            <i class="bi bi-shield-check"></i> Cọc: <span id="detailDeposit">0</span>đ
+          </span>
+
+          <!-- Title -->
+          <h2 class="tv-detail-title" id="detailTitle">Tiêu đề</h2>
+
+          <!-- Location -->
+          <div class="tv-detail-location mb-4">
+            <i class="bi bi-geo-alt-fill text-danger"></i>
+            <span id="detailAddress">Địa chỉ</span>
+          </div>
+
+          <!-- Info Grid -->
+          <div class="tv-detail-info-grid mb-4">
+            <div class="tv-info-item">
+              <i class="bi bi-rulers"></i>
+              <div>
+                <span class="tv-info-label">Diện tích</span>
+                <span class="tv-info-value"><span id="detailArea">0</span> m²</span>
+              </div>
+            </div>
+            <div class="tv-info-item">
+              <i class="bi bi-grid"></i>
+              <div>
+                <span class="tv-info-label">Nội thất</span>
+                <span class="tv-info-value" id="detailCategory">Cơ bản</span>
+              </div>
+            </div>
+            <div class="tv-info-item">
+              <i class="bi bi-door-open"></i>
+              <div>
+                <span class="tv-info-label">Loại phòng</span>
+                <span class="tv-info-value" id="detailStatus">Ở đơn</span>
+              </div>
+            </div>
+            <div class="tv-info-item">
+              <i class="bi bi-calendar3"></i>
+              <div>
+                <span class="tv-info-label">Cọc trước</span>
+                <span class="tv-info-value" id="detailDepositMonth">Chưa cập nhật</span>
+              </div>
+            </div>
+            <div class="tv-info-item">
+              <i class="bi bi-repeat"></i>
+              <div>
+                <span class="tv-info-label">Chu kỳ trả</span>
+                <span class="tv-info-value" id="detailPaymentCycle">Chưa cập nhật</span>
+              </div>
+            </div>
+            <div class="tv-info-item">
+              <i class="bi bi-calendar-check"></i>
+              <div>
+                <span class="tv-info-label">Có thể vào ở từ</span>
+                <span class="tv-info-value" id="detailAvailableFrom">Chưa cập nhật</span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Utility Costs -->
+          <div class="tv-detail-costs mb-4">
+            <div class="tv-cost-item">
+              <i class="bi bi-lightning-charge text-warning"></i>
+              <span>Điện: <strong id="detailElectricity">Chưa cập nhật</strong></span>
+            </div>
+            <div class="tv-cost-item">
+              <i class="bi bi-droplet text-primary"></i>
+              <span>Nước: <strong id="detailWater">Chưa cập nhật</strong></span>
+            </div>
+          </div>
+
+          <!-- Amenities -->
+          <div class="tv-detail-amenities mb-4" id="detailAmenities" style="display:none">
+            <h6 class="tv-detail-section-title">Tiện ích</h6>
+            <div class="tv-amenities-grid" id="detailAmenitiesList"></div>
+          </div>
+
+          <!-- Description -->
+          <div class="tv-detail-description mb-4">
+            <h6 class="tv-detail-section-title">Mô tả</h6>
+            <p id="detailDescription">Mô tả phòng trọ</p>
+          </div>
+
+          <!-- Host Info -->
+          <div class="tv-detail-host">
+            <div class="tv-host-info">
+              <div class="tv-host-avatar">
+                <i class="bi bi-person-circle"></i>
+              </div>
+              <div>
+                <strong id="detailHostName">Chủ trọ</strong>
+                <span id="detailHostRole">Cá nhân</span>
+              </div>
+            </div>
+            <div class="d-flex flex-column flex-sm-row gap-2">
+              <a href="tel:" class="btn-tv btn-tv-success btn-tv-sm" id="btnCallHost">
+                <i class="bi bi-telephone"></i> <span id="detailPhone">SĐT</span>
+              </a>
+              <a href="#" target="_blank" class="btn-tv btn-tv-primary btn-tv-sm" id="btnZaloHost">
+                <i class="bi bi-chat-dots"></i> Nhắn Zalo
+              </a>
+            </div>
+          </div>
+
+          <!-- Posting Time -->
+          <div class="tv-detail-time mt-3" id="detailPostingTime">
+            <i class="bi bi-clock me-1"></i>Vừa xong
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="landing-footer">
+    <div class="container">
+      <div class="row g-4">
+        <div class="col-lg-4 col-md-6">
+          <h5 class="footer-brand"><i class="bi bi-house-door me-2"></i>TrọVíp</h5>
+          <p class="footer-desc">Hệ thống đăng tin và tìm kiếm phòng trọ hàng đầu Đà Nẵng. Mang đến giải pháp nhanh chóng, uy tín và tiện lợi cho chủ trọ và khách thuê.</p>
+          <div class="footer-socials">
+            <a href="#"><i class="bi bi-facebook"></i></a>
+            <a href="#"><i class="bi bi-chat-text-fill"></i></a>
+            <a href="#"><i class="bi bi-youtube"></i></a>
+          </div>
+        </div>
+        <div class="col-lg-2 col-md-6">
+          <h6 class="footer-heading">Khu vực</h6>
+          <ul class="footer-links">
+            <li><a href="/rooms?district=Hải+Châu">Hải Châu</a></li>
+            <li><a href="/rooms?district=Thanh+Khê">Thanh Khê</a></li>
+            <li><a href="/rooms?district=Sơn+Trà">Sơn Trà</a></li>
+            <li><a href="/rooms?district=Liên+Chiểu">Liên Chiểu</a></li>
+          </ul>
+        </div>
+        <div class="col-lg-2 col-md-6">
+          <h6 class="footer-heading">Liên kết</h6>
+          <ul class="footer-links">
+            <li><a href="/rooms">Tìm phòng</a></li>
+            <li><a href="/users/register">Đăng ký</a></li>
+            <li><a href="/users/login">Đăng nhập</a></li>
+          </ul>
+        </div>
+        <div class="col-lg-4 col-md-6">
+          <h6 class="footer-heading">Liên hệ</h6>
+          <ul class="footer-contact">
+            <li><i class="bi bi-telephone"></i> Hotline: 0704699523</li>
+            <li><i class="bi bi-envelope"></i> huyho.09032005@gmail.com</li>
+            <li><i class="bi bi-geo-alt"></i> 87 Bùi Bình Uyên, Ngũ Hành Sơn, Đà Nẵng</li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2026 TrọVíp. Bảo lưu mọi quyền.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const AMENITIES_DATA = <%- JSON.stringify(typeof AMENITIES !== 'undefined' ? AMENITIES : []) %>;
+    
+    // FAQ Toggle
+    function toggleFaq(btn) {
+      const item = btn.closest('.faq-item');
+      const answer = item.querySelector('.faq-answer');
+      const icon = btn.querySelector('.faq-icon');
+      const isOpen = item.classList.contains('open');
+      
+      // Close all
+      document.querySelectorAll('.faq-item.open').forEach(el => {
+        el.classList.remove('open');
+        el.querySelector('.faq-answer').style.maxHeight = null;
+        el.querySelector('.faq-icon').className = 'bi bi-plus-lg faq-icon';
+      });
+      
+      if (!isOpen) {
+        item.classList.add('open');
+        answer.style.maxHeight = answer.scrollHeight + 'px';
+        icon.className = 'bi bi-dash-lg faq-icon';
+      }
+    }
+    
+    function formatTimeSince(dateString) {
+      if (!dateString || dateString === 'undefined') return 'Vừa xong';
+      const date = new Date(dateString);
+      const now = new Date();
+      const seconds = Math.floor((now - date) / 1000);
+      if (seconds < 60) return 'Vừa xong';
+      const minutes = Math.floor(seconds / 60);
+      if (minutes < 60) return `${minutes} phút trước`;
+      const hours = Math.floor(minutes / 60);
+      if (hours < 24) return `${hours} giờ trước`;
+      const days = Math.floor(hours / 24);
+      if (days < 30) return `${days} ngày trước`;
+      return 'Đăng ngày ' + date.toLocaleDateString('vi-VN');
+    }
+
+    function handleCardClick(event, element) {
+      if (window.getSelection() && window.getSelection().toString().trim() !== '') return;
+      
+      const rawRoom = element.getAttribute('data-room');
+      const room = JSON.parse(decodeURIComponent(rawRoom));
+      
+      document.getElementById('detailTitle').textContent = room.title;
+      document.getElementById('detailAddress').textContent = room.address;
+      document.getElementById('detailCategory').textContent = room.category || 'Nội thất cơ bản';
+      document.getElementById('detailStatus').textContent = room.status || 'Ở đơn';
+      document.getElementById('detailArea').textContent = room.area || 0;
+      document.getElementById('detailDescription').textContent = room.description || '';
+      
+      const timeEl = document.getElementById('detailPostingTime');
+      if (timeEl) {
+        timeEl.innerHTML = `<i class="bi bi-clock me-1"></i>${formatTimeSince(room.createdAt)}`;
+      }
+      
+      const priceText = room.price ? (room.price / 1000000).toLocaleString('vi-VN') + ' triệu/tháng' : 'Thỏa thuận';
+      document.getElementById('detailPrice').textContent = priceText;
+      
+      const depositBadge = document.getElementById('detailDepositBadge');
+      if (room.deposit) {
+        depositBadge.style.display = 'inline-flex';
+        document.getElementById('detailDeposit').textContent = room.deposit.toLocaleString('vi-VN');
+      } else {
+        depositBadge.style.display = 'none';
+      }
+
+      document.getElementById('detailDepositMonth').textContent = room.depositMonth !== undefined && room.depositMonth !== null ? `${room.depositMonth} tháng` : 'Chưa cập nhật';
+      document.getElementById('detailPaymentCycle').textContent = room.paymentCycle || 'Chưa cập nhật';
+      const availableFromEl = document.getElementById('detailAvailableFrom');
+      if (availableFromEl) {
+        if (room.availableFrom) {
+          const d = new Date(room.availableFrom);
+          availableFromEl.textContent = d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        } else {
+          availableFromEl.textContent = 'Chưa cập nhật';
+        }
+      }
+      document.getElementById('detailElectricity').textContent = room.electricityPrice !== undefined && room.electricityPrice !== null ? `${room.electricityPrice.toLocaleString('vi-VN')} đ/kWh` : 'Chưa cập nhật';
+      document.getElementById('detailWater').textContent = room.waterPrice !== undefined && room.waterPrice !== null ? `${room.waterPrice.toLocaleString('vi-VN')} đ/m³` : 'Chưa cập nhật';
+
+
+      const statusBadge = document.getElementById('detailBadgeStatus');
+      if (statusBadge) {
+        if (room.isAvailable !== false) {
+          statusBadge.textContent = 'Còn trống';
+          statusBadge.className = 'badge bg-success-subtle text-success border border-success-subtle px-2 py-1 small mb-2 d-inline-block';
+        } else {
+          statusBadge.textContent = 'Đã thuê';
+          statusBadge.className = 'badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1 small mb-2 d-inline-block';
+        }
+      }
+
+      // Carousel
+      const carouselInner = document.getElementById('carouselInner');
+      if (carouselInner) {
+        carouselInner.innerHTML = '';
+        const thumbnailsContainer = document.getElementById('carouselThumbnails');
+        if (thumbnailsContainer) thumbnailsContainer.innerHTML = '';
+        
+        const images = room.images && room.images.length > 0 ? room.images : ['https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=800&h=500&q=80'];
+        
+        if (thumbnailsContainer) {
+          if (images.length > 1) {
+            thumbnailsContainer.style.setProperty('display', 'flex', 'important');
+          } else {
+            thumbnailsContainer.style.setProperty('display', 'none', 'important');
+          }
+        }
+        
+        images.forEach((imgUrl, i) => {
+          const item = document.createElement('div');
+          item.className = `carousel-item ${i === 0 ? 'active' : ''}`;
+          const img = document.createElement('img');
+          img.src = imgUrl;
+          img.className = 'd-block w-100';
+          img.alt = `Room image ${i + 1}`;
+          item.appendChild(img);
+          carouselInner.appendChild(item);
+
+          if (thumbnailsContainer && images.length > 1) {
+            const thumbImg = document.createElement('img');
+            thumbImg.src = imgUrl;
+            thumbImg.className = `thumbnail-item ${i === 0 ? 'active' : ''}`;
+            thumbImg.alt = `Thumbnail ${i + 1}`;
+            thumbImg.addEventListener('click', () => {
+              const carouselInstance = bootstrap.Carousel.getOrCreateInstance(document.getElementById('detailCarousel'));
+              carouselInstance.to(i);
+            });
+            thumbnailsContainer.appendChild(thumbImg);
+          }
+        });
+      }
+
+      const hostName = room.host && room.host.username ? room.host.username : 'Ẩn danh';
+      const hostRole = room.host && room.host.role ? room.host.role : 'Cá nhân';
+      const contactPhone = room.phone || '0905123456';
+
+      document.getElementById('detailHostName').textContent = hostName;
+      document.getElementById('detailHostRole').textContent = hostRole;
+      document.getElementById('detailPhone').textContent = contactPhone;
+      document.getElementById('btnCallHost').href = `tel:${contactPhone}`;
+      document.getElementById('btnZaloHost').href = `https://zalo.me/${contactPhone}`;
+
+      // Amenities
+      const detailAmenitiesContainer = document.getElementById('detailAmenities');
+      const detailAmenitiesList = document.getElementById('detailAmenitiesList');
+      if (detailAmenitiesContainer && detailAmenitiesList) {
+        detailAmenitiesList.innerHTML = '';
+        if (room.amenities && room.amenities.length > 0 && typeof AMENITIES_DATA !== 'undefined') {
+          detailAmenitiesContainer.style.display = 'block';
+          room.amenities.forEach(ak => {
+            const found = AMENITIES_DATA.find(a => a.key === ak);
+            if (found) {
+              const item = document.createElement('div');
+              item.className = 'tv-amenity-detail-item';
+              item.innerHTML = `<i class="bi ${found.icon}"></i> <span>${found.label}</span>`;
+              detailAmenitiesList.appendChild(item);
+            }
+          });
+        } else {
+          detailAmenitiesContainer.style.display = 'none';
+        }
+      }
+
+      const modal = new bootstrap.Modal(document.getElementById('roomDetailModal'));
+      modal.show();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const carouselEl = document.getElementById('detailCarousel');
+      if (carouselEl) {
+        carouselEl.addEventListener('slide.bs.carousel', event => {
+          const activeIndex = event.to;
+          const thumbnailsContainer = document.getElementById('carouselThumbnails');
+          if (thumbnailsContainer) {
+            const thumbs = thumbnailsContainer.querySelectorAll('.thumbnail-item');
+            thumbs.forEach((thumb, idx) => {
+              if (idx === activeIndex) {
+                thumb.classList.add('active');
+                thumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+              } else {
+                thumb.classList.remove('active');
+              }
+            });
+          }
+        });
+      }
+    });
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
