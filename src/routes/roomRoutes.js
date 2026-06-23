@@ -19,7 +19,7 @@ cloudinary.config({
 
 // Cấu hình Cloudinary Storage cho Multer
 const storage = new CloudinaryStorage({
-  cloudinary: cloudinaryModule, // truyền full module (có .v2 bên trong)
+  cloudinary: cloudinary,
   params: {
     folder: 'trovip',
     allowed_formats: ['jpg', 'png', 'jpeg', 'webp'],
